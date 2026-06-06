@@ -1,0 +1,21 @@
+{
+  "name": "cursor-sdk-agent-examples",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TypeScript-first Cursor SDK agent examples with Python ports.",
+  "type": "module",
+  "scripts": {
+    "migrate:python-ports": "npm --workspace @cursor-examples/migration-agent-ts run start --",
+    "build": "npm run build --workspaces",
+    "hello-world:ts": "npm --workspace @cursor-examples/hello-world-ts run start --",
+    "migration-agent:ts": "npm --workspace @cursor-examples/migration-agent-ts run start --",
+    "tool-calling:ts": "npm --workspace @cursor-examples/tool-calling-agent-ts run start --"
+  },
+  "workspaces": [
+    "examples/*/ts"
+  ],
+  "devDependencies": {
+    "@types/node": "^25.9.2",
+    "typescript": "^5.9.3"
+  }
+}
