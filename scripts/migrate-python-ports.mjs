@@ -12,7 +12,28 @@ const results = [];
 for (const exampleDir of examples) {
   const tsDir = path.join(exampleDir, "ts");
   const packageJsonPath = path.join(tsDir, "package.json");
-  const packageJson = await readJson(packageJsonPath);
+
+  if (!(await fileExists(packageJsonPath))) {
+    results.push({
+      status: "error",
+      example: path.basename(exampleDir),
+      message: "missing ts/package.json"
+    });
+    continue;
+  }
+
+  let packageJson;
+  try {
+    packageJson = await readJson(packageJsonPath);
+  } catch {
+    results.push({
+      status: "error",
+      example: path.basename(exampleDir),
+      message: "invalid ts/package.json"
+    });
+    continue;
+  }
+
   const pythonPort = packageJson.cursorExample?.pythonPort;
 
   if (!pythonPort) {
