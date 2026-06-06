@@ -1,28 +1,45 @@
 from __future__ import annotations
 
+import os
 import sys
-from dataclasses import dataclass
+from pathlib import Path
+
+from cursor_sdk import Agent, AgentOptions, LocalAgentOptions
 
 
-@dataclass(frozen=True)
-class AgentInput:
-    name: str
+ROOT_DIR = Path(__file__).resolve().parents[3]
 
 
-@dataclass(frozen=True)
-class AgentResponse:
-    message: str
+def require_env(name: str) -> str:
+    value = os.getenv(name)
+    if not value:
+        raise RuntimeError(f"Missing {name}. Set it before running this SDK example.")
+    return value
 
 
-def run_agent(agent_input: AgentInput) -> AgentResponse:
-    name = agent_input.name.strip() or "there"
-
-    return AgentResponse(
-        message=f"Hello, {name}. This is your first Cursor SDK agent example."
+def main() -> int:
+    name = " ".join(sys.argv[1:]).strip() or "there"
+    result = Agent.prompt(
+        "\n".join(
+            [
+                "You are the Hello World Agent.",
+                f"Greet {name} in one short sentence.",
+                "Mention that this is a Cursor SDK agent example.",
+            ]
+        ),
+        AgentOptions(
+            api_key=require_env("CURSOR_API_KEY"),
+            model=require_env("CURSOR_MODEL"),
+            local=LocalAgentOptions(cwd=str(ROOT_DIR)),
+        ),
     )
+    print(result.result)
+    return 0
 
 
 if __name__ == "__main__":
-    name = " ".join(sys.argv[1:])
-    response = run_agent(AgentInput(name=name))
-    print(response.message)
+    try:
+        raise SystemExit(main())
+    except RuntimeError as error:
+        print(error, file=sys.stderr)
+        raise SystemExit(1)

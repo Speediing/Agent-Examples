@@ -1,65 +1,81 @@
-type ToolResult = {
-  tool: string;
-  result: string;
-};
+import { Agent, type SDKJsonValue } from "@cursor/sdk";
 
-type Tool = {
-  name: string;
-  description: string;
-  canHandle: (prompt: string) => boolean;
-  run: (prompt: string) => ToolResult;
-};
+try {
+  const prompt = process.argv.slice(2).join(" ").trim();
+  const result = await Agent.prompt(
+    [
+      "You are the Tool Calling Agent.",
+      "Use the available custom tools when they are relevant.",
+      "Return a concise final answer that includes the tool result.",
+      `User request: ${prompt || "count the words in this default request"}`
+    ].join("\n"),
+    {
+      apiKey: requireEnv("CURSOR_API_KEY"),
+      model: { id: requireEnv("CURSOR_MODEL") },
+      local: {
+        cwd: process.cwd(),
+        customTools: {
+          add: {
+            description: "Adds a list of numbers.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                numbers: {
+                  type: "array",
+                  items: { type: "number" }
+                }
+              },
+              required: ["numbers"]
+            },
+            execute: (args) => {
+              const numbers = readNumberArray(args.numbers);
+              const total = numbers.reduce((sum, number) => sum + number, 0);
 
-const addTool: Tool = {
-  name: "add",
-  description: "Adds every number found in the prompt.",
-  canHandle: (prompt) => /\b(add|sum|plus)\b/i.test(prompt),
-  run: (prompt) => {
-    const numbers = extractNumbers(prompt);
-    const total = numbers.reduce((sum, number) => sum + number, 0);
+              return {
+                expression: numbers.join(" + "),
+                total
+              };
+            }
+          },
+          word_count: {
+            description: "Counts words in a text string.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                text: { type: "string" }
+              },
+              required: ["text"]
+            },
+            execute: (args) => {
+              const text = typeof args.text === "string" ? args.text : "";
+              const count = text.trim().split(/\s+/).filter(Boolean).length;
 
-    return {
-      tool: "add",
-      result: `${numbers.join(" + ")} = ${total}`
-    };
-  }
-};
+              return { count };
+            }
+          }
+        }
+      }
+    }
+  );
 
-const wordCountTool: Tool = {
-  name: "word_count",
-  description: "Counts words in the prompt.",
-  canHandle: (prompt) => /\b(count|words?)\b/i.test(prompt),
-  run: (prompt) => {
-    const words = prompt.trim().split(/\s+/).filter(Boolean);
-
-    return {
-      tool: "word_count",
-      result: `${words.length} words`
-    };
-  }
-};
-
-const tools: Tool[] = [addTool, wordCountTool];
-
-function runAgent(prompt: string): string {
-  const selectedTool = tools.find((tool) => tool.canHandle(prompt));
-
-  if (!selectedTool) {
-    const availableTools = tools
-      .map((tool) => `${tool.name}: ${tool.description}`)
-      .join("; ");
-
-    return `No tool selected. Available tools: ${availableTools}`;
-  }
-
-  const toolResult = selectedTool.run(prompt);
-  return `Used ${toolResult.tool}: ${toolResult.result}`;
+  console.log(result.result ?? "");
+} catch (error) {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exitCode = 1;
 }
 
-function extractNumbers(input: string): number[] {
-  const matches = input.match(/-?\d+(?:\.\d+)?/g) ?? [];
-  return matches.map(Number);
+function readNumberArray(value: SDKJsonValue | undefined): number[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((item): item is number => typeof item === "number");
 }
 
-const prompt = process.argv.slice(2).join(" ");
-console.log(runAgent(prompt));
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing ${name}. Set it before running this SDK example.`);
+  }
+  return value;
+}

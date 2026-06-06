@@ -1,84 +1,97 @@
 from __future__ import annotations
 
-import re
+import os
 import sys
-from dataclasses import dataclass
-from typing import Callable
+from pathlib import Path
+from typing import Any, Mapping
+
+from cursor_sdk import Agent, AgentOptions, CustomTool, LocalAgentOptions
 
 
-@dataclass(frozen=True)
-class ToolResult:
-    tool: str
-    result: str
+ROOT_DIR = Path(__file__).resolve().parents[3]
 
 
-@dataclass(frozen=True)
-class Tool:
-    name: str
-    description: str
-    can_handle: Callable[[str], bool]
-    run: Callable[[str], ToolResult]
-
-
-def extract_numbers(text: str) -> list[float]:
-    return [float(match) for match in re.findall(r"-?\d+(?:\.\d+)?", text)]
-
-
-def format_number(value: float) -> str:
-    return str(int(value)) if value.is_integer() else str(value)
-
-
-def run_add_tool(prompt: str) -> ToolResult:
-    numbers = extract_numbers(prompt)
+def run_add_tool(args: Mapping[str, Any], _context: object) -> dict[str, Any]:
+    raw_numbers = args.get("numbers", [])
+    numbers = [
+        number
+        for number in raw_numbers
+        if isinstance(number, (int, float)) and not isinstance(number, bool)
+    ]
     total = sum(numbers)
-    rendered_numbers = " + ".join(format_number(number) for number in numbers)
 
-    return ToolResult(
-        tool="add",
-        result=f"{rendered_numbers} = {format_number(total)}",
-    )
-
-
-def run_word_count_tool(prompt: str) -> ToolResult:
-    words = [word for word in re.split(r"\s+", prompt.strip()) if word]
-
-    return ToolResult(
-        tool="word_count",
-        result=f"{len(words)} words",
-    )
+    return {
+        "expression": " + ".join(str(number) for number in numbers),
+        "total": total,
+    }
 
 
-TOOLS = [
-    Tool(
-        name="add",
-        description="Adds every number found in the prompt.",
-        can_handle=lambda prompt: re.search(r"\b(add|sum|plus)\b", prompt, re.I)
-        is not None,
-        run=run_add_tool,
+def run_word_count_tool(args: Mapping[str, Any], _context: object) -> dict[str, int]:
+    text = args.get("text", "")
+    words = str(text).strip().split()
+
+    return {"count": len(words)}
+
+
+CUSTOM_TOOLS = {
+    "add": CustomTool(
+        description="Adds a list of numbers.",
+        input_schema={
+            "type": "object",
+            "properties": {
+                "numbers": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                },
+            },
+            "required": ["numbers"],
+        },
+        execute=run_add_tool,
     ),
-    Tool(
-        name="word_count",
-        description="Counts words in the prompt.",
-        can_handle=lambda prompt: re.search(r"\b(count|words?)\b", prompt, re.I)
-        is not None,
-        run=run_word_count_tool,
+    "word_count": CustomTool(
+        description="Counts words in a text string.",
+        input_schema={
+            "type": "object",
+            "properties": {
+                "text": {"type": "string"},
+            },
+            "required": ["text"],
+        },
+        execute=run_word_count_tool,
     ),
-]
+}
+
+
+def require_env(name: str) -> str:
+    value = os.getenv(name)
+    if not value:
+        raise RuntimeError(f"Missing {name}. Set it before running this SDK example.")
+    return value
 
 
 def run_agent(prompt: str) -> str:
-    selected_tool = next((tool for tool in TOOLS if tool.can_handle(prompt)), None)
-
-    if selected_tool is None:
-        available_tools = "; ".join(
-            f"{tool.name}: {tool.description}" for tool in TOOLS
-        )
-        return f"No tool selected. Available tools: {available_tools}"
-
-    tool_result = selected_tool.run(prompt)
-    return f"Used {tool_result.tool}: {tool_result.result}"
+    result = Agent.prompt(
+        "\n".join(
+            [
+                "You are the Tool Calling Agent.",
+                "Use the available custom tools when they are relevant.",
+                "Return a concise final answer that includes the tool result.",
+                f"User request: {prompt or 'count the words in this default request'}",
+            ]
+        ),
+        AgentOptions(
+            api_key=require_env("CURSOR_API_KEY"),
+            model=require_env("CURSOR_MODEL"),
+            local=LocalAgentOptions(cwd=str(ROOT_DIR), custom_tools=CUSTOM_TOOLS),
+        ),
+    )
+    return result.result
 
 
 if __name__ == "__main__":
-    user_prompt = " ".join(sys.argv[1:])
-    print(run_agent(user_prompt))
+    try:
+        user_prompt = " ".join(sys.argv[1:]).strip()
+        print(run_agent(user_prompt))
+    except RuntimeError as error:
+        print(error, file=sys.stderr)
+        raise SystemExit(1)

@@ -6,6 +6,8 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+from cursor_sdk import Agent, AgentOptions, LocalAgentOptions
+
 
 @dataclass(frozen=True)
 class MigrationResult:
@@ -131,6 +133,47 @@ def has_failures(results: list[MigrationResult]) -> bool:
     return any(result.status in {"error", "missing", "stale"} for result in results)
 
 
+def run_cursor_sdk_migration(results: list[MigrationResult]) -> None:
+    actionable_results = [
+        result for result in results if result.status in {"missing", "stale"}
+    ]
+
+    if not actionable_results:
+        print("SKIPPED Cursor SDK migration: all Python ports are current.")
+        return
+
+    if not os.getenv("CURSOR_API_KEY"):
+        print(
+            "SKIPPED Cursor SDK migration: set CURSOR_API_KEY to let the Migration Agent update Python ports."
+        )
+        return
+
+    if not os.getenv("CURSOR_MODEL"):
+        print("SKIPPED Cursor SDK migration: set CURSOR_MODEL to choose the SDK model.")
+        return
+
+    prompt = "\n\n".join(
+        [
+            "You are the Migration Agent for this examples repository.",
+            "TypeScript examples are canonical. Python ports must match their behavior using the Python Cursor SDK patterns.",
+            "For each stale or missing Python port below, inspect the TypeScript implementation and update or create the matching Python port.",
+            "After editing, run the relevant Python file and report what changed.",
+            json.dumps([result.__dict__ for result in actionable_results], indent=2),
+        ]
+    )
+    result = Agent.prompt(
+        prompt,
+        AgentOptions(
+            api_key=os.environ["CURSOR_API_KEY"],
+            model=os.environ["CURSOR_MODEL"],
+            local=LocalAgentOptions(cwd=str(ROOT_DIR)),
+        ),
+    )
+
+    print("\nCursor SDK migration result:")
+    print(result.result)
+
+
 def relative_path(path: Path) -> str:
     return os.path.relpath(path, ROOT_DIR)
 
@@ -139,14 +182,18 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
             "Migration Agent Python port for auditing TS example parity. "
-            "SDK updates, package validation, and model selection live in the TS version."
+            "SDK updates use the Python Cursor SDK."
         )
     )
     parser.add_argument("--write-stubs", action="store_true")
+    parser.add_argument("--use-cursor-sdk", action="store_true")
     args = parser.parse_args()
 
     results = audit_python_ports(write_stubs=args.write_stubs)
     print_results(results)
+
+    if args.use_cursor_sdk:
+        run_cursor_sdk_migration(results)
 
     return 1 if has_failures(results) else 0
 

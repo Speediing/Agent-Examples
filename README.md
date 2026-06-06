@@ -1,8 +1,8 @@
 # Cursor SDK Agent Examples
 
-TypeScript-first examples for building Cursor SDK agents, with matching Python ports
-for each agent. The TypeScript implementation is the source of truth; Python ports
-are kept in sync from the TypeScript examples.
+TypeScript-first examples for building Cursor SDK agents, with matching Python
+Cursor SDK ports for each agent. The TypeScript implementation is the source of
+truth; Python ports are kept in sync from the TypeScript examples.
 
 ## Repository layout
 
@@ -26,9 +26,9 @@ language folder.
 
 | Example | What it demonstrates | TypeScript | Python |
 | --- | --- | --- | --- |
-| `hello-world` | Minimal request/response agent shape | `examples/hello-world/ts` | `examples/hello-world/python` |
-| `migration-agent` | Uses Cursor SDK to review TS-to-Python port status | `examples/migration-agent/ts` | `examples/migration-agent/python` |
-| `tool-calling-agent` | Simple agent loop with typed tools | `examples/tool-calling-agent/ts` | `examples/tool-calling-agent/python` |
+| `hello-world` | Minimal Cursor SDK prompt | `examples/hello-world/ts` | `examples/hello-world/python` |
+| `migration-agent` | Uses Cursor SDK to update TS-to-Python ports | `examples/migration-agent/ts` | `examples/migration-agent/python` |
+| `tool-calling-agent` | Cursor SDK local agent with custom tools | `examples/tool-calling-agent/ts` | `examples/tool-calling-agent/python` |
 
 ## Setup
 
@@ -37,6 +37,13 @@ language folder.
 ```sh
 npm install
 npm run build
+```
+
+Set SDK credentials before running SDK-backed examples:
+
+```sh
+export CURSOR_API_KEY=...
+export CURSOR_MODEL=...
 ```
 
 Run an example:
@@ -49,8 +56,11 @@ npm run tool-calling:ts -- "add 3 and 9"
 
 ### Python
 
-Python examples use the standard library only, so no package install is required
-for the current examples.
+Install the Python Cursor SDK:
+
+```sh
+python3 -m pip install -r requirements.txt
+```
 
 Run an example:
 
@@ -83,11 +93,12 @@ ask it to create a placeholder:
 npm run migrate:python-ports -- --write-stubs
 ```
 
-The TypeScript Migration Agent can also ask Cursor SDK to update stale or
-missing Python ports:
+The Migration Agent can also ask Cursor SDK to update stale or missing Python
+ports:
 
 ```sh
 CURSOR_API_KEY=... CURSOR_MODEL=... npm run migrate:python-ports -- --use-cursor-sdk
+CURSOR_API_KEY=... CURSOR_MODEL=... python3 examples/migration-agent/python/main.py --use-cursor-sdk
 ```
 
 By default, the command only runs the local audit, so it is safe to use without
