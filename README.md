@@ -11,11 +11,12 @@ examples/
   hello-world/
     ts/       # canonical implementation
     python/   # Python port
+  migration-agent/
+    ts/       # canonical implementation
+    python/   # Python port
   tool-calling-agent/
     ts/       # canonical implementation
     python/   # Python port
-scripts/
-  migrate-python-ports.mjs
 ```
 
 Each example is independently runnable. Keep example-specific code inside its
@@ -26,6 +27,7 @@ language folder.
 | Example | What it demonstrates | TypeScript | Python |
 | --- | --- | --- | --- |
 | `hello-world` | Minimal request/response agent shape | `examples/hello-world/ts` | `examples/hello-world/python` |
+| `migration-agent` | Uses Cursor SDK to review TS-to-Python port status | `examples/migration-agent/ts` | `examples/migration-agent/python` |
 | `tool-calling-agent` | Simple agent loop with typed tools | `examples/tool-calling-agent/ts` | `examples/tool-calling-agent/python` |
 
 ## Setup
@@ -41,6 +43,7 @@ Run an example:
 
 ```sh
 npm run hello-world:ts -- "Ada"
+npm run migration-agent:ts
 npm run tool-calling:ts -- "add 3 and 9"
 ```
 
@@ -53,6 +56,7 @@ Run an example:
 
 ```sh
 python3 examples/hello-world/python/main.py "Ada"
+python3 examples/migration-agent/python/main.py
 python3 examples/tool-calling-agent/python/main.py "add 3 and 9"
 ```
 
@@ -70,7 +74,7 @@ python3 examples/tool-calling-agent/python/main.py "add 3 and 9"
 4. Re-run the TypeScript and Python examples with the same inputs and compare
    their outputs.
 
-The migration script intentionally does not treat Python as a second source of
+The Migration Agent intentionally does not treat Python as a second source of
 truth. It reads the TypeScript example manifests and source timestamps, then
 reports which Python ports need attention. If a Python port is missing, you can
 ask it to create a placeholder:
@@ -78,6 +82,16 @@ ask it to create a placeholder:
 ```sh
 npm run migrate:python-ports -- --write-stubs
 ```
+
+The TypeScript Migration Agent can also ask Cursor SDK to update stale or
+missing Python ports:
+
+```sh
+CURSOR_API_KEY=... CURSOR_MODEL=... npm run migrate:python-ports -- --use-cursor-sdk
+```
+
+By default, the command only runs the local audit, so it is safe to use without
+a Cursor API key.
 
 ## Adding a new example
 

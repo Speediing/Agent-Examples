@@ -5,9 +5,10 @@
   "description": "TypeScript-first Cursor SDK agent examples with Python ports.",
   "type": "module",
   "scripts": {
-    "migrate:python-ports": "node scripts/migrate-python-ports.mjs",
+    "migrate:python-ports": "npm --workspace @cursor-examples/migration-agent-ts run start --",
     "build": "npm run build --workspaces",
     "hello-world:ts": "npm --workspace @cursor-examples/hello-world-ts run start --",
+    "migration-agent:ts": "npm --workspace @cursor-examples/migration-agent-ts run start --",
     "tool-calling:ts": "npm --workspace @cursor-examples/tool-calling-agent-ts run start --"
   },
   "workspaces": [
