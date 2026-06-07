@@ -20,6 +20,9 @@ examples/
   accessibility-agent/
     ts/       # canonical implementation
     python/   # Python port
+  sre-agent/
+    ts/       # canonical implementation
+    python/   # Python port
 ```
 
 Each example is independently runnable. Keep example-specific code inside its
@@ -33,6 +36,7 @@ language folder.
 | `migration-agent` | Uses Cursor SDK to update TS-to-Python ports | `examples/migration-agent/ts` | `examples/migration-agent/python` |
 | `tool-calling-agent` | Cursor SDK local agent with custom tools | `examples/tool-calling-agent/ts` | `examples/tool-calling-agent/python` |
 | `accessibility-agent` | Scans pages with axe-core via a local Playwright tool | `examples/accessibility-agent/ts` | `examples/accessibility-agent/python` |
+| `sre-agent` | Incident triage agent with read-only observability tools | `examples/sre-agent/ts` | `examples/sre-agent/python` |
 
 ## Setup
 
@@ -57,6 +61,7 @@ npm run hello-world:ts -- "Ada"
 npm run migration-agent:ts
 npm run tool-calling:ts -- "add 3 and 9"
 npm run accessibility-agent:ts -- --scan-only
+npm run sre-agent:ts -- "checkout-api returning 503 after deploy"
 ```
 
 The accessibility agent includes a local HTML fixture with intentional violations.
@@ -82,6 +87,7 @@ python3 examples/hello-world/python/main.py "Ada"
 python3 examples/migration-agent/python/main.py
 python3 examples/tool-calling-agent/python/main.py "add 3 and 9"
 python3 examples/accessibility-agent/python/main.py --scan-only
+python3 examples/sre-agent/python/main.py "checkout-api returning 503 after deploy"
 ```
 
 ## TypeScript-to-Python porting flow
