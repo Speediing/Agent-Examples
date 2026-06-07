@@ -9,6 +9,7 @@ from pathlib import Path
 from cursor_sdk import Agent, AgentOptions, LocalAgentOptions
 
 from classifier import SKIP_AUDIT_DIRS, classify_port_status
+from git_signal import latest_source_signal
 
 
 @dataclass(frozen=True)
@@ -65,10 +66,7 @@ def audit_python_ports(write_stubs: bool) -> list[MigrationResult]:
 
         python_port_path = (ts_dir / python_port).resolve()
         ts_files = list_ts_files(ts_dir)
-        latest_ts_mtime = max(
-            (path.stat().st_mtime for path in ts_files),
-            default=0,
-        )
+        latest_ts_mtime = latest_source_signal(ts_files, ROOT_DIR)
         python_exists = python_port_path.exists()
         status = classify_port_status(
             python_exists=python_exists,

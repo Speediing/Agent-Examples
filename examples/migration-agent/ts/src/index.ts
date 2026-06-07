@@ -7,6 +7,7 @@ import {
   shouldSkipAuditDir,
   type PortAuditStatus
 } from "./classifier.js";
+import { latestSourceSignal } from "./git-signal.js";
 import { buildMigrationPrompt } from "./prompt.js";
 
 type MigrationStatus = PortAuditStatus | "error";
@@ -84,7 +85,9 @@ async function auditPythonPorts(): Promise<MigrationResult[]> {
 
     const pythonPortPath = path.resolve(tsDir, pythonPort);
     const tsFiles = await listFiles(tsDir, [".ts", ".json"]);
-    const latestTsMtime = await latestMtime(tsFiles);
+    const latestTsMtime = await latestSourceSignal(tsFiles, rootDir, async (file) =>
+      (await fs.stat(file)).mtimeMs
+    );
     const pythonExists = await fileExists(pythonPortPath);
     const status = classifyPortStatus({
       pythonExists,
@@ -186,18 +189,6 @@ async function listFiles(dir: string, extensions: string[]): Promise<string[]> {
   }
 
   return files;
-}
-
-async function latestMtime(files: string[]): Promise<number> {
-  if (files.length === 0) {
-    return 0;
-  }
-
-  const mtimes = await Promise.all(
-    files.map(async (file) => (await fs.stat(file)).mtimeMs)
-  );
-
-  return Math.max(...mtimes);
 }
 
 async function readJson<T>(filePath: string): Promise<T> {
