@@ -53,7 +53,7 @@ try {
             },
             execute: async (args) => {
               const url =
-                typeof args.url === "string"
+                typeof args.url === "string" && args.url
                   ? resolveTargetUrl(args.url)
                   : targetUrl;
               return scanAccessibility(url);

@@ -22,7 +22,11 @@ def require_env(name: str) -> str:
 def run_agent(target_url: str, user_prompt: str) -> str:
     def run_scan_tool(args: dict[str, object], _context: object) -> dict[str, object]:
         url_value = args.get("url")
-        url = resolve_target_url(str(url_value)) if isinstance(url_value, str) else target_url
+        url = (
+            resolve_target_url(str(url_value))
+            if isinstance(url_value, str) and url_value
+            else target_url
+        )
         result = scan_accessibility(url)
 
         return {
