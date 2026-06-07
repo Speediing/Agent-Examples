@@ -51,7 +51,13 @@ export function resolveTargetUrl(input: string | undefined): string {
 
 export async function scanAccessibility(url: string): Promise<ScanResult> {
   const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext();
+  const context = await browser.newContext({
+    locale: "en-US",
+    timezoneId: "UTC",
+    colorScheme: "light",
+    deviceScaleFactor: 1,
+    viewport: { width: 1280, height: 720 }
+  });
 
   try {
     const page = await context.newPage();

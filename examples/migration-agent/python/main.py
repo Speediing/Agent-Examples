@@ -8,6 +8,9 @@ from pathlib import Path
 
 from cursor_sdk import Agent, AgentOptions, LocalAgentOptions
 
+from classifier import SKIP_AUDIT_DIRS, classify_port_status
+from git_signal import latest_source_signal
+
 
 @dataclass(frozen=True)
 class MigrationResult:
@@ -62,43 +65,59 @@ def audit_python_ports(write_stubs: bool) -> list[MigrationResult]:
             continue
 
         python_port_path = (ts_dir / python_port).resolve()
-        ts_files = [
-            path
-            for path in ts_dir.rglob("*")
-            if path.suffix in {".ts", ".json"} and path.is_file()
-        ]
-        latest_ts_mtime = max(
-            (path.stat().st_mtime for path in ts_files),
-            default=0,
+        ts_files = list_ts_files(ts_dir)
+        latest_ts_mtime = latest_source_signal(ts_files, ROOT_DIR)
+        python_exists = python_port_path.exists()
+        status = classify_port_status(
+            python_exists=python_exists,
+            latest_ts_mtime=latest_ts_mtime,
+            python_mtime=(
+                python_port_path.stat().st_mtime * 1000 if python_exists else 0
+            ),
+            write_stubs=write_stubs,
         )
 
-        if not python_port_path.exists():
-            if write_stubs:
+        if status in {"created", "missing"}:
+            if status == "created":
                 write_python_stub(example_dir.name, python_port_path)
 
             results.append(
                 MigrationResult(
-                    status="created" if write_stubs else "missing",
+                    status=status,
                     example=example_dir.name,
                     message=relative_path(python_port_path),
                 )
             )
             continue
 
-        is_stale = latest_ts_mtime > python_port_path.stat().st_mtime
         results.append(
             MigrationResult(
-                status="stale" if is_stale else "ok",
+                status=status,
                 example=example_dir.name,
                 message=(
                     f"{relative_path(python_port_path)} is older than the TypeScript source"
-                    if is_stale
+                    if status == "stale"
                     else f"{relative_path(python_port_path)} is current"
                 ),
             )
         )
 
     return results
+
+
+def list_ts_files(ts_dir: Path) -> list[Path]:
+    files: list[Path] = []
+
+    for path in ts_dir.rglob("*"):
+        if not path.is_file() or path.suffix not in {".ts", ".json"}:
+            continue
+
+        if any(part in SKIP_AUDIT_DIRS for part in path.parts):
+            continue
+
+        files.append(path)
+
+    return files
 
 
 def write_python_stub(example_name: str, target_path: Path) -> None:

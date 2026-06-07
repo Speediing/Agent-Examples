@@ -1,5 +1,9 @@
 import { Agent } from "@cursor/sdk";
 import {
+  buildAccessibilityPrompt,
+  createAccessibilityCustomTools
+} from "./agent.js";
+import {
   defaultFixtureUrl,
   resolveTargetUrl,
   scanAccessibility,
@@ -21,45 +25,13 @@ try {
   const targetUrl = resolveTargetUrl(positionalArgs[0]);
   const userPrompt = positionalArgs.slice(1).join(" ").trim();
   const result = await Agent.prompt(
-    [
-      "You are the Accessibility Agent.",
-      "Use the scan_accessibility tool to audit the target page for WCAG issues.",
-      "Summarize findings by impact level, mention rule IDs, and suggest concrete fixes.",
-      "If there are no violations, say the page passed the automated scan.",
-      `Target URL: ${targetUrl}`,
-      userPrompt ? `Additional instructions: ${userPrompt}` : ""
-    ]
-      .filter(Boolean)
-      .join("\n"),
+    buildAccessibilityPrompt(targetUrl, userPrompt),
     {
       apiKey: requireEnv("CURSOR_API_KEY"),
       model: { id: requireEnv("CURSOR_MODEL") },
       local: {
         cwd: process.cwd(),
-        customTools: {
-          scan_accessibility: {
-            description:
-              "Runs an axe-core accessibility scan against a URL or local HTML file.",
-            inputSchema: {
-              type: "object",
-              properties: {
-                url: {
-                  type: "string",
-                  description:
-                    "Absolute URL, file:// URL, or filesystem path to scan."
-                }
-              },
-              required: ["url"]
-            },
-            execute: async (args) => {
-              const url =
-                typeof args.url === "string"
-                  ? resolveTargetUrl(args.url)
-                  : targetUrl;
-              return scanAccessibility(url);
-            }
-          }
-        }
+        customTools: createAccessibilityCustomTools(targetUrl)
       }
     }
   );

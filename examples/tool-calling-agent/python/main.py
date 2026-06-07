@@ -3,35 +3,13 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path
-from typing import Any, Mapping
 
 from cursor_sdk import Agent, AgentOptions, CustomTool, LocalAgentOptions
 
+from tools import run_add_tool, run_word_count_tool
+
 
 ROOT_DIR = Path(__file__).resolve().parents[3]
-
-
-def run_add_tool(args: Mapping[str, Any], _context: object) -> dict[str, Any]:
-    raw_numbers = args.get("numbers", [])
-    numbers = [
-        number
-        for number in raw_numbers
-        if isinstance(number, (int, float)) and not isinstance(number, bool)
-    ]
-    total = sum(numbers)
-
-    return {
-        "expression": " + ".join(str(number) for number in numbers),
-        "total": total,
-    }
-
-
-def run_word_count_tool(args: Mapping[str, Any], _context: object) -> dict[str, int]:
-    text = args.get("text", "")
-    words = str(text).strip().split()
-
-    return {"count": len(words)}
-
 
 CUSTOM_TOOLS = {
     "add": CustomTool(
@@ -85,7 +63,7 @@ def run_agent(prompt: str) -> str:
             local=LocalAgentOptions(cwd=str(ROOT_DIR), custom_tools=CUSTOM_TOOLS),
         ),
     )
-    return result.result
+    return result.result or ""
 
 
 if __name__ == "__main__":

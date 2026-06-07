@@ -2,8 +2,15 @@ import { Agent } from "@cursor/sdk";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  classifyPortStatus,
+  shouldSkipAuditDir,
+  type PortAuditStatus
+} from "./classifier.js";
+import { latestSourceSignal } from "./git-signal.js";
+import { buildMigrationPrompt } from "./prompt.js";
 
-type MigrationStatus = "ok" | "stale" | "missing" | "created" | "error";
+type MigrationStatus = PortAuditStatus | "error";
 
 type MigrationResult = {
   status: MigrationStatus;
@@ -78,11 +85,21 @@ async function auditPythonPorts(): Promise<MigrationResult[]> {
 
     const pythonPortPath = path.resolve(tsDir, pythonPort);
     const tsFiles = await listFiles(tsDir, [".ts", ".json"]);
-    const latestTsMtime = await latestMtime(tsFiles);
+    const latestTsMtime = await latestSourceSignal(tsFiles, rootDir, async (file) =>
+      (await fs.stat(file)).mtimeMs
+    );
     const pythonExists = await fileExists(pythonPortPath);
+    const status = classifyPortStatus({
+      pythonExists,
+      latestTsMtime,
+      pythonMtime: pythonExists
+        ? (await fs.stat(pythonPortPath)).mtimeMs
+        : 0,
+      writeStubs: shouldWriteStubs
+    });
 
-    if (!pythonExists) {
-      if (shouldWriteStubs) {
+    if (status === "created" || status === "missing") {
+      if (status === "created") {
         await writePythonStub({
           exampleName: path.basename(exampleDir),
           targetPath: pythonPortPath
@@ -90,22 +107,20 @@ async function auditPythonPorts(): Promise<MigrationResult[]> {
       }
 
       auditResults.push({
-        status: shouldWriteStubs ? "created" : "missing",
+        status,
         example: path.basename(exampleDir),
         message: relativePath(pythonPortPath)
       });
       continue;
     }
 
-    const pythonMtime = (await fs.stat(pythonPortPath)).mtimeMs;
-    const isStale = latestTsMtime > pythonMtime;
-
     auditResults.push({
-      status: isStale ? "stale" : "ok",
+      status,
       example: path.basename(exampleDir),
-      message: isStale
-        ? `${relativePath(pythonPortPath)} is older than the TypeScript source`
-        : `${relativePath(pythonPortPath)} is current`
+      message:
+        status === "stale"
+          ? `${relativePath(pythonPortPath)} is older than the TypeScript source`
+          : `${relativePath(pythonPortPath)} is current`
     });
   }
 
@@ -136,16 +151,7 @@ async function runCursorSdkMigration(resultsToReview: MigrationResult[]) {
     return;
   }
 
-  const prompt = [
-    "You are the Migration Agent for this examples repository.",
-    "TypeScript examples are canonical. Python ports must match their behavior.",
-    "For each stale or missing Python port below, inspect the TypeScript implementation and update or create the matching Python port.",
-    "Use the Python Cursor SDK in Python ports, mirroring the TypeScript Cursor SDK pattern.",
-    "After editing, run the relevant Python file and report what changed.",
-    JSON.stringify(actionableResults, null, 2)
-  ].join("\n\n");
-
-  const response = await Agent.prompt(prompt, {
+  const response = await Agent.prompt(buildMigrationPrompt(actionableResults), {
     apiKey: process.env.CURSOR_API_KEY,
     model: { id: process.env.CURSOR_MODEL },
     local: { cwd: rootDir }
@@ -168,31 +174,21 @@ async function listFiles(dir: string, extensions: string[]): Promise<string[]> {
   const files: string[] = [];
 
   for (const entry of entries) {
-    const entryPath = path.join(dir, entry.name);
-
     if (entry.isDirectory()) {
-      files.push(...(await listFiles(entryPath, extensions)));
+      if (shouldSkipAuditDir(entry.name)) {
+        continue;
+      }
+
+      files.push(...(await listFiles(path.join(dir, entry.name), extensions)));
       continue;
     }
 
     if (extensions.includes(path.extname(entry.name))) {
-      files.push(entryPath);
+      files.push(path.join(dir, entry.name));
     }
   }
 
   return files;
-}
-
-async function latestMtime(files: string[]): Promise<number> {
-  if (files.length === 0) {
-    return 0;
-  }
-
-  const mtimes = await Promise.all(
-    files.map(async (file) => (await fs.stat(file)).mtimeMs)
-  );
-
-  return Math.max(...mtimes);
 }
 
 async function readJson<T>(filePath: string): Promise<T> {

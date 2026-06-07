@@ -7,6 +7,10 @@
   "scripts": {
     "migrate:python-ports": "npm --workspace @cursor-examples/migration-agent-ts run start --",
     "build": "npm run build --workspaces",
+    "typecheck": "tsc --noEmit --project tsconfig.eval.json && npm run build --workspaces",
+    "test": "vitest run --config vitest.tier0.config.ts",
+    "test:llm": "vitest run --config vitest.config.ts eval/tier1 eval/tier2 eval/parity/ts-python-trace.test.ts",
+    "test:all": "npm run test && npm run test:llm",
     "hello-world:ts": "npm --workspace @cursor-examples/hello-world-ts run start --",
     "migration-agent:ts": "npm --workspace @cursor-examples/migration-agent-ts run start --",
     "tool-calling:ts": "npm --workspace @cursor-examples/tool-calling-agent-ts run start --",
@@ -18,6 +22,7 @@
   ],
   "devDependencies": {
     "@types/node": "^25.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
   }
 }

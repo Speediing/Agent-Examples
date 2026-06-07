@@ -1,0 +1,17 @@
+{
+  "paths": [
+    "examples/hello-world",
+    "examples/tool-calling-agent",
+    "examples/accessibility-agent",
+    "examples/migration-agent",
+    "examples/sre-agent"
+  ],
+  "npmScripts": [
+    "hello-world:ts",
+    "tool-calling:ts",
+    "accessibility-agent:ts",
+    "migration-agent:ts",
+    "migrate:python-ports",
+    "sre-agent:ts"
+  ]
+}
