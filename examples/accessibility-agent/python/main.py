@@ -19,48 +19,46 @@ def require_env(name: str) -> str:
     return value
 
 
-def run_scan_tool(args: dict[str, object], _context: object) -> dict[str, object]:
-    url_value = args.get("url")
-    url = resolve_target_url(str(url_value)) if isinstance(url_value, str) else resolve_target_url(None)
-    result = scan_accessibility(url)
+def run_agent(target_url: str, user_prompt: str) -> str:
+    def run_scan_tool(args: dict[str, object], _context: object) -> dict[str, object]:
+        url_value = args.get("url")
+        url = resolve_target_url(str(url_value)) if isinstance(url_value, str) else target_url
+        result = scan_accessibility(url)
 
-    return {
-        "url": result.url,
-        "violationCount": result.violation_count,
-        "violations": [
-            {
-                "id": violation.id,
-                "impact": violation.impact,
-                "description": violation.description,
-                "help": violation.help,
-                "helpUrl": violation.help_url,
-                "nodeCount": violation.node_count,
-                "targets": violation.targets,
-            }
-            for violation in result.violations
-        ],
+        return {
+            "url": result.url,
+            "violationCount": result.violation_count,
+            "violations": [
+                {
+                    "id": violation.id,
+                    "impact": violation.impact,
+                    "description": violation.description,
+                    "help": violation.help,
+                    "helpUrl": violation.help_url,
+                    "nodeCount": violation.node_count,
+                    "targets": violation.targets,
+                }
+                for violation in result.violations
+            ],
+        }
+
+    custom_tools = {
+        "scan_accessibility": CustomTool(
+            description="Runs an axe-core accessibility scan against a URL or local HTML file.",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "Absolute URL, file:// URL, or filesystem path to scan.",
+                    }
+                },
+                "required": ["url"],
+            },
+            execute=run_scan_tool,
+        )
     }
 
-
-CUSTOM_TOOLS = {
-    "scan_accessibility": CustomTool(
-        description="Runs an axe-core accessibility scan against a URL or local HTML file.",
-        input_schema={
-            "type": "object",
-            "properties": {
-                "url": {
-                    "type": "string",
-                    "description": "Absolute URL, file:// URL, or filesystem path to scan.",
-                }
-            },
-            "required": ["url"],
-        },
-        execute=run_scan_tool,
-    )
-}
-
-
-def run_agent(target_url: str, user_prompt: str) -> str:
     result = Agent.prompt(
         "\n".join(
             [
@@ -75,7 +73,7 @@ def run_agent(target_url: str, user_prompt: str) -> str:
         AgentOptions(
             api_key=require_env("CURSOR_API_KEY"),
             model=require_env("CURSOR_MODEL"),
-            local=LocalAgentOptions(cwd=str(ROOT_DIR), custom_tools=CUSTOM_TOOLS),
+            local=LocalAgentOptions(cwd=str(ROOT_DIR), custom_tools=custom_tools),
         ),
     )
     return result.result

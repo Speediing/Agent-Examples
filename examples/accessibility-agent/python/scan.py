@@ -97,6 +97,6 @@ def print_scan_result(result: ScanResult) -> None:
 
     if result.violation_count == 0:
         print("No automated accessibility violations found.")
-    else:
+    elif result.url == default_fixture_url():
         print()
         print(f"Fixture reference: {default_fixture_url()}")

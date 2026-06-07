@@ -91,11 +91,9 @@ function printScanResult(result: ScanResult) {
 
   if (result.violationCount === 0) {
     console.log("No automated accessibility violations found.");
-  } else {
+  } else if (result.url === defaultFixtureUrl()) {
     console.log("");
-    console.log(
-      `Fixture reference: ${defaultFixtureUrl()}`
-    );
+    console.log(`Fixture reference: ${defaultFixtureUrl()}`);
   }
 }
 
