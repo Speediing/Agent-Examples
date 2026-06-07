@@ -92,8 +92,9 @@ Add tests when you:
 - **Change runnable commands or example paths** (in this repo or the docs site)
   - Update root `package.json` scripts and the matching fields in
     `agent-example-site/app/blog/posts.ts`.
-  - Tier 0 `eval/docs-parity.test.ts` checks alignment when
-    `AGENT_EXAMPLE_SITE_PATH` points at the site repo.
+  - Update `eval/fixtures/cookbook-parity.json` so CI keeps parity coverage.
+  - Run `AGENT_EXAMPLE_SITE_PATH=../agent-example-site npm test` locally for the
+    live cross-repo check against `app/blog/posts.ts`.
 
 - **Add a new failure mode worth guarding** (especially SRE)
   - Add a Tier 2 case in `eval/tier2/` before fixing behavior when possible.

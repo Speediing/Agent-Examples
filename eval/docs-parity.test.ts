@@ -1,11 +1,14 @@
-import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { describe, expect, it } from "vitest";
 import { repoRoot } from "./helpers.js";
 
 const siteRepoPath =
   process.env.AGENT_EXAMPLE_SITE_PATH ??
   path.resolve(repoRoot, "../agent-example-site");
+
+const postsPath = path.join(siteRepoPath, "app/blog/posts.ts");
+const siteRepoAvailable = existsSync(postsPath);
 
 const packageScripts = JSON.parse(
   readFileSync(path.join(repoRoot, "package.json"), "utf8")
@@ -30,28 +33,58 @@ function extractDocFields(source: string) {
   return { paths, commands };
 }
 
-describe("docs↔code parity", () => {
-  it("aligns cookbook paths and npm scripts with this repository", () => {
-    const postsSource = readFileSync(
-      path.join(siteRepoPath, "app/blog/posts.ts"),
-      "utf8"
+describe.skipIf(!siteRepoAvailable)(
+  "docs↔code parity (requires agent-example-site checkout)",
+  () => {
+    it("aligns cookbook paths and npm scripts with this repository", () => {
+      const postsSource = readFileSync(postsPath, "utf8");
+      const { paths, commands } = extractDocFields(postsSource);
+
+      expect(paths.length).toBeGreaterThan(0);
+      expect(commands.length).toBeGreaterThan(0);
+
+      for (const examplePath of paths) {
+        expect(examplePath.startsWith("examples/")).toBe(true);
+        expect(
+          readFileSync(
+            path.join(repoRoot, examplePath, "ts/package.json"),
+            "utf8"
+          )
+        ).toContain('"name"');
+      }
+
+      for (const command of commands) {
+        for (const script of extractNpmScripts(command)) {
+          expect(packageScripts[script]).toBeTruthy();
+        }
+      }
+    });
+  }
+);
+
+describe("docs↔code parity fixture", () => {
+  it("aligns committed cookbook metadata with this repository", () => {
+    const fixturePath = path.join(
+      repoRoot,
+      "eval/fixtures/cookbook-parity.json"
     );
-    const { paths, commands } = extractDocFields(postsSource);
+    const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as {
+      paths: string[];
+      npmScripts: string[];
+    };
 
-    expect(paths.length).toBeGreaterThan(0);
-    expect(commands.length).toBeGreaterThan(0);
-
-    for (const examplePath of paths) {
+    for (const examplePath of fixture.paths) {
       expect(examplePath.startsWith("examples/")).toBe(true);
       expect(
-        readFileSync(path.join(repoRoot, examplePath, "ts/package.json"), "utf8")
+        readFileSync(
+          path.join(repoRoot, examplePath, "ts/package.json"),
+          "utf8"
+        )
       ).toContain('"name"');
     }
 
-    for (const command of commands) {
-      for (const script of extractNpmScripts(command)) {
-        expect(packageScripts[script]).toBeTruthy();
-      }
+    for (const script of fixture.npmScripts) {
+      expect(packageScripts[script]).toBeTruthy();
     }
   });
 });
