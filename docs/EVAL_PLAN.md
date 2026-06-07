@@ -1,8 +1,10 @@
-# Agent Eval Suite & Affordable CI — Plan (v3)
+# Agent Eval Suite & Affordable CI — Plan (v4)
 
-Status: plan for review (converged after two adversarial review rounds — GPT + Opus.
-Round 2 confirmed all round-1 blockers/majors resolved; v3 folds in round-2 refinements
-and turns Phase 1 into an executable contract). This is a **plan**, not an
+Status: plan for review (converged after adversarial review rounds — GPT + Opus. v3
+turned Phase 1 into an executable contract; v4 adds §9, the eval-driven improvement
+loop. A review round on §9 concluded the *automated* flywheel is the wrong tool for a
+static teaching repo with no production traffic, so §9 was reframed to a manual,
+human-paced, sre-scoped loop with CI-enforced guardrails.) This is a **plan**, not an
 implementation. It targets the five Cursor SDK agents in this repo and the docs site in
 the sibling `agent-example-site` repo.
 
@@ -253,10 +255,121 @@ LLM-judge quality metric (non-blocking) + Tier 2 adversarial + randomized mocks.
 ### Phase 4
 Normalized TS↔Python parity + trace-shape behavioral parity (non-blocking).
 
-## 9. Open questions
+## 9. The improvement loop (what to build *after* the evals exist)
+
+OpenAI's "Agent Improvement Loop" cookbook closes a flywheel: traces → human/LLM
+feedback → reusable evals → HALO-style ranked diagnosis → a `codex_handoff.md` → a
+coding agent edits the harness → re-run. It is a good pattern — **but it was designed
+to mine real, diverse production traffic, and this repo has none.** Two structural
+facts decide how much of it we should build:
+
+- **Closed loop = overfitting machine.** Our only trace source would be the team's own
+  small synthetic eval set against a near-fixed incident. With no external input
+  distribution, "traces → evals → fix" can only optimize toward cases we already wrote.
+  Held-out splits and significance tests cannot manufacture an input distribution that
+  doesn't exist.
+- **Objective conflict.** The example prompts are *published teaching artifacts*
+  (`agent-example-site` renders them verbatim). "Optimize the harness to pass evals"
+  contorts those prompts to fit mock-data quirks — which makes the lesson worse. The
+  loop's objective opposes the repo's purpose.
+- **One viable target.** Of the five agents, only **sre-agent** has enough harness
+  surface to optimize. hello-world has no tools and a static prompt; tool-calling is a
+  trivial 2-tool route; accessibility is a deterministic scan with a thin summary;
+  migration's only LLM path is barred from CI (§5).
+
+**Decision: build the manual, human-paced version; do not build the automated
+flywheel for this repo.** The evals are a **necessary precondition, not a sufficient
+safety net** — they make the loop *reviewable and bounded*, not "safe to close". The
+automated apparatus (persist-everything, auto-ranking, auto-handoff to a write-capable
+agent) is deferred until there is a real trace distribution (production usage) or a
+second viable target.
+
+### What to build now (manual loop, scoped to sre-agent)
+1. **Periodic review, human-paced.** On the Tier-1 cadence, a human reads a sampled set
+   of sre-agent traces + judge rationales and writes down failure modes.
+2. **Cases first, authored independently of the fix.** A human (or a role/model
+   isolated from whoever implements the fix) adds eval cases for each failure mode and
+   commits them first. The implementer never sees new-case bodies — only the validation
+   command and pass/fail.
+3. **Human-written handoff, typed.** A `handoff.md` with a fixed schema: allowed files,
+   **forbidden files**, exact validation command, the specific cases expected to flip,
+   and a reviewer checklist. Target is the §2 guardrail/validation code — **not the
+   published teaching prompts** (see scope rule below).
+4. **Implement on a branch, gate, human-approve.** The branch must pass the whole suite
+   incl. new cases; a human approves the diff (seeing the held-out delta + CI + trace
+   citations + diff-scope report), then merges.
+
+### Guardrails — enforced in CI, not just written in the handoff
+- **Diff-scope allowlist (CI-enforced).** Fail any improvement PR whose diff touches
+  `graders/`, held-out config/fixtures, thresholds, `.github/workflows`, lockfiles, or
+  pinned versions — regardless of what the handoff says. Separate PR types for
+  eval-cases, implementation, and grader/threshold changes.
+- **Teaching prompts out of scope.** Loop-driven edits do **not** modify prompts/tool
+  maps that `posts.ts` publishes. The loop touches guardrail/validation/routing code,
+  or a forked non-teaching agent. Any teaching-prompt change is a normal human PR with
+  docs reconciled (§4.4) — never an automated optimization.
+- **Held-out is an isolation boundary, not a label.** Store held-out cases **outside
+  the repo**; expose only aggregate pass/fail to the implementer; hide expected outputs
+  and traces. Generate held-out from the §3 randomized-incident generator the optimizer
+  never tunes; grade it with deterministic trace/grounding graders only (never the
+  diagnosis-family judge). A held-out case **used as a gate is burned** — rotate in
+  fresh seeds each cadence and track which seeds have been observed.
+- **"Improvement" needs a delta test, not an absolute rate.** §4.3 gates an absolute
+  Wilson bound; that does not test a *difference* between two noisy iterations. Require
+  a **pre-registered paired delta test** (two-proportion / bootstrap CI on the
+  difference, paired by case+seed), improvement CI lower bound > 0 on visible **and**
+  non-inferiority on held-out, with multiplicity correction across cases and
+  alpha-spending across cadences. Freeze N before looking; otherwise repeated looks
+  ratchet on lucky samples.
+- **Traces are untrusted input.** Tier-2 fixtures contain prompt-injection text *by
+  design*; that text flows into diagnosis and any handoff. Treat all trace/label text
+  as **data, hard-delimited, never instructions**; the implementer's write scope is
+  path-allowlisted regardless. ("Never triggered by untrusted input" is not enough when
+  the loop's own inputs are adversarial.)
+- **De-correlate the model roles (incl. the implementer).** Different model families
+  for agent, judge, feedback, diagnosis, **and implementer** — and state plainly that
+  cross-family ≠ independent (shared training data still correlates errors), so this
+  mitigates, not eliminates, bias. Pin every id (§10).
+- **Diagnosis ≠ root cause.** A trace citation supports but doesn't prove a cause.
+  Require a minimal repro or before/after ablation and human signoff on the diagnosis
+  before any code change.
+- **Coverage, not just observed failures.** Maintain a coverage matrix (agent × tool ×
+  failure mode × adversarial axis) and add synthetic cases for high-risk gaps, so the
+  suite isn't biased toward whatever the few traces happened to expose.
+
+### Trace substrate (for diagnosis, separate from grading)
+Persisting only deduped `tool_call` events drops exactly what's needed to diagnose
+*prompt* failures. For the diagnosis substrate, also retain assistant `TextBlock`s and
+`SDKThinkingMessage` (redacted), event ordering/timestamps, and the `truncated` flags —
+and exclude truncated fields from evidence (recompute tool ground truth from the pure
+handler, as §3 does). Reconcile with cost/privacy: persist **minimal metadata for all
+runs + full traces for a sampled fraction + all failures under retention** (not "every
+run", which contradicts §6/§7). Redact prompts/paths/URLs and forbid secrets/PII before
+storing; keep trace artifacts **private**, not in public-repo CI output. Before building
+any of this, evaluate the SDK's own `JsonlLocalAgentStore` / `SqliteLocalAgentStore`
+(`@cursor/sdk`) rather than reinventing persistence.
+
+## 10. Open questions
 - Which cheap, stable model id do we pin for CI, and can we get a sandboxed key with a
   hard spend cap?
 - Acceptable monthly eval budget + cadence (drives N and the cost table in §4.3)?
 - Repo home for evals: this repo, the site repo, or a dedicated eval repo?
 - Do we change the migration staleness signal (mtime → content hash / commit time) as
   part of this work, or only wrap the classifier for testing?
+- Loop: pin the five distinct model ids (agent/judge/feedback/diagnosis/implementer);
+  Promptfoo vs our own harness for the rubric layer; where (private) traces live +
+  retention + sampling rate; held-out generator + split size + power + refresh/burn
+  policy; and whether a non-teaching fork of sre-agent is the right loop target so the
+  published prompts stay untouched.
+
+## 10. Open questions
+- Which cheap, stable model id do we pin for CI, and can we get a sandboxed key with a
+  hard spend cap?
+- Acceptable monthly eval budget + cadence (drives N and the cost table in §4.3)?
+- Repo home for evals: this repo, the site repo, or a dedicated eval repo?
+- Do we change the migration staleness signal (mtime → content hash / commit time) as
+  part of this work, or only wrap the classifier for testing?
+- Loop: Promptfoo vs our own harness for the rubric layer; where traces live (artifact
+  store vs DB) plus retention + sampling rate; is the implementer a Cursor cloud agent
+  via the SDK or a manually-triggered background agent; held-out split size and refresh
+  policy?
