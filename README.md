@@ -17,6 +17,9 @@ examples/
   tool-calling-agent/
     ts/       # canonical implementation
     python/   # Python port
+  accessibility-agent/
+    ts/       # canonical implementation
+    python/   # Python port
 ```
 
 Each example is independently runnable. Keep example-specific code inside its
@@ -29,6 +32,7 @@ language folder.
 | `hello-world` | Minimal Cursor SDK prompt | `examples/hello-world/ts` | `examples/hello-world/python` |
 | `migration-agent` | Uses Cursor SDK to update TS-to-Python ports | `examples/migration-agent/ts` | `examples/migration-agent/python` |
 | `tool-calling-agent` | Cursor SDK local agent with custom tools | `examples/tool-calling-agent/ts` | `examples/tool-calling-agent/python` |
+| `accessibility-agent` | Scans pages with axe-core via a local Playwright tool | `examples/accessibility-agent/ts` | `examples/accessibility-agent/python` |
 
 ## Setup
 
@@ -52,6 +56,15 @@ Run an example:
 npm run hello-world:ts -- "Ada"
 npm run migration-agent:ts
 npm run tool-calling:ts -- "add 3 and 9"
+npm run accessibility-agent:ts -- --scan-only
+```
+
+The accessibility agent includes a local HTML fixture with intentional violations.
+Use `--scan-only` to run the axe-core scan without Cursor SDK credentials.
+Install Playwright browsers once before the first scan:
+
+```sh
+npx playwright install chromium
 ```
 
 ### Python
@@ -68,6 +81,7 @@ Run an example:
 python3 examples/hello-world/python/main.py "Ada"
 python3 examples/migration-agent/python/main.py
 python3 examples/tool-calling-agent/python/main.py "add 3 and 9"
+python3 examples/accessibility-agent/python/main.py --scan-only
 ```
 
 ## TypeScript-to-Python porting flow
