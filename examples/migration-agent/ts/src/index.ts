@@ -152,7 +152,7 @@ async function runCursorSdkMigration(resultsToReview: MigrationResult[]) {
   });
 
   console.log("\nCursor SDK migration result:");
-  console.log(String(response));
+  console.log(response.result ?? "");
 }
 
 async function listExampleDirs(): Promise<string[]> {

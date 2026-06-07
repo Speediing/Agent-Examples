@@ -155,8 +155,9 @@ def run_cursor_sdk_migration(results: list[MigrationResult]) -> None:
     prompt = "\n\n".join(
         [
             "You are the Migration Agent for this examples repository.",
-            "TypeScript examples are canonical. Python ports must match their behavior using the Python Cursor SDK patterns.",
+            "TypeScript examples are canonical. Python ports must match their behavior.",
             "For each stale or missing Python port below, inspect the TypeScript implementation and update or create the matching Python port.",
+            "Use the Python Cursor SDK in Python ports, mirroring the TypeScript Cursor SDK pattern.",
             "After editing, run the relevant Python file and report what changed.",
             json.dumps([result.__dict__ for result in actionable_results], indent=2),
         ]
