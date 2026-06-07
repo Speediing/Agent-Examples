@@ -9,7 +9,8 @@
     "build": "npm run build --workspaces",
     "hello-world:ts": "npm --workspace @cursor-examples/hello-world-ts run start --",
     "migration-agent:ts": "npm --workspace @cursor-examples/migration-agent-ts run start --",
-    "tool-calling:ts": "npm --workspace @cursor-examples/tool-calling-agent-ts run start --"
+    "tool-calling:ts": "npm --workspace @cursor-examples/tool-calling-agent-ts run start --",
+    "sre-agent:ts": "npm --workspace @cursor-examples/sre-agent-ts run start --"
   },
   "workspaces": [
     "examples/*/ts"
