@@ -1,13 +1,19 @@
 import { spawnSync } from "node:child_process";
+import path from "node:path";
 
 export function gitLatestCommitTimeMs(
   filePath: string,
   cwd: string
 ): number | null {
-  const result = spawnSync("git", ["log", "-1", "--format=%ct", "--", filePath], {
-    cwd,
-    encoding: "utf8"
-  });
+  const relativePath = path.relative(cwd, filePath);
+  const result = spawnSync(
+    "git",
+    ["log", "-1", "--format=%ct", "--", relativePath],
+    {
+      cwd,
+      encoding: "utf8"
+    }
+  );
 
   if (result.status !== 0) {
     return null;

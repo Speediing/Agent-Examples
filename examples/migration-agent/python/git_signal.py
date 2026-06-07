@@ -5,8 +5,13 @@ from pathlib import Path
 
 
 def git_latest_commit_time_ms(file_path: Path, cwd: Path) -> float | None:
+    try:
+        relative_path = file_path.relative_to(cwd)
+    except ValueError:
+        relative_path = file_path
+
     result = subprocess.run(
-        ["git", "log", "-1", "--format=%ct", "--", str(file_path)],
+        ["git", "log", "-1", "--format=%ct", "--", str(relative_path)],
         cwd=cwd,
         capture_output=True,
         text=True,

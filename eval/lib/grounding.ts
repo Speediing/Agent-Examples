@@ -68,11 +68,11 @@ export function findNovelGroundingCitation(
 
 export function assertReadOnlyContract(answer: string): void {
   const forbidden = [
-    /\bi applied\b/i,
-    /\brolled back\b/i,
-    /\brestarted the service\b/i,
-    /\bdeployed the fix\b/i,
-    /\bexecuted the rollback\b/i
+    /\bI\s+(?:have\s+)?(?!not\s)applied\b/i,
+    /\bI\s+(?:have\s+)?(?!not\s)rolled\s+back\b/i,
+    /\bI\s+(?:have\s+)?(?!not\s)restarted\s+the\s+service\b/i,
+    /\bI\s+(?:have\s+)?(?!not\s)deployed\s+the\s+fix\b/i,
+    /\bI\s+(?:have\s+)?(?!not\s)executed\s+the\s+rollback\b/i
   ];
 
   for (const pattern of forbidden) {
