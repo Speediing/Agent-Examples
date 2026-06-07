@@ -24,18 +24,21 @@ language folder.
 
 ## How to use this cookbook
 
-Each recipe builds one agent pattern from a runnable example. Start with the
-TypeScript version because it is the canonical implementation, then compare the
-Python port when you want to see the same idea in another SDK.
+Each recipe teaches one agent pattern by walking through the code you would
+write to build it yourself. Start with the TypeScript version because it is the
+canonical implementation, then compare the Python port when you want to see the
+same idea in another SDK.
 
 Read each recipe in this order:
 
 1. Read the introduction to understand the agent job.
 2. Check what you will learn and the prerequisites.
-3. Run the command once with the default prompt or sample input.
-4. Read the entrypoint to see what stays deterministic local code and what is
+3. Read the build steps: input boundary, prompt contract, SDK call, local
+   tools or audit code, and verification.
+4. Run the command once with the default prompt or sample input.
+5. Read the entrypoint to see what stays deterministic local code and what is
    sent to Cursor.
-5. Make one narrow change, then run the TypeScript and Python versions with the
+6. Make one narrow change, then run the TypeScript and Python versions with the
    same input.
 
 ## Recipes
@@ -48,26 +51,30 @@ Read each recipe in this order:
 
 ### `hello-world`
 
-Build the smallest useful SDK loop: collect command-line input, call
-`Agent.prompt`, and print the model response.
+Build the smallest useful SDK loop yourself: command-line input, prompt
+contract, SDK options, and script-friendly output.
 
 What you will learn:
 
-- How to call `Agent.prompt` from a local script.
-- Why the working directory is still part of the agent context.
-- How to keep setup failures readable when credentials are missing.
+- How to structure an agent entrypoint around input, prompt, SDK options, and
+  output.
+- How to write a prompt contract that names the role, task, and output
+  constraint.
+- How to adapt the starter loop to your own use case before adding tools.
 
 Prerequisites:
 
 - `npm install` and `npm run build`
 - `CURSOR_API_KEY` and `CURSOR_MODEL` exported in your shell
 
-Recipe:
+Build it:
 
-1. Run the TypeScript example.
-2. Read the prompt construction in `examples/hello-world/ts/src/index.ts`.
-3. Change one instruction, such as tone or output shape.
-4. Run the Python port with the same input and compare the behavior.
+1. Decide the agent job in one sentence.
+2. Read command-line input with `process.argv`.
+3. Build a prompt from short ordered instructions.
+4. Call `Agent.prompt` with `CURSOR_API_KEY`, `CURSOR_MODEL`, and `local.cwd`.
+5. Print `result.result` and keep setup errors readable.
+6. Replace the greeting prompt with your own prompt-first workflow.
 
 Run it:
 
@@ -76,33 +83,36 @@ npm run hello-world:ts -- "Ada"
 python3 examples/hello-world/python/main.py "Ada"
 ```
 
-Takeaway: this recipe is your setup check. If it works, the same SDK loop can
-carry tools, repository reads, and longer tasks.
+Takeaway: this recipe gives you the skeleton for any prompt-first local agent.
+Keep the skeleton and replace the prompt contract with your own workflow.
 
 ### `tool-calling-agent`
 
-Give Cursor deterministic local helpers. The agent decides when a tool is
-relevant, but the calculation still happens in code you own.
+Build an agent that plans with Cursor but delegates facts, validation, and side
+effects to local tools.
 
 What you will learn:
 
-- How to register local custom tools with the Cursor SDK.
-- Why tool descriptions and JSON schemas shape tool selection.
-- How to validate SDK JSON arguments before running deterministic code.
+- How to decide which parts of the workflow belong in tools instead of the
+  prompt.
+- How to define a custom tool with a description, JSON schema, and execute
+  handler.
+- How to validate SDK JSON arguments before local code acts on them.
 
 Prerequisites:
 
 - The `hello-world` recipe runs successfully.
 - `npm run build`
-- A request that clearly maps to a tool, such as `add 3 and 9`
+- One deterministic operation you want your own agent to perform locally.
 
-Recipe:
+Build it:
 
-1. Read the user request from the command line.
-2. Register `add` and `word_count` as `customTools`.
-3. Define each tool with a description, JSON input schema, and execute function.
-4. Let Cursor choose the tool, receive the local result, and write the final
-   answer.
+1. Choose what the model should not guess.
+2. Write a tool description that tells Cursor when the tool is useful.
+3. Define a narrow JSON schema for the tool input.
+4. Validate SDK JSON values inside the handler.
+5. Return structured data, not a polished sentence.
+6. Attach the tools under `local.customTools` in `Agent.prompt`.
 
 Run it:
 
@@ -111,19 +121,21 @@ npm run tool-calling:ts -- "add 3 and 9"
 python3 examples/tool-calling-agent/python/main.py "add 3 and 9"
 ```
 
-Extend it by replacing `add` with a project-specific helper, such as reading
-package metadata, checking a schema, or running a narrow repository audit.
+Adapt it by replacing `add` with a project-specific helper, such as reading
+package metadata, checking a schema, querying an internal API, or running a
+narrow repository audit.
 
 ### `migration-agent`
 
-Turn a maintenance problem into a repeatable agent workflow. TypeScript is the
-source of truth, and Python ports should stay aligned with it.
+Build a two-phase maintenance agent: deterministic local audit first, focused
+Cursor repair second.
 
 What you will learn:
 
+- How to model an agent workflow as deterministic audit plus agentic repair.
 - How to encode source-of-truth ownership in package metadata.
-- Why deterministic audits should run before agentic repair.
-- How to pass a focused set of stale or missing ports to Cursor.
+- How to give Cursor a focused repair prompt instead of asking it to rediscover
+  everything.
 
 Prerequisites:
 
@@ -131,13 +143,14 @@ Prerequisites:
 - `cursorExample.pythonPort` metadata in each TypeScript package
 - SDK credentials only for the repair step, not the audit
 
-Recipe:
+Build it:
 
-1. List every directory under `examples/`.
-2. Read each `ts/package.json`.
-3. Use `cursorExample.pythonPort` to locate the Python port.
-4. Compare TypeScript source timestamps with the Python file timestamp.
-5. Optionally send only stale or missing ports to Cursor for repair.
+1. Split the workflow into audit, repair, and verification phases.
+2. Declare the source-of-truth contract in `cursorExample.pythonPort`.
+3. Build a local scanner that validates package metadata.
+4. Classify repository state into `ok`, `missing`, `stale`, and `error`.
+5. Filter actionable results before calling Cursor.
+6. Send Cursor the narrow repair brief and the local repository boundary.
 
 Run the local audit:
 
@@ -154,7 +167,8 @@ CURSOR_API_KEY=... CURSOR_MODEL=... python3 examples/migration-agent/python/main
 ```
 
 Takeaway: local code finds the facts, then Cursor edits from a narrow brief.
-That keeps the repair loop focused and reviewable.
+Reuse the shape for generated clients, docs pages, design-system examples, or
+configuration drift checks.
 
 ## Setup
 
