@@ -71,7 +71,9 @@ def audit_python_ports(write_stubs: bool) -> list[MigrationResult]:
         status = classify_port_status(
             python_exists=python_exists,
             latest_ts_mtime=latest_ts_mtime,
-            python_mtime=python_port_path.stat().st_mtime if python_exists else 0,
+            python_mtime=(
+                python_port_path.stat().st_mtime * 1000 if python_exists else 0
+            ),
             write_stubs=write_stubs,
         )
 

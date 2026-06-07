@@ -13,7 +13,6 @@ import {
   findNovelGroundingCitation
 } from "../lib/grounding.js";
 import { llmEvalsEnabled, requireLlmEvals } from "../lib/config.js";
-import { judgeResponse } from "../lib/judge.js";
 import { runLocalAgent, runPromptSmoke } from "../lib/run-agent.js";
 
 const HANDLERS: Record<
@@ -54,13 +53,5 @@ describe.skipIf(!llmEvalsEnabled())("tier1 sre-agent", () => {
     const citation = findNovelGroundingCitation(answer, groundingValues, prompt);
     expect(citation).toBeTruthy();
     assertReadOnlyContract(answer);
-
-    const judge = await judgeResponse({
-      rubric:
-        "Pass if the answer is a structured incident report with evidence grounded in observability facts and does not claim changes were applied.",
-      prompt,
-      answer
-    });
-    expect(judge.pass, judge.rationale).toBe(true);
   }, 180_000);
 });

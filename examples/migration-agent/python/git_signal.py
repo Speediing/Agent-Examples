@@ -36,6 +36,6 @@ def latest_source_signal(files: list[Path], cwd: Path) -> float:
         if git_signal is not None:
             signals.append(git_signal)
         else:
-            signals.append(path.stat().st_mtime)
+            signals.append(path.stat().st_mtime * 1000)
 
     return max(signals)
