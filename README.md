@@ -22,22 +22,23 @@ examples/
 Each example is independently runnable. Keep example-specific code inside its
 language folder.
 
-## How to use these guides
+## How to use this cookbook
 
-Each example is a small agent teammate with a specific job. Start with the
+Each recipe builds one agent pattern from a runnable example. Start with the
 TypeScript version because it is the canonical implementation, then compare the
 Python port when you want to see the same idea in another SDK.
 
-Read each guide in this order:
+Read each recipe in this order:
 
-1. Understand the teammate's job and why an agent helps.
-2. Run the command once with the default prompt or sample input.
-3. Read the entrypoint to see what is deterministic local code and what is sent
-   to Cursor.
-4. Make one narrow change, then run the TypeScript and Python versions with the
+1. Read the introduction to understand the agent job.
+2. Check what you will learn and the prerequisites.
+3. Run the command once with the default prompt or sample input.
+4. Read the entrypoint to see what stays deterministic local code and what is
+   sent to Cursor.
+5. Make one narrow change, then run the TypeScript and Python versions with the
    same input.
 
-## Example guides
+## Recipes
 
 | Example | What it demonstrates | TypeScript | Python |
 | --- | --- | --- | --- |
@@ -47,22 +48,26 @@ Read each guide in this order:
 
 ### `hello-world`
 
-This is the smallest useful SDK loop. It reads a name from the command line,
-builds a short prompt, calls `Agent.prompt`, and prints the model response.
+Build the smallest useful SDK loop: collect command-line input, call
+`Agent.prompt`, and print the model response.
 
-Why it helps:
+What you will learn:
 
-- It verifies credentials, model selection, and local working directory setup.
-- It keeps the prompt visible, so readers can see exactly what Cursor receives.
-- It gives you a safe place to change tone, instructions, and output shape
-  before adding tools or file edits.
+- How to call `Agent.prompt` from a local script.
+- Why the working directory is still part of the agent context.
+- How to keep setup failures readable when credentials are missing.
 
-Code flow:
+Prerequisites:
 
-1. Read `process.argv` or `sys.argv`.
-2. Build the prompt from short, ordered instructions.
-3. Pass `CURSOR_API_KEY`, `CURSOR_MODEL`, and the repository `cwd` into the SDK.
-4. Print `result.result`.
+- `npm install` and `npm run build`
+- `CURSOR_API_KEY` and `CURSOR_MODEL` exported in your shell
+
+Recipe:
+
+1. Run the TypeScript example.
+2. Read the prompt construction in `examples/hello-world/ts/src/index.ts`.
+3. Change one instruction, such as tone or output shape.
+4. Run the Python port with the same input and compare the behavior.
 
 Run it:
 
@@ -71,19 +76,27 @@ npm run hello-world:ts -- "Ada"
 python3 examples/hello-world/python/main.py "Ada"
 ```
 
+Takeaway: this recipe is your setup check. If it works, the same SDK loop can
+carry tools, repository reads, and longer tasks.
+
 ### `tool-calling-agent`
 
-This guide shows how to give Cursor deterministic local helpers. The agent can
-decide when a tool is relevant, but the calculation still happens in code you
-own.
+Give Cursor deterministic local helpers. The agent decides when a tool is
+relevant, but the calculation still happens in code you own.
 
-Why it helps:
+What you will learn:
 
-- Prompts handle intent and explanation.
-- Tools handle facts, validation, and side effects.
-- Structured tool results make the final answer easier to check.
+- How to register local custom tools with the Cursor SDK.
+- Why tool descriptions and JSON schemas shape tool selection.
+- How to validate SDK JSON arguments before running deterministic code.
 
-Code flow:
+Prerequisites:
+
+- The `hello-world` recipe runs successfully.
+- `npm run build`
+- A request that clearly maps to a tool, such as `add 3 and 9`
+
+Recipe:
 
 1. Read the user request from the command line.
 2. Register `add` and `word_count` as `customTools`.
@@ -103,18 +116,22 @@ package metadata, checking a schema, or running a narrow repository audit.
 
 ### `migration-agent`
 
-This guide turns a maintenance problem into a repeatable agent workflow. The
-TypeScript example is the source of truth, and the Python port should stay
-aligned with it.
+Turn a maintenance problem into a repeatable agent workflow. TypeScript is the
+source of truth, and Python ports should stay aligned with it.
 
-Why it helps:
+What you will learn:
 
-- The default audit is deterministic and safe to run without credentials.
-- The package metadata creates a clear link from each TypeScript example to its
-  Python port.
-- Cursor is only called after local code identifies stale or missing ports.
+- How to encode source-of-truth ownership in package metadata.
+- Why deterministic audits should run before agentic repair.
+- How to pass a focused set of stale or missing ports to Cursor.
 
-Code flow:
+Prerequisites:
+
+- `npm install` and `npm run build`
+- `cursorExample.pythonPort` metadata in each TypeScript package
+- SDK credentials only for the repair step, not the audit
+
+Recipe:
 
 1. List every directory under `examples/`.
 2. Read each `ts/package.json`.
@@ -135,6 +152,9 @@ Ask Cursor to repair stale or missing ports:
 CURSOR_API_KEY=... CURSOR_MODEL=... npm run migrate:python-ports -- --use-cursor-sdk
 CURSOR_API_KEY=... CURSOR_MODEL=... python3 examples/migration-agent/python/main.py --use-cursor-sdk
 ```
+
+Takeaway: local code finds the facts, then Cursor edits from a narrow brief.
+That keeps the repair loop focused and reviewable.
 
 ## Setup
 
