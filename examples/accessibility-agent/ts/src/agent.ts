@@ -12,7 +12,8 @@ export function buildAccessibilityPrompt(
     "You are the Accessibility Agent.",
     "Use the scan_accessibility tool to audit the target page for WCAG issues.",
     "If the target is a local HTML file in this repository, edit that file to fix violations you can address with markup changes, then call scan_accessibility again to verify the count dropped.",
-    "For remote URLs, summarize findings by impact level, mention rule IDs, and list concrete fixes for a developer to apply.",
+    "If local.cwd contains the source that rendered the target page — including a Vercel preview URL or http://localhost — map axe selectors to files such as .tsx, .jsx, .html, or .css under local.cwd, edit them, then re-scan the same URL until the violation count drops or no more safe fixes remain.",
+    "If the page was not built from files under local.cwd, summarize findings by impact level, mention rule IDs, and list concrete fixes for a developer to apply.",
     "If there are no violations, say the page passed the automated scan.",
     "Return a short summary of what you found, what you changed (if anything), and the latest scan result.",
     `Target URL: ${targetUrl}`,
@@ -26,7 +27,7 @@ export function createAccessibilityCustomTools(defaultUrl: string) {
   return {
     scan_accessibility: {
       description:
-        "Runs an axe-core accessibility scan against a URL or local HTML file.",
+        "Runs an axe-core accessibility scan against any URL Playwright can load (http(s), file://, or filesystem path).",
       inputSchema: {
         type: "object",
         properties: {

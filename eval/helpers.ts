@@ -7,12 +7,12 @@ const repoRoot = path.resolve(
   ".."
 );
 
-export function runNpmScript(
+export function runPnpmScript(
   script: string,
   args: string[] = [],
   env: NodeJS.ProcessEnv = {}
 ) {
-  return spawnSync("npm", ["run", script, "--", ...args], {
+  return spawnSync("pnpm", ["run", script, ...args], {
     cwd: repoRoot,
     env: { ...process.env, ...env },
     encoding: "utf8"

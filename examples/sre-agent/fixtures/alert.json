@@ -1,0 +1,18 @@
+{
+  "event": {
+    "event_type": "incident.triggered",
+    "data": {
+      "id": "Q12ABC",
+      "type": "incident",
+      "title": "checkout-api returning 503 after deploy",
+      "service": {
+        "summary": "checkout-api",
+        "id": "PSVC123"
+      },
+      "urgency": "high",
+      "body": {
+        "details": "HTTP 5xx rate above 15% for checkout-api after deploy a91f2c1"
+      }
+    }
+  }
+}

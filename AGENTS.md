@@ -12,13 +12,13 @@ for the current coverage map.
 Always run **Tier 0** (no API key, deterministic):
 
 ```sh
-npm ci
-npm run build
-npx playwright install chromium   # first run / after lockfile changes
-AGENT_EXAMPLE_SITE_PATH=../agent-example-site npm test
+pnpm install --frozen-lockfile
+pnpm run build
+pnpm exec playwright install chromium   # first run / after lockfile changes
+AGENT_EXAMPLE_SITE_PATH=../agent-example-site pnpm test
 python3 -m pip install -r requirements-dev.txt
 python3 -m pytest
-npm run typecheck
+pnpm run typecheck
 ```
 
 Run **Tier 1/2 LLM evals** when you change prompts, tool maps, handler logic that
@@ -27,13 +27,13 @@ affects traces, or anything an LLM must do correctly:
 ```sh
 export CURSOR_API_KEY=...
 export CURSOR_MODEL=...   # or CURSOR_AGENT_MODEL
-npm run test:llm
+pnpm run test:llm
 ```
 
 Or run everything:
 
 ```sh
-npm run test:all
+pnpm run test:all
 python3 -m pytest
 ```
 
@@ -44,9 +44,9 @@ PR. LLM evals catch regressions in tool choice, grounding, and read-only contrac
 
 | Tier | Command | Needs key | Use when |
 | --- | --- | --- | --- |
-| 0 | `npm test` | No | Handlers, classifiers, scans, setup/negative cases, docs↔code parity |
-| 1 | `npm run test:llm` (tier1) | Yes | Trace assertions, grounding, smoke output for each agent |
-| 2 | `npm run test:llm` (tier2) | Yes | SRE adversarial cases (unknown service, injection, metrics contract) |
+| 0 | `pnpm test` | No | Handlers, classifiers, scans, setup/negative cases, docs↔code parity |
+| 1 | `pnpm run test:llm` (tier1) | Yes | Trace assertions, grounding, smoke output for each agent |
+| 2 | `pnpm run test:llm` (tier2) | Yes | SRE adversarial cases (unknown service, injection, metrics contract) |
 | parity | `eval/parity/*`, pytest | Mixed | TS↔Python deterministic handler parity |
 
 ## Where tests live
@@ -85,7 +85,7 @@ Add tests when you:
 
 - **Change prompts or custom tools**
   - Update the shared factory module, not only `index.ts` / `main.py`.
-  - Re-run `npm run test:llm` for that agent.
+  - Re-run `pnpm run test:llm` for that agent.
   - Adjust trace graders in `eval/tier1/` if expected tool names, args, or
     grounding rules changed.
 
@@ -93,7 +93,7 @@ Add tests when you:
   - Update root `package.json` scripts and the matching fields in
     `agent-example-site/app/blog/posts.ts`.
   - Update `eval/fixtures/cookbook-parity.json` so CI keeps parity coverage.
-  - Run `AGENT_EXAMPLE_SITE_PATH=../agent-example-site npm test` locally for the
+  - Run `AGENT_EXAMPLE_SITE_PATH=../agent-example-site pnpm test` locally for the
     live cross-repo check against `app/blog/posts.ts`.
 
 - **Add a new failure mode worth guarding** (especially SRE)

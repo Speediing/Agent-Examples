@@ -117,3 +117,27 @@ def build_sre_prompt(incident: str) -> str:
             f"Incident report: {incident or 'checkout-api returning 503 errors after a deploy'}",
         ]
     )
+
+
+def build_sre_response_prompt(alert_payload: str) -> str:
+    return "\n".join(
+        [
+            "You are an on-call SRE agent. Each user message is a PagerDuty alert payload.",
+            "Triage it to root cause and ship the minimal safe fix.",
+            "",
+            "local.cwd contains logs/, infra/, and runbooks/ for the alerting service.",
+            "Use read-only observability tools first, then read and edit files in the checkout.",
+            "",
+            "Workflow for every alert:",
+            "1. Call observability tools and read logs/ to identify the failure signature.",
+            "2. Consult lookup_runbook, then find the root cause under infra/.",
+            "3. Edit the manifest in place and produce a unified diff.",
+            "4. open_pull_request(title, body, diff) with the fix.",
+            "5. request_approval(summary) and wait for the human decision.",
+            "6. Only if the result is approved, merge_pull_request(pr_number).",
+            "",
+            "Never call merge_pull_request unless request_approval returned approved.",
+            "Keep the fix minimal — do not refactor unrelated config.",
+            alert_payload,
+        ]
+    )

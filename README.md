@@ -36,15 +36,15 @@ language folder.
 | `migration-agent` | Uses Cursor SDK to update TS-to-Python ports | `examples/migration-agent/ts` | `examples/migration-agent/python` |
 | `tool-calling-agent` | Cursor SDK local agent with custom tools | `examples/tool-calling-agent/ts` | `examples/tool-calling-agent/python` |
 | `accessibility-agent` | Scans pages with axe-core via a local Playwright tool | `examples/accessibility-agent/ts` | `examples/accessibility-agent/python` |
-| `sre-agent` | Incident triage agent with read-only observability tools | `examples/sre-agent/ts` | `examples/sre-agent/python` |
+| `sre-agent` | On-call incident response: investigate, open a fix PR, gate merge on approval | `examples/sre-agent/ts` | `examples/sre-agent/python` |
 
 ## Setup
 
 ### TypeScript
 
 ```sh
-npm install
-npm run build
+pnpm install
+pnpm run build
 ```
 
 Set SDK credentials before running SDK-backed examples:
@@ -57,11 +57,12 @@ export CURSOR_MODEL=...
 Run an example:
 
 ```sh
-npm run hello-world:ts -- "Ada"
-npm run migration-agent:ts
-npm run tool-calling:ts -- "add 3 and 9"
-npm run accessibility-agent:ts -- --scan-only
-npm run sre-agent:ts -- "checkout-api returning 503 after deploy"
+pnpm run hello-world:ts "Ada"
+pnpm run migration-agent:ts
+pnpm run tool-calling:ts "add 3 and 9"
+pnpm run accessibility-agent:ts --scan-only
+pnpm run sre-agent:ts --auto-approve
+pnpm run sre-agent:ts --report-only "checkout-api returning 503 after deploy"
 ```
 
 The accessibility agent includes a local HTML fixture with intentional violations.
@@ -69,7 +70,7 @@ Use `--scan-only` to run the axe-core scan without Cursor SDK credentials.
 Install Playwright browsers once before the first scan:
 
 ```sh
-npx playwright install chromium
+pnpm exec playwright install chromium
 ```
 
 ### Python
@@ -87,7 +88,8 @@ python3 examples/hello-world/python/main.py "Ada"
 python3 examples/migration-agent/python/main.py
 python3 examples/tool-calling-agent/python/main.py "add 3 and 9"
 python3 examples/accessibility-agent/python/main.py --scan-only
-python3 examples/sre-agent/python/main.py "checkout-api returning 503 after deploy"
+python3 examples/sre-agent/python/main.py --auto-approve
+python3 examples/sre-agent/python/main.py --report-only "checkout-api returning 503 after deploy"
 ```
 
 ## TypeScript-to-Python porting flow
@@ -96,7 +98,7 @@ python3 examples/sre-agent/python/main.py "checkout-api returning 503 after depl
 2. Run the migration check:
 
    ```sh
-   npm run migrate:python-ports
+   pnpm run migrate:python-ports
    ```
 
 3. If the script reports a stale or missing Python port, update the Python
@@ -110,14 +112,14 @@ reports which Python ports need attention. If a Python port is missing, you can
 ask it to create a placeholder:
 
 ```sh
-npm run migrate:python-ports -- --write-stubs
+pnpm run migrate:python-ports --write-stubs
 ```
 
 The Migration Agent can also ask Cursor SDK to update stale or missing Python
 ports:
 
 ```sh
-CURSOR_API_KEY=... CURSOR_MODEL=... npm run migrate:python-ports -- --use-cursor-sdk
+CURSOR_API_KEY=... CURSOR_MODEL=... pnpm run migrate:python-ports --use-cursor-sdk
 CURSOR_API_KEY=... CURSOR_MODEL=... python3 examples/migration-agent/python/main.py --use-cursor-sdk
 ```
 
@@ -147,5 +149,5 @@ The TypeScript `package.json` must include:
 }
 ```
 
-That metadata lets `npm run migrate:python-ports` find and validate the Python
+That metadata lets `pnpm run migrate:python-ports` find and validate the Python
 port.

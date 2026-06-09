@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout-api
+  namespace: production
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+        - name: checkout-api
+          image: registry.example/checkout-api:a91f2c1
+          env:
+            - name: CHECKOUT_WORKER_CONCURRENCY
+              value: "32"
+            - name: DB_POOL_MAX_CONNECTIONS
+              value: "8"
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

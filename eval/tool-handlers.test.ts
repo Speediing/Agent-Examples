@@ -80,3 +80,57 @@ describe("sre handlers", () => {
     expect(result.runbook?.steps.length).toBeGreaterThan(0);
   });
 });
+
+describe("sre pr handlers", () => {
+  it("opens a pull request and blocks merge until approval", async () => {
+    const {
+      createPrToolState,
+      mergePullRequest,
+      openPullRequest,
+      requestApproval
+    } = await import("../examples/sre-agent/ts/src/pr-tools.js");
+
+    const state = createPrToolState(false);
+    const opened = openPullRequest(state, {
+      title: "Fix pool size",
+      body: "Restore db pool headroom",
+      diff: "--- a/deploy.yaml\n+++ b/deploy.yaml"
+    });
+
+    expect(opened.opened).toBe(true);
+    expect(opened.pr_number).toBe(1);
+
+    const pending = requestApproval(state, {
+      summary: "Increase DB_POOL_MAX_CONNECTIONS to 24"
+    });
+    expect(pending.decision).toBe("pending");
+
+    const blocked = mergePullRequest(state, { pr_number: 1 });
+    expect(blocked.merged).toBe(false);
+  });
+
+  it("merges only after auto-approval", async () => {
+    const {
+      createPrToolState,
+      mergePullRequest,
+      openPullRequest,
+      requestApproval
+    } = await import("../examples/sre-agent/ts/src/pr-tools.js");
+
+    const state = createPrToolState(true);
+    openPullRequest(state, {
+      title: "Fix pool size",
+      body: "Restore db pool headroom",
+      diff: "--- a/deploy.yaml\n+++ b/deploy.yaml"
+    });
+
+    const approved = requestApproval(state, {
+      summary: "Increase DB_POOL_MAX_CONNECTIONS to 24"
+    });
+    expect(approved.decision).toBe("approved");
+
+    const merged = mergePullRequest(state, { pr_number: 1 });
+    expect(merged.merged).toBe(true);
+    expect(state.prs[0]?.merged).toBe(true);
+  });
+});

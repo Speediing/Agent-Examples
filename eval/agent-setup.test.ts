@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { runNpmScript } from "./helpers.js";
+import { runPnpmScript } from "./helpers.js";
 
 function withoutSdkEnv() {
   return {
@@ -10,13 +10,13 @@ function withoutSdkEnv() {
 
 describe("agent setup and negative cases", () => {
   it("hello-world exits when SDK credentials are missing", () => {
-    const result = runNpmScript("hello-world:ts", ['"Ada"'], withoutSdkEnv());
+    const result = runPnpmScript("hello-world:ts", ['"Ada"'], withoutSdkEnv());
     expect(result.status).not.toBe(0);
     expect(result.stderr + result.stdout).toMatch(/Missing CURSOR_API_KEY/);
   });
 
   it("tool-calling exits when SDK credentials are missing", () => {
-    const result = runNpmScript(
+    const result = runPnpmScript(
       "tool-calling:ts",
       ['"add 3 and 9"'],
       withoutSdkEnv()
@@ -26,7 +26,7 @@ describe("agent setup and negative cases", () => {
   });
 
   it("sre-agent exits when SDK credentials are missing", () => {
-    const result = runNpmScript(
+    const result = runPnpmScript(
       "sre-agent:ts",
       ['"checkout-api returning 503 after deploy"'],
       withoutSdkEnv()
@@ -36,7 +36,7 @@ describe("agent setup and negative cases", () => {
   });
 
   it("accessibility full agent exits when SDK credentials are missing", () => {
-    const result = runNpmScript(
+    const result = runPnpmScript(
       "accessibility-agent:ts",
       ['"focus on critical issues"'],
       withoutSdkEnv()
@@ -46,7 +46,7 @@ describe("agent setup and negative cases", () => {
   });
 
   it("accessibility scan-only runs without SDK credentials", () => {
-    const result = runNpmScript(
+    const result = runPnpmScript(
       "accessibility-agent:ts",
       ["--scan-only"],
       withoutSdkEnv()
@@ -56,7 +56,7 @@ describe("agent setup and negative cases", () => {
   });
 
   it("accessibility scan-only fails for a missing file", () => {
-    const result = runNpmScript(
+    const result = runPnpmScript(
       "accessibility-agent:ts",
       ["--scan-only", "/tmp/does-not-exist-accessibility-fixture.html"],
       withoutSdkEnv()
@@ -65,13 +65,13 @@ describe("agent setup and negative cases", () => {
   });
 
   it("migration-agent audit runs without SDK credentials", () => {
-    const result = runNpmScript("migration-agent:ts", [], withoutSdkEnv());
+    const result = runPnpmScript("migration-agent:ts", [], withoutSdkEnv());
     expect(result.stdout).toMatch(/OK|STALE|MISSING|ERROR/);
     expect(result.stderr + result.stdout).not.toMatch(/Missing CURSOR_API_KEY/);
   });
 
   it("migration-agent skips SDK repair when credentials are missing", () => {
-    const result = runNpmScript(
+    const result = runPnpmScript(
       "migration-agent:ts",
       ["--use-cursor-sdk"],
       withoutSdkEnv()

@@ -14,8 +14,8 @@ const packageScripts = JSON.parse(
   readFileSync(path.join(repoRoot, "package.json"), "utf8")
 ).scripts as Record<string, string>;
 
-function extractNpmScripts(command: string): string[] {
-  const matches = [...command.matchAll(/npm run ([^\s]+)/g)];
+function extractPnpmScripts(command: string): string[] {
+  const matches = [...command.matchAll(/pnpm run ([^\s]+)/g)];
   return matches.map((match) => match[1] ?? "").filter(Boolean);
 }
 
@@ -36,7 +36,7 @@ function extractDocFields(source: string) {
 describe.skipIf(!siteRepoAvailable)(
   "docs↔code parity (requires agent-example-site checkout)",
   () => {
-    it("aligns cookbook paths and npm scripts with this repository", () => {
+    it("aligns cookbook paths and pnpm scripts with this repository", () => {
       const postsSource = readFileSync(postsPath, "utf8");
       const { paths, commands } = extractDocFields(postsSource);
 
@@ -54,7 +54,7 @@ describe.skipIf(!siteRepoAvailable)(
       }
 
       for (const command of commands) {
-        for (const script of extractNpmScripts(command)) {
+        for (const script of extractPnpmScripts(command)) {
           expect(packageScripts[script]).toBeTruthy();
         }
       }
@@ -70,7 +70,7 @@ describe("docs↔code parity fixture", () => {
     );
     const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as {
       paths: string[];
-      npmScripts: string[];
+      packageScripts: string[];
     };
 
     for (const examplePath of fixture.paths) {
@@ -83,7 +83,7 @@ describe("docs↔code parity fixture", () => {
       ).toContain('"name"');
     }
 
-    for (const script of fixture.npmScripts) {
+    for (const script of fixture.packageScripts) {
       expect(packageScripts[script]).toBeTruthy();
     }
   });

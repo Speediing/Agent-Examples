@@ -58,7 +58,7 @@ These were read from the installed `dist/cjs/*.d.ts`; a committed reference test
 
 ### Tier 0 — Static & deterministic (no LLM, no API key, no network egress)
 Runs on **every** push/PR. Fast, blocking. Must be *actually* deterministic:
-- `npm ci`, lint, `tsc --noEmit`, `build` for both repos. (`npm ci`, not `install`,
+- `pnpm install --frozen-lockfile`, lint, `tsc --noEmit`, `build` for both repos. (`pnpm install --frozen-lockfile`, not `install`,
   is required for the lockfile pin to mean anything.)
 - Unit tests of **pure** functions: `add`, `word_count`, the 6 SRE handlers, URL
   resolution, and the migration **classifier** refactored to a pure function over
@@ -115,10 +115,10 @@ Gated triggers only (§6). Three grader classes, strongest first:
 ## 4. Foolproofing the evals themselves (anti-flake, anti-gaming)
 
 ### 4.1 Determinism
-- `npm ci` + **exact** versions in the eval image; drop `^`/`~` for `@cursor/sdk`,
+- `pnpm install --frozen-lockfile` + **exact** versions in the eval image; drop `^`/`~` for `@cursor/sdk`,
   `playwright`, `@axe-core/playwright`, `axe-core` in the eval lane. Lock Python deps.
 - Playwright browser cache key = `hash(package-lock.json)` + Playwright version;
-  install with `npx playwright install --with-deps chromium`.
+  install with `pnpm exec playwright install --with-deps chromium`.
 - A separate **scheduled dependency-drift job** bumps deps and re-baselines after
   human review, so security updates aren't blocked by pinning.
 
@@ -170,8 +170,8 @@ blocking exit code becomes a coin flip. `listFiles` also recurses into `node_mod
 
 ### Tier 0 workflow
 `on: [push, pull_request]`. Minimal `permissions: { contents: read }`. Node + Python
-where needed; cache npm + Playwright (version-keyed). "No network egress" applies to
-**test execution**, not setup: `npm ci` and `npx playwright install` need the network
+where needed; cache pnpm + Playwright (version-keyed). "No network egress" applies to
+**test execution**, not setup: `pnpm install --frozen-lockfile` and `pnpm exec playwright install` need the network
 (or, better, a prebuilt container image that bakes deps + the pinned browser so the
 test step itself is offline). Free Actions minutes on public repos cover this (cache
 storage, artifact retention, and browser downloads are *not* unlimited — set retention
@@ -241,7 +241,7 @@ the site has `lint`/`build`. Phase 1 therefore *adds* the harness, then wires CI
 6. Docs `command`/`path` parity test (cross-repo checkout per §6).
 7. A committed **type reference test** importing `RunResult`, `SDKMessage`,
    `SDKToolUseMessage` so the §2 SDK claims are CI-enforced.
-8. Tier 0 workflow: `npm ci` → `npm run lint`/`build`/`test` (this repo + site),
+8. Tier 0 workflow: `pnpm install --frozen-lockfile` → `pnpm run lint`/`build`/`test` (this repo + site),
    `tsc --noEmit`, pytest. Per-repo commands listed explicitly in the workflow.
 
 ### Phase 2 — Tier 1 (gated, costs money)
