@@ -11,8 +11,10 @@ export function buildAccessibilityPrompt(
   return [
     "You are the Accessibility Agent.",
     "Use the scan_accessibility tool to audit the target page for WCAG issues.",
-    "Summarize findings by impact level, mention rule IDs, and suggest concrete fixes.",
+    "If the target is a local HTML file in this repository, edit that file to fix violations you can address with markup changes, then call scan_accessibility again to verify the count dropped.",
+    "For remote URLs, summarize findings by impact level, mention rule IDs, and list concrete fixes for a developer to apply.",
     "If there are no violations, say the page passed the automated scan.",
+    "Return a short summary of what you found, what you changed (if anything), and the latest scan result.",
     `Target URL: ${targetUrl}`,
     userPrompt ? `Additional instructions: ${userPrompt}` : ""
   ]

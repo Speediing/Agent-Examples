@@ -6,7 +6,7 @@ from pathlib import Path
 
 from cursor_sdk import Agent, AgentOptions, CustomTool, LocalAgentOptions
 
-from tools import run_add_tool, run_word_count_tool
+from tools import build_tool_calling_prompt, run_add_tool, run_word_count_tool
 
 
 ROOT_DIR = Path(__file__).resolve().parents[3]
@@ -49,14 +49,7 @@ def require_env(name: str) -> str:
 
 def run_agent(prompt: str) -> str:
     result = Agent.prompt(
-        "\n".join(
-            [
-                "You are the Tool Calling Agent.",
-                "Use the available custom tools when they are relevant.",
-                "Return a concise final answer that includes the tool result.",
-                f"User request: {prompt or 'count the words in this default request'}",
-            ]
-        ),
+        build_tool_calling_prompt(prompt),
         AgentOptions(
             api_key=require_env("CURSOR_API_KEY"),
             model=require_env("CURSOR_MODEL"),

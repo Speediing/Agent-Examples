@@ -6,6 +6,7 @@ from pathlib import Path
 
 from cursor_sdk import Agent, AgentOptions, CustomTool, LocalAgentOptions
 
+from agent import build_accessibility_prompt
 from scan import print_scan_result, resolve_target_url, scan_accessibility
 
 
@@ -60,16 +61,7 @@ def run_agent(target_url: str, user_prompt: str) -> str:
     }
 
     result = Agent.prompt(
-        "\n".join(
-            [
-                "You are the Accessibility Agent.",
-                "Use the scan_accessibility tool to audit the target page for WCAG issues.",
-                "Summarize findings by impact level, mention rule IDs, and suggest concrete fixes.",
-                "If there are no violations, say the page passed the automated scan.",
-                f"Target URL: {target_url}",
-                f"Additional instructions: {user_prompt}" if user_prompt else "",
-            ]
-        ),
+        build_accessibility_prompt(target_url, user_prompt),
         AgentOptions(
             api_key=require_env("CURSOR_API_KEY"),
             model=require_env("CURSOR_MODEL"),

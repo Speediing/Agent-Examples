@@ -10,6 +10,7 @@ from cursor_sdk import Agent, AgentOptions, LocalAgentOptions
 
 from classifier import SKIP_AUDIT_DIRS, classify_port_status
 from git_signal import latest_source_signal
+from prompt import build_migration_prompt
 
 
 @dataclass(frozen=True)
@@ -171,17 +172,8 @@ def run_cursor_sdk_migration(results: list[MigrationResult]) -> None:
         print("SKIPPED Cursor SDK migration: set CURSOR_MODEL to choose the SDK model.")
         return
 
-    prompt = "\n\n".join(
-        [
-            "You are the Migration Agent for this examples repository.",
-            "TypeScript examples are canonical. Python ports must match their behavior using the Python Cursor SDK patterns.",
-            "For each stale or missing Python port below, inspect the TypeScript implementation and update or create the matching Python port.",
-            "After editing, run the relevant Python file and report what changed.",
-            json.dumps([result.__dict__ for result in actionable_results], indent=2),
-        ]
-    )
     result = Agent.prompt(
-        prompt,
+        build_migration_prompt([result.__dict__ for result in actionable_results]),
         AgentOptions(
             api_key=os.environ["CURSOR_API_KEY"],
             model=os.environ["CURSOR_MODEL"],

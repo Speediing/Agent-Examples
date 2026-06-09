@@ -6,6 +6,8 @@ from pathlib import Path
 
 from cursor_sdk import Agent, AgentOptions, LocalAgentOptions
 
+from agent import build_hello_world_prompt
+
 
 ROOT_DIR = Path(__file__).resolve().parents[3]
 
@@ -18,15 +20,9 @@ def require_env(name: str) -> str:
 
 
 def main() -> int:
-    name = " ".join(sys.argv[1:]).strip() or "there"
+    name = " ".join(sys.argv[1:])
     result = Agent.prompt(
-        "\n".join(
-            [
-                "You are the Hello World Agent.",
-                f"Greet {name} in one short sentence.",
-                "Mention that this is a Cursor SDK agent example.",
-            ]
-        ),
+        build_hello_world_prompt(name),
         AgentOptions(
             api_key=require_env("CURSOR_API_KEY"),
             model=require_env("CURSOR_MODEL"),
