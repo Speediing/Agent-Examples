@@ -24,7 +24,7 @@ from tools import (
     run_query_metrics,
 )
 
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
 EXAMPLE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FIXTURES_DIR = os.path.join(EXAMPLE_DIR, "fixtures")
 
