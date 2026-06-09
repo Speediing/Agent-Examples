@@ -6,7 +6,7 @@
     "examples/migration-agent",
     "examples/sre-agent"
   ],
-  "npmScripts": [
+  "packageScripts": [
     "hello-world:ts",
     "tool-calling:ts",
     "accessibility-agent:ts",

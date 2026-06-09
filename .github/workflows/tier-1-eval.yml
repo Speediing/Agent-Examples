@@ -28,24 +28,28 @@ jobs:
         with:
           path: Agent-Examples
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: npm
-          cache-dependency-path: Agent-Examples/package-lock.json
+          cache: pnpm
+          cache-dependency-path: Agent-Examples/pnpm-lock.yaml
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build examples
-        run: npm run build
+        run: pnpm run build
 
       - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Run Tier 1 and Tier 2 LLM evals
         env:
@@ -54,4 +58,4 @@ jobs:
           CURSOR_JUDGE_MODEL: ${{ vars.CURSOR_JUDGE_MODEL }}
           EVAL_SAMPLES: "1"
           EVAL_CASE_TIMEOUT_MS: "180000"
-        run: npm run test:llm
+        run: pnpm run test:llm

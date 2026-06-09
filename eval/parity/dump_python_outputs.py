@@ -42,11 +42,35 @@ sre = load(
     "examples/sre-agent/python/tools.py",
     package_dir="examples/sre-agent/python",
 )
+pr_tools = load(
+    "parity_sre_pr_tools",
+    "examples/sre-agent/python/pr_tools.py",
+    package_dir="examples/sre-agent/python",
+)
 hello_world = load("parity_hello_world_agent", "examples/hello-world/python/agent.py")
 accessibility = load(
     "parity_accessibility_agent", "examples/accessibility-agent/python/agent.py"
 )
 migration = load("parity_migration_prompt", "examples/migration-agent/python/prompt.py")
+
+
+def sre_pr_state_with_open_pr(auto_approve: bool):
+    state = pr_tools.create_pr_tool_state(auto_approve)
+    pr_tools.run_open_pull_request(
+        state,
+        {
+            "title": "Fix pool size",
+            "body": "Restore db pool headroom",
+            "diff": "--- a/deploy.yaml\n+++ b/deploy.yaml",
+        },
+    )
+    return state
+
+
+def sre_pr_merge_approved():
+    state = sre_pr_state_with_open_pr(auto_approve=True)
+    pr_tools.run_request_approval(state, {"summary": "Increase pool size"})
+    return pr_tools.run_merge_pull_request(state, {"pr_number": 1})
 
 MIGRATION_SAMPLE = [
     {
@@ -88,6 +112,24 @@ output = {
         "runbook_missing": sre.run_lookup_runbook({"symptom": "disk full"}),
         "prompt": sre.build_sre_prompt("checkout-api returning 503 after deploy"),
         "prompt_default": sre.build_sre_prompt(""),
+        "response_prompt": sre.build_sre_response_prompt('{"title":"checkout-api 503"}'),
+        "pr_open": pr_tools.run_open_pull_request(
+            pr_tools.create_pr_tool_state(False),
+            {
+                "title": "Fix pool size",
+                "body": "Restore db pool headroom",
+                "diff": "--- a/deploy.yaml\n+++ b/deploy.yaml",
+            },
+        ),
+        "pr_approve_pending": pr_tools.run_request_approval(
+            sre_pr_state_with_open_pr(auto_approve=False),
+            {"summary": "Increase pool size"},
+        ),
+        "pr_merge_blocked": pr_tools.run_merge_pull_request(
+            sre_pr_state_with_open_pr(auto_approve=False),
+            {"pr_number": 1},
+        ),
+        "pr_merge_approved": sre_pr_merge_approved(),
     },
     "hello_world": {
         "prompt": hello_world.build_hello_world_prompt("Ada"),

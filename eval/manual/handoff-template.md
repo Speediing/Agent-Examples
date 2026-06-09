@@ -15,7 +15,7 @@
 ## Validation command
 
 ```sh
-npm run test:all
+pnpm run test:all
 python3 -m pytest
 ```
 

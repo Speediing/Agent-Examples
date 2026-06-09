@@ -1,0 +1,4 @@
+2026-06-07T14:31:12Z ERROR pool exhausted waiting for checkout-db connection
+2026-06-07T14:31:14Z ERROR request failed status=503 route=/v1/checkout
+2026-06-07T14:31:19Z ERROR circuit breaker open for checkout-db
+2026-06-07T14:31:22Z ERROR checkout worker concurrency=32 waiting on db pool maxConnections=8

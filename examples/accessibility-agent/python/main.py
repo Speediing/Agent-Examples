@@ -45,7 +45,7 @@ def run_agent(target_url: str, user_prompt: str) -> str:
 
     custom_tools = {
         "scan_accessibility": CustomTool(
-            description="Runs an axe-core accessibility scan against a URL or local HTML file.",
+            description="Runs an axe-core accessibility scan against any URL Playwright can load (http(s), file://, or filesystem path).",
             input_schema={
                 "type": "object",
                 "properties": {

@@ -19,11 +19,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: npm
-          cache-dependency-path: package-lock.json
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
       - uses: actions/setup-python@v5
         with:
@@ -32,22 +36,22 @@ jobs:
           cache-dependency-path: requirements-dev.txt
 
       - name: Install Node dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Install Python test dependencies
         run: python3 -m pip install -r requirements-dev.txt
 
       - name: Typecheck examples
-        run: npm run typecheck
+        run: pnpm run typecheck
 
       - name: Build examples
-        run: npm run build
+        run: pnpm run build
 
       - name: Install Playwright Chromium
-        run: npx playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Run Vitest Tier 0 suite
-        run: npm test
+        run: pnpm test
 
       - name: Run pytest
         run: python3 -m pytest

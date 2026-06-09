@@ -16,6 +16,13 @@ import {
   lookupRunbook,
   queryMetrics
 } from "../../examples/sre-agent/ts/src/tools.js";
+import {
+  createPrToolState,
+  mergePullRequest,
+  openPullRequest,
+  requestApproval
+} from "../../examples/sre-agent/ts/src/pr-tools.js";
+import { buildSreResponsePrompt } from "../../examples/sre-agent/ts/src/response.js";
 import { buildHelloWorldPrompt } from "../../examples/hello-world/ts/src/agent.js";
 import { buildAccessibilityPrompt } from "../../examples/accessibility-agent/ts/src/agent.js";
 import { buildMigrationPrompt } from "../../examples/migration-agent/ts/src/prompt.js";
@@ -103,6 +110,44 @@ describe.skipIf(!pythonAvailable())("ts↔python live parity", () => {
       buildSrePrompt("checkout-api returning 503 after deploy")
     );
     expect(py.sre.prompt_default).toBe(buildSrePrompt(""));
+    expect(py.sre.response_prompt).toBe(
+      buildSreResponsePrompt('{"title":"checkout-api 503"}')
+    );
+
+    const pendingState = createPrToolState(false);
+    openPullRequest(pendingState, {
+      title: "Fix pool size",
+      body: "Restore db pool headroom",
+      diff: "--- a/deploy.yaml\n+++ b/deploy.yaml"
+    });
+    expect(normalize(py.sre.pr_open)).toEqual(
+      normalize(
+        openPullRequest(createPrToolState(false), {
+          title: "Fix pool size",
+          body: "Restore db pool headroom",
+          diff: "--- a/deploy.yaml\n+++ b/deploy.yaml"
+        })
+      )
+    );
+    expect(normalize(py.sre.pr_approve_pending)).toEqual(
+      normalize(
+        requestApproval(pendingState, { summary: "Increase pool size" })
+      )
+    );
+    expect(normalize(py.sre.pr_merge_blocked)).toEqual(
+      normalize(mergePullRequest(pendingState, { pr_number: 1 }))
+    );
+
+    const approvedState = createPrToolState(true);
+    openPullRequest(approvedState, {
+      title: "Fix pool size",
+      body: "Restore db pool headroom",
+      diff: "--- a/deploy.yaml\n+++ b/deploy.yaml"
+    });
+    requestApproval(approvedState, { summary: "Increase pool size" });
+    expect(normalize(py.sre.pr_merge_approved)).toEqual(
+      normalize(mergePullRequest(approvedState, { pr_number: 1 }))
+    );
     expect(py.hello_world.prompt).toBe(buildHelloWorldPrompt("Ada"));
     expect(py.hello_world.prompt_default).toBe(buildHelloWorldPrompt("   "));
     expect(py.accessibility.prompt).toBe(
