@@ -29,3 +29,14 @@ def run_word_count_tool(args: Mapping[str, Any], _context: object) -> dict[str, 
     words = str(text).strip().split()
 
     return {"count": len(words)}
+
+
+def build_tool_calling_prompt(prompt: str) -> str:
+    return "\n".join(
+        [
+            "You are the Tool Calling Agent.",
+            "Use the available custom tools when they are relevant.",
+            "Return a concise final answer that includes the tool result.",
+            f"User request: {prompt or 'count the words in this default request'}",
+        ]
+    )
