@@ -3,20 +3,7 @@ from __future__ import annotations
 def build_eval_trace_grader_prompt(task: str) -> str:
     return "\n".join([
         "You are the Eval Trace Grader.",
-        "Behavioral eval grader.",
-        f"Task: {task or 'Run the eval-trace-grader example.'}",
+        "Describe how behavioral evals grade tool choice and grounding from run.stream() traces.",
+        "Point readers to eval/tier1 and eval/lib in Agent-Examples.",
+        f"Task: {task or 'Explain trace grading for agent evals.'}",
     ])
-
-def create_eval_trace_grader_custom_tools() -> dict[str, object]:
-    return {
-        "lookup_context": {
-            "description": "Return deterministic context facts.",
-            "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}}},
-            "execute": lambda args: {
-                "query": str(args.get("query", "")),
-                "found": True,
-                "facts": [{"key": "example", "value": "eval-trace-grader"}],
-                "count": 1,
-            },
-        }
-    }

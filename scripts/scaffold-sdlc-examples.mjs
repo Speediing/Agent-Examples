@@ -66,9 +66,6 @@ function buildPromptFn(slug, title, lesson) {
   return [
     "You are the ${toAgentName(slug)}.",
     "${lesson}.",
-    "Use the available tools when they return facts you need.",
-    "Do not invent data the tools did not return.",
-    "Return a concise markdown answer with evidence from tool results.",
     \`Task: \${task || "Run the ${slug} example with a realistic input."}\`
   ].join("\\n");
 }`;
@@ -430,7 +427,206 @@ function requireEnv(name: string): string {
 `;
 }
 
-function pythonTools(slug, pattern, lesson) {
+function pythonReadStringHelper() {
+  return `
+def _read_string(value: object | None) -> str:
+    return value.strip() if isinstance(value, str) else ""
+`;
+}
+
+function pythonLtTools(slug, lesson) {
+  const py = toPythonName(slug);
+  return `from __future__ import annotations
+${pythonReadStringHelper()}
+def lookup_context(args: dict[str, object]) -> dict[str, object]:
+    query = _read_string(args.get("query")).lower() or "${slug}"
+    return {
+        "query": query,
+        "found": True,
+        "facts": [
+            {"key": "example", "value": "${slug}"},
+            {"key": "lesson", "value": "${lesson}"},
+            {"key": "pattern", "value": "local-tools"},
+        ],
+        "count": 3,
+    }
+
+def build_${py}_prompt(task: str) -> str:
+    return "\\n".join([
+        "You are the ${toAgentName(slug)}.",
+        "${lesson}.",
+        "Call lookup_context before you summarize.",
+        "Do not invent facts the tool did not return.",
+        f"Task: {task or 'Run the ${slug} example.'}",
+    ])
+
+def create_${py}_custom_tools() -> dict[str, object]:
+    return {
+        "lookup_context": {
+            "description": "Return deterministic context facts for the ${slug} example.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "Short task or topic string"},
+                },
+            },
+            "execute": lookup_context,
+        }
+    }
+`;
+}
+
+function pythonPfTools(slug, lesson) {
+  const py = toPythonName(slug);
+  return `from __future__ import annotations
+
+def build_${py}_prompt(task: str) -> str:
+    return "\\n".join([
+        "You are the ${toAgentName(slug)}.",
+        "${lesson}.",
+        f"Task: {task or 'Run the ${slug} example with a realistic input.'}",
+    ])
+`;
+}
+
+function pythonBeTools(slug) {
+  const py = toPythonName(slug);
+  return `from __future__ import annotations
+
+def build_${py}_prompt(task: str) -> str:
+    return "\\n".join([
+        "You are the Eval Trace Grader.",
+        "Describe how behavioral evals grade tool choice and grounding from run.stream() traces.",
+        "Point readers to eval/tier1 and eval/lib in Agent-Examples.",
+        f"Task: {task or 'Explain trace grading for agent evals.'}",
+    ])
+`;
+}
+
+function pythonSfrTools(slug, lesson) {
+  const py = toPythonName(slug);
+  return `from __future__ import annotations
+${pythonReadStringHelper()}
+def scan_target(args: dict[str, object]) -> dict[str, object]:
+    target = _read_string(args.get("target")) or "sample-input"
+    return {
+        "target": target,
+        "violations": [
+            {
+                "id": "${slug}-rule-1",
+                "impact": "moderate",
+                "summary": "Example violation for ${slug}",
+            }
+        ],
+        "count": 1,
+        "passed": False,
+    }
+
+def build_${py}_prompt(task: str) -> str:
+    return "\\n".join([
+        "You are the ${toAgentName(slug)}.",
+        "${lesson}.",
+        "Call scan_target and cite violation ids from the tool result.",
+        f"Task: {task or 'Scan the sample input for ${slug}.'}",
+    ])
+
+def create_${py}_custom_tools() -> dict[str, object]:
+    return {
+        "scan_target": {
+            "description": "Scan the target input and return structured violations.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "target": {"type": "string", "description": "Path, diff snippet, or label to scan"},
+                },
+            },
+            "execute": scan_target,
+        }
+    }
+`;
+}
+
+function pythonAtaTools(slug, lesson, writes) {
+  const py = toPythonName(slug);
+  const auditOnly = writes
+    ? "Only recommend writes when audit_state.writes_enabled is true."
+    : "This example is audit-only.";
+  return `from __future__ import annotations
+
+import sys
+${pythonReadStringHelper()}
+def audit_state(args: dict[str, object]) -> dict[str, object]:
+    scope = _read_string(args.get("scope")) or "${slug}"
+    return {
+        "scope": scope,
+        "drift_detected": True,
+        "actionable": [{"id": "1", "kind": "${slug}", "summary": "Example drift record for audit"}],
+        "count": 1,
+        "writes_enabled": "--act" in sys.argv,
+    }
+
+def build_${py}_prompt(task: str) -> str:
+    return "\\n".join([
+        "You are the ${toAgentName(slug)}.",
+        "${lesson}.",
+        "Call audit_state first. ${auditOnly}",
+        f"Task: {task or 'Audit scope for ${slug}.'}",
+    ])
+
+def create_${py}_custom_tools() -> dict[str, object]:
+    return {
+        "audit_state": {
+            "description": "Return deterministic audit records for the ${slug} example.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "scope": {"type": "string", "description": "Audit scope label"},
+                },
+            },
+            "execute": audit_state,
+        }
+    }
+`;
+}
+
+function pythonIagTools(slug, lesson) {
+  const py = toPythonName(slug);
+  return `from __future__ import annotations
+${pythonReadStringHelper()}
+SIGNALS: dict[str, dict[str, object]] = {
+    "${slug}": {"status": "investigating", "evidence": ["signal-a", "signal-b"]}
+}
+
+def get_signals(args: dict[str, object]) -> dict[str, object]:
+    subject = _read_string(args.get("subject")) or "${slug}"
+    signal = SIGNALS.get(subject, SIGNALS["${slug}"])
+    return {"subject": subject, "found": True, "signal": signal, "known_subjects": list(SIGNALS)}
+
+def build_${py}_prompt(task: str) -> str:
+    return "\\n".join([
+        "You are the ${toAgentName(slug)}.",
+        "${lesson}.",
+        "Investigate with get_signals. This example is read-only: recommend actions but do not claim you applied changes.",
+        f"Incident or subject: {task or '${slug} investigation'}",
+    ])
+
+def create_${py}_custom_tools() -> dict[str, object]:
+    return {
+        "get_signals": {
+            "description": "Return mock investigation signals for the ${slug} example.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "subject": {"type": "string", "description": "Service, diff, or incident label"},
+                },
+            },
+            "execute": get_signals,
+        }
+    }
+`;
+}
+
+function pythonTools(slug, pattern, lesson, writes = false) {
   const py = toPythonName(slug);
   if (pattern === "CHAT") {
     return `from __future__ import annotations
@@ -439,33 +635,27 @@ def build_${py}_prompt(thread_text: str) -> str:
     return "\\n".join([
         "You are the ${toAgentName(slug)}.",
         "${lesson}.",
+        "Do not claim you created a ticket or opened a pull request.",
         f"Thread:\\n{thread_text or 'Example ${slug} thread.'}",
     ])
 `;
   }
-  return `from __future__ import annotations
-
-def build_${py}_prompt(task: str) -> str:
-    return "\\n".join([
-        "You are the ${toAgentName(slug)}.",
-        "${lesson}.",
-        f"Task: {task or 'Run the ${slug} example.'}",
-    ])
-
-def create_${py}_custom_tools() -> dict[str, object]:
-    return {
-        "lookup_context": {
-            "description": "Return deterministic context facts.",
-            "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}}},
-            "execute": lambda args: {
-                "query": str(args.get("query", "")),
-                "found": True,
-                "facts": [{"key": "example", "value": "${slug}"}],
-                "count": 1,
-            },
-        }
-    }
-`;
+  switch (pattern) {
+    case "PF":
+      return pythonPfTools(slug, lesson);
+    case "LT":
+      return pythonLtTools(slug, lesson);
+    case "SFR":
+      return pythonSfrTools(slug, lesson);
+    case "ATA":
+      return pythonAtaTools(slug, lesson, writes);
+    case "IAG":
+      return pythonIagTools(slug, lesson);
+    case "BE":
+      return pythonBeTools(slug);
+    default:
+      throw new Error(`Unknown pattern ${pattern}`);
+  }
 }
 
 function pythonMain(slug, pattern) {
@@ -473,13 +663,78 @@ function pythonMain(slug, pattern) {
   const usesTools = ["LT", "SFR", "ATA", "IAG"].includes(pattern);
   if (pattern === "CHAT") {
     return `from __future__ import annotations
-import json, sys
+
+import json
+import os
+import sys
+from dataclasses import dataclass
+
 from agent import build_${py}_prompt
+
+
+@dataclass
+class ApprovalState:
+    approved: bool = False
+    rejected: bool = False
+
+
+def create_approval_state() -> ApprovalState:
+    return ApprovalState()
+
+
+def approve(state: ApprovalState) -> None:
+    state.approved = True
+    state.rejected = False
+
+
+def reject(state: ApprovalState) -> None:
+    state.approved = False
+    state.rejected = True
+
+
+def can_execute_side_effects(state: ApprovalState) -> bool:
+    return state.approved and not state.rejected
+
+
+def create_record(plan: str, approval: ApprovalState) -> dict[str, object]:
+    if not can_execute_side_effects(approval):
+        return {
+            "created": False,
+            "reason": "Side effects require an explicit human approval.",
+            "record": None,
+        }
+    return {
+        "created": True,
+        "reason": None,
+        "record": {"id": "${slug}-1", "url": "https://tracker.example.com/${slug}/1"},
+    }
+
 
 def main() -> int:
     text = " ".join(a for a in sys.argv[1:] if a not in {"--approve", "--reject", "--offline"})
-    print(build_${py}_prompt(text))
-    print(json.dumps({"approved": "--approve" in sys.argv}, indent=2))
+    approval = create_approval_state()
+    if "--approve" in sys.argv:
+        approve(approval)
+    if "--reject" in sys.argv:
+        reject(approval)
+
+    plan = build_${py}_prompt(text)
+    if "--offline" not in sys.argv and os.getenv("CURSOR_API_KEY") and os.getenv("CURSOR_MODEL"):
+        from cursor_sdk import Agent, AgentOptions, LocalAgentOptions
+
+        result = Agent.prompt(
+            plan,
+            AgentOptions(
+                api_key=os.environ["CURSOR_API_KEY"],
+                model=os.environ["CURSOR_MODEL"],
+                local=LocalAgentOptions(cwd=os.getcwd()),
+            ),
+        )
+        plan = result.result or plan
+
+    record = create_record(plan, approval)
+    print(plan)
+    print(json.dumps({"approved": approval.approved, "record_created": record["created"]}, indent=2))
     return 0
 
 if __name__ == "__main__":
@@ -548,11 +803,14 @@ for (const entry of catalog.examples) {
     writeFile(path.join(base, "ts/src/tools.ts"), toolsForPattern(entry));
     writeFile(path.join(base, "ts/src/index.ts"), indexTs(entry.slug, entry.pattern));
   }
-  writeFile(path.join(base, "python/tools.py"), pythonTools(entry.slug, entry.pattern, entry.lesson));
+  writeFile(
+    path.join(base, "python/tools.py"),
+    pythonTools(entry.slug, entry.pattern, entry.lesson, entry.writes)
+  );
   writeFile(
     path.join(base, "python/agent.py"),
-    pattern === "CHAT"
-      ? pythonTools(entry.slug, entry.pattern, entry.lesson)
+    entry.pattern === "CHAT"
+      ? pythonTools(entry.slug, entry.pattern, entry.lesson, entry.writes)
       : `from tools import build_${toPythonName(entry.slug)}_prompt\n\n__all__ = ["build_${toPythonName(entry.slug)}_prompt"]\n`
   );
   writeFile(path.join(base, "python/main.py"), pythonMain(entry.slug, entry.pattern));
@@ -596,4 +854,34 @@ parity.paths = [
 ];
 fs.writeFileSync(parityPath, JSON.stringify(parity, null, 2) + "\n");
 
-console.log(`Scaffolded ${created} new examples.`);
+const customPythonPorts = new Set([
+  "slack-bot",
+  "spec-drafter",
+  "codebase-explainer",
+  "pr-summarizer",
+  "risk-classifier",
+]);
+
+let refreshed = 0;
+for (const entry of catalog.examples) {
+  if (customPythonPorts.has(entry.slug)) continue;
+
+  const base = path.join(rootDir, "examples", entry.slug);
+  const toolsPath = path.join(base, "python/tools.py");
+  if (!fs.existsSync(toolsPath)) continue;
+
+  writeFile(toolsPath, pythonTools(entry.slug, entry.pattern, entry.lesson, entry.writes));
+  writeFile(path.join(base, "python/main.py"), pythonMain(entry.slug, entry.pattern));
+  if (entry.pattern === "CHAT") {
+    writeFile(
+      path.join(base, "python/agent.py"),
+      pythonTools(entry.slug, entry.pattern, entry.lesson, entry.writes)
+    );
+  }
+  if (entry.pattern === "PF") {
+    writeFile(path.join(base, "ts/src/tools.ts"), toolsForPattern(entry));
+  }
+  refreshed++;
+}
+
+console.log(`Scaffolded ${created} new examples; refreshed ${refreshed} catalog ports.`);

@@ -1,22 +1,41 @@
 from __future__ import annotations
 
+def _read_string(value: object | None) -> str:
+    return value.strip() if isinstance(value, str) else ""
+
+def scan_target(args: dict[str, object]) -> dict[str, object]:
+    target = _read_string(args.get("target")) or "sample-input"
+    return {
+        "target": target,
+        "violations": [
+            {
+                "id": "secret-scanner-gate-rule-1",
+                "impact": "moderate",
+                "summary": "Example violation for secret-scanner-gate",
+            }
+        ],
+        "count": 1,
+        "passed": False,
+    }
+
 def build_secret_scanner_gate_prompt(task: str) -> str:
     return "\n".join([
         "You are the Secret Scanner Gate.",
         "Secret scan gate.",
-        f"Task: {task or 'Run the secret-scanner-gate example.'}",
+        "Call scan_target and cite violation ids from the tool result.",
+        f"Task: {task or 'Scan the sample input for secret-scanner-gate.'}",
     ])
 
 def create_secret_scanner_gate_custom_tools() -> dict[str, object]:
     return {
-        "lookup_context": {
-            "description": "Return deterministic context facts.",
-            "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}}},
-            "execute": lambda args: {
-                "query": str(args.get("query", "")),
-                "found": True,
-                "facts": [{"key": "example", "value": "secret-scanner-gate"}],
-                "count": 1,
+        "scan_target": {
+            "description": "Scan the target input and return structured violations.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "target": {"type": "string", "description": "Path, diff snippet, or label to scan"},
+                },
             },
+            "execute": scan_target,
         }
     }

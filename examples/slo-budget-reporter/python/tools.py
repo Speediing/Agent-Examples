@@ -4,19 +4,5 @@ def build_slo_budget_reporter_prompt(task: str) -> str:
     return "\n".join([
         "You are the Slo Budget Reporter.",
         "SLO reporter.",
-        f"Task: {task or 'Run the slo-budget-reporter example.'}",
+        f"Task: {task or 'Run the slo-budget-reporter example with a realistic input.'}",
     ])
-
-def create_slo_budget_reporter_custom_tools() -> dict[str, object]:
-    return {
-        "lookup_context": {
-            "description": "Return deterministic context facts.",
-            "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}}},
-            "execute": lambda args: {
-                "query": str(args.get("query", "")),
-                "found": True,
-                "facts": [{"key": "example", "value": "slo-budget-reporter"}],
-                "count": 1,
-            },
-        }
-    }
