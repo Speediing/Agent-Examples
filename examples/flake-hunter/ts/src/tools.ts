@@ -9,7 +9,7 @@ export function auditState(args: { scope?: SDKJsonValue }) {
   return {
     scope,
     drift_detected: true,
-    actionable: [{ id: "1", kind: "flake-hunter", summary: "Example drift record for audit" }],
+    actionable: [{ id: "flake-payments-int", kind: "flake", summary: "payments.integration.test.ts failed 3/10 recent runs" }],
     count: 1,
     writes_enabled: false
   };

@@ -9,7 +9,7 @@ export function auditState(args: { scope?: SDKJsonValue }) {
   return {
     scope,
     drift_detected: true,
-    actionable: [{ id: "1", kind: "codemod-runner", summary: "Example drift record for audit" }],
+    actionable: [{ id: "codemod-imports", kind: "codemod", summary: "rename-legacy-imports would touch 47 files" }],
     count: 1,
     writes_enabled: process.argv.includes('--act')
   };

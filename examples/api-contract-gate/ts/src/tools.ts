@@ -9,7 +9,7 @@ export function scanTarget(args: { target?: SDKJsonValue }) {
   return {
     target,
     violations: [
-      { id: "api-contract-gate-rule-1", impact: "moderate", summary: "Example violation for api-contract-gate" }
+      { id: "openapi/removed-endpoint", path: "openapi/payments.yaml", summary: "GET /v1/refunds removed without deprecation window" }
     ],
     count: 1,
     passed: false
@@ -18,7 +18,7 @@ export function scanTarget(args: { target?: SDKJsonValue }) {
 
 export function buildApiContractGatePrompt(task: string): string {
   return [
-    "You are the Api Contract Gate.",
+    "You are the API Contract Gate.",
     "Contract scan gate.",
     "Call scan_target and cite violation ids from the tool result.",
     `Task: ${task || "Scan the sample input for api-contract-gate."}`

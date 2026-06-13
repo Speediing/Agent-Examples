@@ -9,7 +9,7 @@ export function auditState(args: { scope?: SDKJsonValue }) {
   return {
     scope,
     drift_detected: true,
-    actionable: [{ id: "1", kind: "version-bump-agent", summary: "Example drift record for audit" }],
+    actionable: [{ id: "semver-minor", kind: "version", summary: "feat commits since v2.3.0 suggest minor bump" }],
     count: 1,
     writes_enabled: process.argv.includes('--act')
   };

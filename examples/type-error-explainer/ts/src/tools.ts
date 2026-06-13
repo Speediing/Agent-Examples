@@ -10,11 +10,10 @@ export function lookupContext(args: { query?: SDKJsonValue }) {
     query,
     found: true,
     facts: [
-      { key: "example", value: "type-error-explainer" },
-      { key: "lesson", value: "Compiler output explainer" },
-      { key: "pattern", value: "local-tools" }
+      { key: "error_code", value: "TS2345 on src/payments/refund.ts:42" },
+      { key: "hint", value: "Argument type RefundInput missing field currency" }
     ],
-    count: 3
+    count: 2
   };
 }
 

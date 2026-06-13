@@ -9,7 +9,7 @@ export function scanTarget(args: { target?: SDKJsonValue }) {
   return {
     target,
     violations: [
-      { id: "convention-reviewer-rule-1", impact: "moderate", summary: "Example violation for convention-reviewer" }
+      { id: "style/no-default-export", path: "src/components/Checkout.tsx", summary: "Default export in components/ violates house style" }
     ],
     count: 1,
     passed: false

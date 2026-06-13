@@ -10,11 +10,10 @@ export function lookupContext(args: { query?: SDKJsonValue }) {
     query,
     found: true,
     facts: [
-      { key: "example", value: "scaffolding-agent" },
-      { key: "lesson", value: "Gated scaffolding" },
-      { key: "pattern", value: "local-tools" }
+      { key: "convention", value: "payments/* modules use handler + schema pattern" },
+      { key: "target_path", value: "src/payments/refund-handler/" }
     ],
-    count: 3
+    count: 2
   };
 }
 

@@ -10,17 +10,16 @@ export function lookupContext(args: { query?: SDKJsonValue }) {
     query,
     found: true,
     facts: [
-      { key: "example", value: "db-migration-drafter" },
-      { key: "lesson", value: "Gated migration drafts" },
-      { key: "pattern", value: "local-tools" }
+      { key: "column", value: "orders.refund_status varchar(32)" },
+      { key: "migration_file", value: "migrations/20260301_add_refund_status.sql" }
     ],
-    count: 3
+    count: 2
   };
 }
 
 export function buildDbMigrationDrafterPrompt(task: string): string {
   return [
-    "You are the Db Migration Drafter.",
+    "You are the DB Migration Drafter.",
     "Gated migration drafts.",
     "Call lookup_context before you summarize.",
     "Do not invent facts the tool did not return.",

@@ -9,7 +9,7 @@ export function auditState(args: { scope?: SDKJsonValue }) {
   return {
     scope,
     drift_detected: true,
-    actionable: [{ id: "1", kind: "feature-flag-reaper", summary: "Example drift record for audit" }],
+    actionable: [{ id: "flag-legacy-checkout", kind: "flag", summary: "ENABLE_LEGACY_CHECKOUT at 100% for 30 days" }],
     count: 1,
     writes_enabled: process.argv.includes('--act')
   };

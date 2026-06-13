@@ -10,11 +10,10 @@ export function lookupContext(args: { query?: SDKJsonValue }) {
     query,
     found: true,
     facts: [
-      { key: "example", value: "test-coverage-agent" },
-      { key: "lesson", value: "Coverage gap finder" },
-      { key: "pattern", value: "local-tools" }
+      { key: "uncovered_lines", value: "checkout.ts:142-189 (refund branch)" },
+      { key: "suggested_test", value: "tests/checkout/refund.test.ts" }
     ],
-    count: 3
+    count: 2
   };
 }
 

@@ -10,11 +10,10 @@ export function lookupContext(args: { query?: SDKJsonValue }) {
     query,
     found: true,
     facts: [
-      { key: "example", value: "test-generator" },
-      { key: "lesson", value: "Gated test generation" },
-      { key: "pattern", value: "local-tools" }
+      { key: "module", value: "src/payments/refund.ts" },
+      { key: "exported_fn", value: "createRefund" }
     ],
-    count: 3
+    count: 2
   };
 }
 

@@ -9,7 +9,7 @@ export function scanTarget(args: { target?: SDKJsonValue }) {
   return {
     target,
     violations: [
-      { id: "snapshot-reviewer-rule-1", impact: "moderate", summary: "Example violation for snapshot-reviewer" }
+      { id: "snapshot/ui-regression", path: "src/checkout/__snapshots__/page.test.tsx.snap", summary: "Snapshot diff exceeds allowed pixel threshold" }
     ],
     count: 1,
     passed: false

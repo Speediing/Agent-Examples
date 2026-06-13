@@ -9,7 +9,7 @@ export function auditState(args: { scope?: SDKJsonValue }) {
   return {
     scope,
     drift_detected: true,
-    actionable: [{ id: "1", kind: "api-client-generator", summary: "Example drift record for audit" }],
+    actionable: [{ id: "openapi-payments", kind: "openapi", summary: "payments.yaml drift: new RefundStatus enum" }],
     count: 1,
     writes_enabled: process.argv.includes('--act')
   };
@@ -17,7 +17,7 @@ export function auditState(args: { scope?: SDKJsonValue }) {
 
 export function buildApiClientGeneratorPrompt(task: string): string {
   return [
-    "You are the Api Client Generator.",
+    "You are the API Client Generator.",
     "OpenAPI drift repair.",
     "Call audit_state first. Only recommend writes when audit_state.writes_enabled is true.",
     `Task: ${task || "Audit scope for api-client-generator."}`

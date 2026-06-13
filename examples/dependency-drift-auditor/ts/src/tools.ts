@@ -9,7 +9,7 @@ export function auditState(args: { scope?: SDKJsonValue }) {
   return {
     scope,
     drift_detected: true,
-    actionable: [{ id: "1", kind: "dependency-drift-auditor", summary: "Example drift record for audit" }],
+    actionable: [{ id: "lockfile-drift", kind: "lockfile", summary: "package-lock differs from registry for 3 packages" }],
     count: 1,
     writes_enabled: false
   };

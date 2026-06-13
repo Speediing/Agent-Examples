@@ -9,7 +9,7 @@ export function auditState(args: { scope?: SDKJsonValue }) {
   return {
     scope,
     drift_detected: true,
-    actionable: [{ id: "1", kind: "backlog-groomer", summary: "Example drift record for audit" }],
+    actionable: [{ id: "stale-142", kind: "ticket", summary: "TEAM-142 untouched for 90 days" }],
     count: 1,
     writes_enabled: false
   };

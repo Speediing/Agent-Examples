@@ -10,11 +10,10 @@ export function lookupContext(args: { query?: SDKJsonValue }) {
     query,
     found: true,
     facts: [
-      { key: "example", value: "mutation-test-triager" },
-      { key: "lesson", value: "Mutation triage" },
-      { key: "pattern", value: "local-tools" }
+      { key: "survivor", value: "refund.ts:58 conditional boundary" },
+      { key: "test_gap", value: "missing case when amount is zero" }
     ],
-    count: 3
+    count: 2
   };
 }
 

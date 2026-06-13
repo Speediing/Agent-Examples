@@ -10,11 +10,10 @@ export function lookupContext(args: { query?: SDKJsonValue }) {
     query,
     found: true,
     facts: [
-      { key: "example", value: "boilerplate-generator" },
-      { key: "lesson", value: "Schema-driven codegen" },
-      { key: "pattern", value: "local-tools" }
+      { key: "schema", value: "RefundRequest table in prisma/schema.prisma" },
+      { key: "output_path", value: "src/payments/refund-request/" }
     ],
-    count: 3
+    count: 2
   };
 }
 
