@@ -4,7 +4,12 @@
     "examples/tool-calling-agent",
     "examples/accessibility-agent",
     "examples/migration-agent",
-    "examples/sre-agent"
+    "examples/sre-agent",
+    "examples/spec-drafter",
+    "examples/codebase-explainer",
+    "examples/pr-summarizer",
+    "examples/risk-classifier",
+    "examples/slack-bot"
   ],
   "npmScripts": [
     "hello-world:ts",
@@ -12,6 +17,11 @@
     "accessibility-agent:ts",
     "migration-agent:ts",
     "migrate:python-ports",
-    "sre-agent:ts"
+    "sre-agent:ts",
+    "spec-drafter:ts",
+    "codebase-explainer:ts",
+    "pr-summarizer:ts",
+    "risk-classifier:ts",
+    "slack-bot:ts"
   ]
 }

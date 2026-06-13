@@ -15,7 +15,12 @@
     "migration-agent:ts": "npm --workspace @cursor-examples/migration-agent-ts run start --",
     "tool-calling:ts": "npm --workspace @cursor-examples/tool-calling-agent-ts run start --",
     "accessibility-agent:ts": "npm --workspace @cursor-examples/accessibility-agent-ts run start --",
-    "sre-agent:ts": "npm --workspace @cursor-examples/sre-agent-ts run start --"
+    "sre-agent:ts": "npm --workspace @cursor-examples/sre-agent-ts run start --",
+    "spec-drafter:ts": "npm --workspace @cursor-examples/spec-drafter-ts run start --",
+    "codebase-explainer:ts": "npm --workspace @cursor-examples/codebase-explainer-ts run start --",
+    "pr-summarizer:ts": "npm --workspace @cursor-examples/pr-summarizer-ts run start --",
+    "risk-classifier:ts": "npm --workspace @cursor-examples/risk-classifier-ts run start --",
+    "slack-bot:ts": "npm --workspace @cursor-examples/slack-bot-ts run start --"
   },
   "workspaces": [
     "examples/*/ts"

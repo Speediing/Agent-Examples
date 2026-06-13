@@ -1,7 +1,6 @@
 # Content Roadmap — more examples across the SDLC
 
-Status: plan for review. This is a **backlog plus a repeatable playbook**, not an
-implementation. It targets the runnable examples in this repo (`examples/<name>/`)
+Status: Wave 1 shipped (slack-bot, spec-drafter, codebase-explainer, pr-summarizer, risk-classifier). This file remains the backlog plus repeatable playbook for Waves 2–5. It targets the runnable examples in this repo (`examples/<name>/`)
 and the cookbook posts in the sibling `agent-example-site` repo
 (`app/blog/posts.ts`, `app/blog/guides.ts`).
 
@@ -370,7 +369,7 @@ and the eval gates stay small.
 
 Check rows off as they ship.
 
-**Plan** — [ ] 1 `slack-bot` · [ ] 2 `spec-drafter` · [ ] 3 `codebase-explainer` ·
+**Plan** — [x] 1 `slack-bot` · [x] 2 `spec-drafter` · [x] 3 `codebase-explainer` ·
 [ ] 4 `duplicate-ticket-detector` · [ ] 5 `backlog-groomer` · [ ] 6 `prior-art-finder` ·
 [ ] 7 `roadmap-digest` · [ ] 8 `adr-writer` · [ ] 9 `estimation-helper` ·
 [ ] 10 `requirements-clarifier`
@@ -380,7 +379,7 @@ Check rows off as they ship.
 [ ] 16 `type-error-explainer` · [ ] 17 `db-migration-drafter` ·
 [ ] 18 `api-client-generator`
 
-**Review** — [ ] 19 `pr-summarizer` · [ ] 20 `risk-classifier` ·
+**Review** — [x] 19 `pr-summarizer` · [x] 20 `risk-classifier` ·
 [ ] 21 `convention-reviewer` · [ ] 22 `api-contract-gate` ·
 [ ] 23 `security-review-agent` · [ ] 24 `codeowners-router` ·
 [ ] 25 `performance-budget-gate` · [ ] 26 `secret-scanner-gate` ·

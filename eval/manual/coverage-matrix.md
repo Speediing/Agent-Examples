@@ -17,6 +17,12 @@
 | sre | query_metrics | null treated as evidence | 2 | decoy metric |
 | migration | classifier | stale/missing misclassified | 0 | git checkout mtime |
 | migration | prompt builder | TS↔Python wording drift | 0 | n/a |
+| spec-drafter | search_repo_files / read_repo_file | invented file paths | 0 | n/a |
+| codebase-explainer | list_module_files / read_repo_file | invented module map | 0 | n/a |
+| pr-summarizer | read_pr_diff / list_changed_files | risky file not grounded | 1 | n/a |
+| risk-classifier | score_changed_files | risk band not grounded | 1 | n/a |
+| slack-bot | triage prompt | missing thread grounding | 1 | n/a |
+| slack-bot | approval gate | side effect without approval | 2 | prompt injection |
 | sre | all handlers (Python) | TS↔Python output drift | 0 | n/a |
 | all | prompt builders | TS↔Python prompt drift (live exec) | 0 | n/a |
 | all | TS↔Python handlers | normalized output drift | 4 | n/a |
