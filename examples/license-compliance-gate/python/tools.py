@@ -10,7 +10,7 @@ def audit_state(args: dict[str, object]) -> dict[str, object]:
     return {
         "scope": scope,
         "drift_detected": True,
-        "actionable": [{"id": "1", "kind": "license-compliance-gate", "summary": "Example drift record for audit"}],
+        "actionable": [{"id": "license-gpl", "kind": "license", "summary": "axios 1.7.0 introduces GPL-3.0 transitive dependency"}],
         "count": 1,
         "writes_enabled": False,
     }

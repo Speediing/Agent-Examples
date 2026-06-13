@@ -9,11 +9,10 @@ def lookup_context(args: dict[str, object]) -> dict[str, object]:
         "query": query,
         "found": True,
         "facts": [
-            {"key": "example", "value": "mutation-test-triager"},
-            {"key": "lesson", "value": "Mutation triage"},
-            {"key": "pattern", "value": "local-tools"},
+            {"key": "survivor", "value": "refund.ts:58 conditional boundary"},
+            {"key": "test_gap", "value": "missing case when amount is zero"}
         ],
-        "count": 3,
+        "count": 2,
     }
 
 def build_mutation_test_triager_prompt(task: str) -> str:

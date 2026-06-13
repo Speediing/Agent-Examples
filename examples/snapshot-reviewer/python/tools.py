@@ -9,9 +9,9 @@ def scan_target(args: dict[str, object]) -> dict[str, object]:
         "target": target,
         "violations": [
             {
-                "id": "snapshot-reviewer-rule-1",
-                "impact": "moderate",
-                "summary": "Example violation for snapshot-reviewer",
+                "id": "snapshot/ui-regression",
+                "path": "src/checkout/__snapshots__/page.test.tsx.snap",
+                "summary": "Snapshot diff exceeds allowed pixel threshold",
             }
         ],
         "count": 1,

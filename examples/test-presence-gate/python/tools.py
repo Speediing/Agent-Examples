@@ -9,9 +9,9 @@ def scan_target(args: dict[str, object]) -> dict[str, object]:
         "target": target,
         "violations": [
             {
-                "id": "test-presence-gate-rule-1",
-                "impact": "moderate",
-                "summary": "Example violation for test-presence-gate",
+                "id": "test/missing-coverage",
+                "path": "src/payments/refund.ts",
+                "summary": "Application code changed without matching test file",
             }
         ],
         "count": 1,

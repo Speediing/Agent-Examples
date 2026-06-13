@@ -9,11 +9,10 @@ def lookup_context(args: dict[str, object]) -> dict[str, object]:
         "query": query,
         "found": True,
         "facts": [
-            {"key": "example", "value": "estimation-helper"},
-            {"key": "lesson", "value": "Estimation with file evidence"},
-            {"key": "pattern", "value": "local-tools"},
+            {"key": "touched_paths", "value": "src/payments/, src/checkout/, openapi/payments.yaml"},
+            {"key": "estimate", "value": "3-5 days with test coverage"}
         ],
-        "count": 3,
+        "count": 2,
     }
 
 def build_estimation_helper_prompt(task: str) -> str:

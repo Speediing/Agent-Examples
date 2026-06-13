@@ -10,7 +10,7 @@ def audit_state(args: dict[str, object]) -> dict[str, object]:
     return {
         "scope": scope,
         "drift_detected": True,
-        "actionable": [{"id": "1", "kind": "feature-flag-reaper", "summary": "Example drift record for audit"}],
+        "actionable": [{"id": "flag-legacy-checkout", "kind": "flag", "summary": "ENABLE_LEGACY_CHECKOUT at 100% for 30 days"}],
         "count": 1,
         "writes_enabled": "--act" in sys.argv,
     }

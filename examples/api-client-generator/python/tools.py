@@ -10,14 +10,14 @@ def audit_state(args: dict[str, object]) -> dict[str, object]:
     return {
         "scope": scope,
         "drift_detected": True,
-        "actionable": [{"id": "1", "kind": "api-client-generator", "summary": "Example drift record for audit"}],
+        "actionable": [{"id": "openapi-payments", "kind": "openapi", "summary": "payments.yaml drift: new RefundStatus enum"}],
         "count": 1,
         "writes_enabled": "--act" in sys.argv,
     }
 
 def build_api_client_generator_prompt(task: str) -> str:
     return "\n".join([
-        "You are the Api Client Generator.",
+        "You are the API Client Generator.",
         "OpenAPI drift repair.",
         "Call audit_state first. Only recommend writes when audit_state.writes_enabled is true.",
         f"Task: {task or 'Audit scope for api-client-generator.'}",

@@ -9,16 +9,15 @@ def lookup_context(args: dict[str, object]) -> dict[str, object]:
         "query": query,
         "found": True,
         "facts": [
-            {"key": "example", "value": "db-migration-drafter"},
-            {"key": "lesson", "value": "Gated migration drafts"},
-            {"key": "pattern", "value": "local-tools"},
+            {"key": "column", "value": "orders.refund_status varchar(32)"},
+            {"key": "migration_file", "value": "migrations/20260301_add_refund_status.sql"}
         ],
-        "count": 3,
+        "count": 2,
     }
 
 def build_db_migration_drafter_prompt(task: str) -> str:
     return "\n".join([
-        "You are the Db Migration Drafter.",
+        "You are the DB Migration Drafter.",
         "Gated migration drafts.",
         "Call lookup_context before you summarize.",
         "Do not invent facts the tool did not return.",

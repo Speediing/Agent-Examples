@@ -9,9 +9,9 @@ def scan_target(args: dict[str, object]) -> dict[str, object]:
         "target": target,
         "violations": [
             {
-                "id": "performance-budget-gate-rule-1",
-                "impact": "moderate",
-                "summary": "Example violation for performance-budget-gate",
+                "id": "perf/bundle-limit",
+                "path": "main.js",
+                "summary": "Main bundle 412kb exceeds 370kb preview budget",
             }
         ],
         "count": 1,

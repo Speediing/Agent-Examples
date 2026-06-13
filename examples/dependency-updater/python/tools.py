@@ -10,7 +10,7 @@ def audit_state(args: dict[str, object]) -> dict[str, object]:
     return {
         "scope": scope,
         "drift_detected": True,
-        "actionable": [{"id": "1", "kind": "dependency-updater", "summary": "Example drift record for audit"}],
+        "actionable": [{"id": "dep-lodash-421", "kind": "dependency", "summary": "lodash 4.17.20 → 4.17.21 security patch available"}],
         "count": 1,
         "writes_enabled": "--act" in sys.argv,
     }

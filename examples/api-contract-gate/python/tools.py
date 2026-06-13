@@ -9,9 +9,9 @@ def scan_target(args: dict[str, object]) -> dict[str, object]:
         "target": target,
         "violations": [
             {
-                "id": "api-contract-gate-rule-1",
-                "impact": "moderate",
-                "summary": "Example violation for api-contract-gate",
+                "id": "openapi/removed-endpoint",
+                "path": "openapi/payments.yaml",
+                "summary": "GET /v1/refunds removed without deprecation window",
             }
         ],
         "count": 1,
@@ -20,7 +20,7 @@ def scan_target(args: dict[str, object]) -> dict[str, object]:
 
 def build_api_contract_gate_prompt(task: str) -> str:
     return "\n".join([
-        "You are the Api Contract Gate.",
+        "You are the API Contract Gate.",
         "Contract scan gate.",
         "Call scan_target and cite violation ids from the tool result.",
         f"Task: {task or 'Scan the sample input for api-contract-gate.'}",

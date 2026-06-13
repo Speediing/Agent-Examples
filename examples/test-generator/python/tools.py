@@ -9,11 +9,10 @@ def lookup_context(args: dict[str, object]) -> dict[str, object]:
         "query": query,
         "found": True,
         "facts": [
-            {"key": "example", "value": "test-generator"},
-            {"key": "lesson", "value": "Gated test generation"},
-            {"key": "pattern", "value": "local-tools"},
+            {"key": "module", "value": "src/payments/refund.ts"},
+            {"key": "exported_fn", "value": "createRefund"}
         ],
-        "count": 3,
+        "count": 2,
     }
 
 def build_test_generator_prompt(task: str) -> str:

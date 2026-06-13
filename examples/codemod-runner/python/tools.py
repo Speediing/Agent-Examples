@@ -10,7 +10,7 @@ def audit_state(args: dict[str, object]) -> dict[str, object]:
     return {
         "scope": scope,
         "drift_detected": True,
-        "actionable": [{"id": "1", "kind": "codemod-runner", "summary": "Example drift record for audit"}],
+        "actionable": [{"id": "codemod-imports", "kind": "codemod", "summary": "rename-legacy-imports would touch 47 files"}],
         "count": 1,
         "writes_enabled": "--act" in sys.argv,
     }

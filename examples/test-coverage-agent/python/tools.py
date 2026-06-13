@@ -9,11 +9,10 @@ def lookup_context(args: dict[str, object]) -> dict[str, object]:
         "query": query,
         "found": True,
         "facts": [
-            {"key": "example", "value": "test-coverage-agent"},
-            {"key": "lesson", "value": "Coverage gap finder"},
-            {"key": "pattern", "value": "local-tools"},
+            {"key": "uncovered_lines", "value": "checkout.ts:142-189 (refund branch)"},
+            {"key": "suggested_test", "value": "tests/checkout/refund.test.ts"}
         ],
-        "count": 3,
+        "count": 2,
     }
 
 def build_test_coverage_agent_prompt(task: str) -> str:

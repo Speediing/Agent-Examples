@@ -9,11 +9,10 @@ def lookup_context(args: dict[str, object]) -> dict[str, object]:
         "query": query,
         "found": True,
         "facts": [
-            {"key": "example", "value": "duplicate-ticket-detector"},
-            {"key": "lesson", "value": "Collision detection before plan"},
-            {"key": "pattern", "value": "local-tools"},
+            {"key": "linear_issue", "value": "TEAM-482 checkout 503 after deploy"},
+            {"key": "similar_code", "value": "src/checkout/retry.ts handles deploy windows"}
         ],
-        "count": 3,
+        "count": 2,
     }
 
 def build_duplicate_ticket_detector_prompt(task: str) -> str:

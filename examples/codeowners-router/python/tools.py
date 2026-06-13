@@ -9,11 +9,10 @@ def lookup_context(args: dict[str, object]) -> dict[str, object]:
         "query": query,
         "found": True,
         "facts": [
-            {"key": "example", "value": "codeowners-router"},
-            {"key": "lesson", "value": "Reviewer routing"},
-            {"key": "pattern", "value": "local-tools"},
+            {"key": "payments_paths", "value": "src/payments/**"},
+            {"key": "suggested_reviewers", "value": "@payments-team, @infra-oncall"}
         ],
-        "count": 3,
+        "count": 2,
     }
 
 def build_codeowners_router_prompt(task: str) -> str:

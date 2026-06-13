@@ -9,11 +9,10 @@ def lookup_context(args: dict[str, object]) -> dict[str, object]:
         "query": query,
         "found": True,
         "facts": [
-            {"key": "example", "value": "prior-art-finder"},
-            {"key": "lesson", "value": "Prior art search"},
-            {"key": "pattern", "value": "local-tools"},
+            {"key": "module", "value": "src/payments/refund.ts"},
+            {"key": "related_adr", "value": "docs/adr/014-refund-flow.md"}
         ],
-        "count": 3,
+        "count": 2,
     }
 
 def build_prior_art_finder_prompt(task: str) -> str:

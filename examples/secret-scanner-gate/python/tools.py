@@ -9,9 +9,9 @@ def scan_target(args: dict[str, object]) -> dict[str, object]:
         "target": target,
         "violations": [
             {
-                "id": "secret-scanner-gate-rule-1",
-                "impact": "moderate",
-                "summary": "Example violation for secret-scanner-gate",
+                "id": "secret/aws-access-key",
+                "path": "src/config.ts",
+                "summary": "AWS access key pattern introduced in diff",
             }
         ],
         "count": 1,

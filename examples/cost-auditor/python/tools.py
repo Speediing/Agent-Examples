@@ -10,7 +10,7 @@ def audit_state(args: dict[str, object]) -> dict[str, object]:
     return {
         "scope": scope,
         "drift_detected": True,
-        "actionable": [{"id": "1", "kind": "cost-auditor", "summary": "Example drift record for audit"}],
+        "actionable": [{"id": "cost-ec2-spike", "kind": "cost", "summary": "EC2 spend +34% week-over-week in us-east-1"}],
         "count": 1,
         "writes_enabled": False,
     }

@@ -9,11 +9,10 @@ def lookup_context(args: dict[str, object]) -> dict[str, object]:
         "query": query,
         "found": True,
         "facts": [
-            {"key": "example", "value": "boilerplate-generator"},
-            {"key": "lesson", "value": "Schema-driven codegen"},
-            {"key": "pattern", "value": "local-tools"},
+            {"key": "schema", "value": "RefundRequest table in prisma/schema.prisma"},
+            {"key": "output_path", "value": "src/payments/refund-request/"}
         ],
-        "count": 3,
+        "count": 2,
     }
 
 def build_boilerplate_generator_prompt(task: str) -> str:
