@@ -1,12 +1,18 @@
 import { Agent } from "@cursor/sdk";
-import { buildReleaseNotesDrafterPrompt } from "./tools.js";
+import {
+  buildReleaseNotesDrafterPrompt,
+  createReleaseNotesDrafterCustomTools,
+} from "./tools.js";
 
 try {
   const task = process.argv.slice(2).join(" ").trim();
   const result = await Agent.prompt(buildReleaseNotesDrafterPrompt(task), {
     apiKey: requireEnv("CURSOR_API_KEY"),
     model: { id: requireEnv("CURSOR_MODEL") },
-    local: { cwd: process.cwd() }
+    local: {
+      cwd: process.cwd(),
+      customTools: createReleaseNotesDrafterCustomTools(),
+    },
   });
   console.log(result.result ?? "");
 } catch (error) {

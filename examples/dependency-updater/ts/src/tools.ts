@@ -9,9 +9,25 @@ export function auditState(args: { scope?: SDKJsonValue }) {
   return {
     scope,
     drift_detected: true,
-    actionable: [{ id: "dep-lodash-421", kind: "dependency", summary: "lodash 4.17.20 → 4.17.21 security patch available" }],
-    count: 1,
-    writes_enabled: process.argv.includes('--act')
+    actionable: [
+      {
+        id: "dep-lodash-421",
+        kind: "dependency",
+        summary: "lodash 4.17.20 → 4.17.21 security patch available"
+      },
+      {
+        id: "lockfile-drift",
+        kind: "lockfile",
+        summary: "package-lock.json behind registry for axios 1.7.2"
+      },
+      {
+        id: "semver-bump",
+        kind: "release",
+        summary: "conventional commits since v2.3.0 suggest minor bump to v2.4.0"
+      }
+    ],
+    count: 3,
+    writes_enabled: process.argv.includes("--act")
   };
 }
 
@@ -19,7 +35,8 @@ export function buildDependencyUpdaterPrompt(task: string): string {
   return [
     "You are the Dependency Updater.",
     "Dependency audit then act.",
-    "Call audit_state first. Only recommend writes when audit_state.writes_enabled is true.",
+    "Call audit_state first. Cover dependency bumps, lockfile drift, and semver impact.",
+    "Only recommend writes when audit_state.writes_enabled is true.",
     `Task: ${task || "Audit scope for dependency-updater."}`
   ].join("\n");
 }
@@ -27,7 +44,8 @@ export function buildDependencyUpdaterPrompt(task: string): string {
 export function createDependencyUpdaterCustomTools() {
   return {
     audit_state: {
-      description: "Return deterministic audit records for the dependency-updater example.",
+      description:
+        "Return dependency, lockfile drift, and semver audit records for the dependency-updater example.",
       inputSchema: {
         type: "object",
         properties: {

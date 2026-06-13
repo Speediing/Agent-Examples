@@ -1,0 +1,10 @@
+{
+  "module": "payments/refund-handler",
+  "convention": "payments/* modules use handler + schema pattern",
+  "target_path": "src/payments/refund-handler/",
+  "proposed_files": [
+    "src/payments/refund-handler/handler.ts",
+    "src/payments/refund-handler/schema.ts",
+    "src/payments/refund-handler/index.ts"
+  ]
+}

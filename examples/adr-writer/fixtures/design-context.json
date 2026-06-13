@@ -1,0 +1,22 @@
+{
+  "topic": "Move auth to OIDC for internal APIs",
+  "related_files": [
+    "src/auth/session.ts",
+    "src/auth/oidc-client.ts",
+    "docs/adr/011-session-storage.md"
+  ],
+  "constraints": [
+    "Must support existing service accounts during migration",
+    "No breaking change to public REST endpoints in v1"
+  ],
+  "options": [
+    {
+      "name": "OIDC proxy in API gateway",
+      "tradeoff": "Centralized auth, more infra coupling"
+    },
+    {
+      "name": "Library middleware in each service",
+      "tradeoff": "Flexible rollout, duplicated config risk"
+    }
+  ]
+}

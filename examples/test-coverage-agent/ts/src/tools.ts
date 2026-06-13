@@ -1,19 +1,41 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { SDKJsonValue } from "@cursor/sdk";
+
+const exampleRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../..",
+);
+
+type CoverageGap = {
+  file: string;
+  changed_lines: number[];
+  uncovered_lines: number[];
+  suggested_test: string;
+};
 
 export function readString(value: SDKJsonValue | undefined): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-export function lookupContext(args: { query?: SDKJsonValue }) {
-  const query = readString(args.query).toLowerCase() || "test-coverage-agent";
+function loadCoverageGap(): CoverageGap {
+  const raw = fs.readFileSync(
+    path.join(exampleRoot, "fixtures/coverage-gap.json"),
+    "utf8",
+  );
+  return JSON.parse(raw) as CoverageGap;
+}
+
+export function analyzeCoverageGap(args: { file?: SDKJsonValue }) {
+  const gap = loadCoverageGap();
+  const file = readString(args.file) || gap.file;
   return {
-    query,
-    found: true,
-    facts: [
-      { key: "uncovered_lines", value: "checkout.ts:142-189 (refund branch)" },
-      { key: "suggested_test", value: "tests/checkout/refund.test.ts" }
-    ],
-    count: 2
+    file,
+    changed_lines: gap.changed_lines,
+    uncovered_lines: gap.uncovered_lines,
+    uncovered_count: gap.uncovered_lines.length,
+    suggested_test: gap.suggested_test,
   };
 }
 
@@ -21,23 +43,22 @@ export function buildTestCoverageAgentPrompt(task: string): string {
   return [
     "You are the Test Coverage Agent.",
     "Coverage gap finder.",
-    "Call lookup_context before you summarize.",
-    "Do not invent facts the tool did not return.",
-    `Task: ${task || "Run the test-coverage-agent example."}`
+    "Call analyze_coverage_gap first. Propose tests only for uncovered_lines from tool output.",
+    `Task: ${task || "Find untested changed lines from the coverage fixture."}`,
   ].join("\n");
 }
 
 export function createTestCoverageAgentCustomTools() {
   return {
-    lookup_context: {
-      description: "Return deterministic context facts for the test-coverage-agent example.",
+    analyze_coverage_gap: {
+      description: "Return changed and uncovered line ranges from a coverage report fixture.",
       inputSchema: {
         type: "object",
         properties: {
-          query: { type: "string", description: "Short task or topic string" }
-        }
+          file: { type: "string", description: "Application file path" },
+        },
       },
-      execute: (args: { query?: SDKJsonValue }) => lookupContext(args)
-    }
+      execute: (args: { file?: SDKJsonValue }) => analyzeCoverageGap(args),
+    },
   };
 }

@@ -1,0 +1,14 @@
+[
+  {
+    "linear_issue": "TEAM-482 checkout 503 after deploy",
+    "similar_code": "src/checkout/retry.ts handles deploy windows",
+    "prior_art_module": "src/payments/refund.ts",
+    "related_adr": "docs/adr/014-refund-flow.md"
+  },
+  {
+    "linear_issue": "TEAM-401 duplicate refund handler request",
+    "similar_code": "src/payments/refund.ts already exports createRefund",
+    "prior_art_module": "src/payments/refund.ts",
+    "related_adr": "docs/adr/014-refund-flow.md"
+  }
+]

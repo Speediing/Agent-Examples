@@ -1,12 +1,18 @@
 import { Agent } from "@cursor/sdk";
-import { buildAdrWriterPrompt } from "./tools.js";
+import {
+  buildAdrWriterPrompt,
+  createAdrWriterCustomTools,
+} from "./tools.js";
 
 try {
   const task = process.argv.slice(2).join(" ").trim();
   const result = await Agent.prompt(buildAdrWriterPrompt(task), {
     apiKey: requireEnv("CURSOR_API_KEY"),
     model: { id: requireEnv("CURSOR_MODEL") },
-    local: { cwd: process.cwd() }
+    local: {
+      cwd: process.cwd(),
+      customTools: createAdrWriterCustomTools(),
+    },
   });
   console.log(result.result ?? "");
 } catch (error) {

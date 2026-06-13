@@ -2,23 +2,13 @@
   "lookup": {
     "duplicate-ticket-detector": [
       { "key": "linear_issue", "value": "TEAM-482 checkout 503 after deploy" },
-      { "key": "similar_code", "value": "src/checkout/retry.ts handles deploy windows" }
-    ],
-    "prior-art-finder": [
-      { "key": "module", "value": "src/payments/refund.ts" },
+      { "key": "similar_code", "value": "src/checkout/retry.ts handles deploy windows" },
+      { "key": "prior_art_module", "value": "src/payments/refund.ts" },
       { "key": "related_adr", "value": "docs/adr/014-refund-flow.md" }
-    ],
-    "estimation-helper": [
-      { "key": "touched_paths", "value": "src/payments/, src/checkout/, openapi/payments.yaml" },
-      { "key": "estimate", "value": "3-5 days with test coverage" }
     ],
     "scaffolding-agent": [
       { "key": "convention", "value": "payments/* modules use handler + schema pattern" },
       { "key": "target_path", "value": "src/payments/refund-handler/" }
-    ],
-    "boilerplate-generator": [
-      { "key": "schema", "value": "RefundRequest table in prisma/schema.prisma" },
-      { "key": "output_path", "value": "src/payments/refund-request/" }
     ],
     "type-error-explainer": [
       { "key": "error_code", "value": "TS2345 on src/payments/refund.ts:42" },
@@ -31,41 +21,9 @@
     "test-coverage-agent": [
       { "key": "uncovered_lines", "value": "checkout.ts:142-189 (refund branch)" },
       { "key": "suggested_test", "value": "tests/checkout/refund.test.ts" }
-    ],
-    "test-generator": [
-      { "key": "module", "value": "src/payments/refund.ts" },
-      { "key": "exported_fn", "value": "createRefund" }
-    ],
-    "mutation-test-triager": [
-      { "key": "survivor", "value": "refund.ts:58 conditional boundary" },
-      { "key": "test_gap", "value": "missing case when amount is zero" }
-    ],
-    "codeowners-router": [
-      { "key": "payments_paths", "value": "src/payments/**" },
-      { "key": "suggested_reviewers", "value": "@payments-team, @infra-oncall" }
     ]
   },
   "scan": {
-    "convention-reviewer": {
-      "id": "style/no-default-export",
-      "path": "src/components/Checkout.tsx",
-      "summary": "Default export in components/ violates house style"
-    },
-    "convention-fixer": {
-      "id": "style/no-default-export",
-      "path": "src/components/Checkout.tsx",
-      "summary": "Default export in components/ violates house style"
-    },
-    "api-contract-gate": {
-      "id": "openapi/removed-endpoint",
-      "path": "openapi/payments.yaml",
-      "summary": "GET /v1/refunds removed without deprecation window"
-    },
-    "performance-budget-gate": {
-      "id": "perf/bundle-limit",
-      "path": "main.js",
-      "summary": "Main bundle 412kb exceeds 370kb preview budget"
-    },
     "secret-scanner-gate": {
       "id": "secret/aws-access-key",
       "path": "src/config.ts",
@@ -74,12 +32,7 @@
     "test-presence-gate": {
       "id": "test/missing-coverage",
       "path": "src/payments/refund.ts",
-      "summary": "Application code changed without matching test file"
-    },
-    "snapshot-reviewer": {
-      "id": "snapshot/ui-regression",
-      "path": "src/checkout/__snapshots__/page.test.tsx.snap",
-      "summary": "Snapshot diff exceeds allowed pixel threshold"
+      "summary": "Application file changed without matching test in diff"
     }
   },
   "audit": {
@@ -88,60 +41,26 @@
       "kind": "dependency",
       "summary": "lodash 4.17.20 → 4.17.21 security patch available"
     },
-    "codemod-runner": {
-      "id": "codemod-imports",
-      "kind": "codemod",
-      "summary": "rename-legacy-imports would touch 47 files"
-    },
-    "api-client-generator": {
-      "id": "openapi-payments",
-      "kind": "openapi",
-      "summary": "payments.yaml drift: new RefundStatus enum"
-    },
-    "version-bump-agent": {
-      "id": "semver-minor",
-      "kind": "version",
-      "summary": "feat commits since v2.3.0 suggest minor bump"
-    },
-    "flake-hunter": {
-      "id": "flake-payments-int",
-      "kind": "flake",
-      "summary": "payments.integration.test.ts failed 3/10 recent runs"
-    },
-    "backlog-groomer": {
-      "id": "stale-142",
-      "kind": "ticket",
-      "summary": "TEAM-142 untouched for 90 days"
-    },
-    "license-compliance-gate": {
-      "id": "license-gpl",
-      "kind": "license",
-      "summary": "axios 1.7.0 introduces GPL-3.0 transitive dependency"
-    },
     "feature-flag-reaper": {
       "id": "flag-legacy-checkout",
-      "kind": "flag",
-      "summary": "ENABLE_LEGACY_CHECKOUT at 100% for 30 days"
+      "kind": "feature_flag",
+      "summary": "ENABLE_LEGACY_CHECKOUT enabled in prod for 180 days"
     },
-    "dependency-drift-auditor": {
-      "id": "lockfile-drift",
-      "kind": "lockfile",
-      "summary": "package-lock differs from registry for 3 packages"
+    "flake-hunter": {
+      "id": "flake-payments-integration",
+      "kind": "test",
+      "summary": "payments.integration.test.ts failed 4 of last 10 runs"
     },
     "cost-auditor": {
       "id": "cost-ec2-spike",
       "kind": "cost",
-      "summary": "EC2 spend +34% week-over-week in us-east-1"
-    },
-    "runbook-freshness-auditor": {
-      "id": "runbook-stale",
-      "kind": "runbook",
-      "summary": "checkout rollback runbook references removed service"
-    },
-    "fixture-freshness-auditor": {
-      "id": "fixture-stale",
-      "kind": "fixture",
-      "summary": "payments fixtures missing refund_status column"
+      "summary": "EC2 spend in us-east-1 up 34% week over week"
+    }
+  },
+  "signals": {
+    "postmortem-drafter": {
+      "status": "resolved",
+      "evidence": ["deploy-482", "checkout-error-rate", "rollback-runbook"]
     }
   }
 }

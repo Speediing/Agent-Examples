@@ -10,7 +10,7 @@ def audit_state(args: dict[str, object]) -> dict[str, object]:
     return {
         "scope": scope,
         "drift_detected": True,
-        "actionable": [{"id": "flag-legacy-checkout", "kind": "flag", "summary": "ENABLE_LEGACY_CHECKOUT at 100% for 30 days"}],
+        "actionable": [{"id": "flag-legacy-checkout", "kind": "feature_flag", "summary": "ENABLE_LEGACY_CHECKOUT enabled in prod for 180 days"}],
         "count": 1,
         "writes_enabled": "--act" in sys.argv,
     }

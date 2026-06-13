@@ -9,7 +9,7 @@ export function auditState(args: { scope?: SDKJsonValue }) {
   return {
     scope,
     drift_detected: true,
-    actionable: [{ id: "cost-ec2-spike", kind: "cost", summary: "EC2 spend +34% week-over-week in us-east-1" }],
+    actionable: [{ id: "cost-ec2-spike", kind: "cost", summary: "EC2 spend in us-east-1 up 34% week over week" }],
     count: 1,
     writes_enabled: false
   };

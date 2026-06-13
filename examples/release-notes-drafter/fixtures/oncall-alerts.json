@@ -1,0 +1,17 @@
+{
+  "window": "overnight",
+  "alerts": [
+    {
+      "id": "alert-checkout-error-rate",
+      "severity": "P2",
+      "summary": "checkout error rate > 2% for 5m",
+      "owner": "@payments-oncall"
+    },
+    {
+      "id": "alert-deploy-latency",
+      "severity": "P3",
+      "summary": "deploy pipeline p95 latency elevated",
+      "owner": "@infra-oncall"
+    }
+  ]
+}

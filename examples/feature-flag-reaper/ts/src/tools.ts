@@ -9,7 +9,7 @@ export function auditState(args: { scope?: SDKJsonValue }) {
   return {
     scope,
     drift_detected: true,
-    actionable: [{ id: "flag-legacy-checkout", kind: "flag", summary: "ENABLE_LEGACY_CHECKOUT at 100% for 30 days" }],
+    actionable: [{ id: "flag-legacy-checkout", kind: "feature_flag", summary: "ENABLE_LEGACY_CHECKOUT enabled in prod for 180 days" }],
     count: 1,
     writes_enabled: process.argv.includes('--act')
   };

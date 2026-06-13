@@ -1,0 +1,14 @@
+diff --git a/src/payments/refund.ts b/src/payments/refund.ts
+index 1111111..2222222 100644
+--- a/src/payments/refund.ts
++++ b/src/payments/refund.ts
+@@ -1,4 +1,8 @@
+ export async function createRefund(chargeId: string) {
+-  return gateway.refund({ chargeId });
++  const validated = validateChargeId(chargeId);
++  return gateway.refund({ chargeId: validated });
++}
++
++function validateChargeId(chargeId: string) {
++  return chargeId.trim();
+ }

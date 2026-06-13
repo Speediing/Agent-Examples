@@ -10,16 +10,19 @@ def lookup_context(args: dict[str, object]) -> dict[str, object]:
         "found": True,
         "facts": [
             {"key": "linear_issue", "value": "TEAM-482 checkout 503 after deploy"},
-            {"key": "similar_code", "value": "src/checkout/retry.ts handles deploy windows"}
+            {"key": "similar_code", "value": "src/checkout/retry.ts handles deploy windows"},
+            {"key": "prior_art_module", "value": "src/payments/refund.ts"},
+            {"key": "related_adr", "value": "docs/adr/014-refund-flow.md"}
         ],
-        "count": 2,
+        "count": 4,
     }
 
 def build_duplicate_ticket_detector_prompt(task: str) -> str:
     return "\n".join([
         "You are the Duplicate Ticket Detector.",
-        "Collision detection before plan.",
+        "Collision and prior art search before plan.",
         "Call lookup_context before you summarize.",
+        "Report both duplicate tickets and existing implementations the team should reuse.",
         "Do not invent facts the tool did not return.",
         f"Task: {task or 'Run the duplicate-ticket-detector example.'}",
     ])
@@ -27,7 +30,7 @@ def build_duplicate_ticket_detector_prompt(task: str) -> str:
 def create_duplicate_ticket_detector_custom_tools() -> dict[str, object]:
     return {
         "lookup_context": {
-            "description": "Return deterministic context facts for the duplicate-ticket-detector example.",
+            "description": "Return duplicate-ticket and prior-art facts for the duplicate-ticket-detector example.",
             "inputSchema": {
                 "type": "object",
                 "properties": {

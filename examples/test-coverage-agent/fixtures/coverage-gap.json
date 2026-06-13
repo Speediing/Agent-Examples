@@ -1,0 +1,6 @@
+{
+  "file": "src/payments/checkout.ts",
+  "changed_lines": [142, 143, 144, 145, 186, 187, 188, 189],
+  "uncovered_lines": [142, 143, 186, 187, 188, 189],
+  "suggested_test": "tests/checkout/refund.test.ts"
+}

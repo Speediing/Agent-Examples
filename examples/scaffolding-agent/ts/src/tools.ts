@@ -1,19 +1,42 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { SDKJsonValue } from "@cursor/sdk";
+
+const exampleRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../..",
+);
+
+type ScaffoldPlan = {
+  module: string;
+  convention: string;
+  target_path: string;
+  proposed_files: string[];
+};
 
 export function readString(value: SDKJsonValue | undefined): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-export function lookupContext(args: { query?: SDKJsonValue }) {
-  const query = readString(args.query).toLowerCase() || "scaffolding-agent";
+function loadPlan(): ScaffoldPlan {
+  const raw = fs.readFileSync(
+    path.join(exampleRoot, "fixtures/scaffold-plan.json"),
+    "utf8",
+  );
+  return JSON.parse(raw) as ScaffoldPlan;
+}
+
+export function proposeScaffold(args: { module?: SDKJsonValue }) {
+  const plan = loadPlan();
+  const module = readString(args.module) || plan.module;
   return {
-    query,
-    found: true,
-    facts: [
-      { key: "convention", value: "payments/* modules use handler + schema pattern" },
-      { key: "target_path", value: "src/payments/refund-handler/" }
-    ],
-    count: 2
+    module,
+    convention: plan.convention,
+    target_path: plan.target_path,
+    proposed_files: plan.proposed_files,
+    count: plan.proposed_files.length,
+    writes_enabled: process.argv.includes("--act"),
   };
 }
 
@@ -21,23 +44,22 @@ export function buildScaffoldingAgentPrompt(task: string): string {
   return [
     "You are the Scaffolding Agent.",
     "Gated scaffolding.",
-    "Call lookup_context before you summarize.",
-    "Do not invent facts the tool did not return.",
-    `Task: ${task || "Run the scaffolding-agent example."}`
+    "Call propose_scaffold first. Only recommend creating files when writes_enabled is true.",
+    `Task: ${task || "Propose a gated module scaffold from the fixture plan."}`,
   ].join("\n");
 }
 
 export function createScaffoldingAgentCustomTools() {
   return {
-    lookup_context: {
-      description: "Return deterministic context facts for the scaffolding-agent example.",
+    propose_scaffold: {
+      description: "Return a scaffold plan with proposed file paths from house conventions.",
       inputSchema: {
         type: "object",
         properties: {
-          query: { type: "string", description: "Short task or topic string" }
-        }
+          module: { type: "string", description: "Module path to scaffold" },
+        },
       },
-      execute: (args: { query?: SDKJsonValue }) => lookupContext(args)
-    }
+      execute: (args: { module?: SDKJsonValue }) => proposeScaffold(args),
+    },
   };
 }

@@ -1,43 +1,67 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { SDKJsonValue } from "@cursor/sdk";
+
+const exampleRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../..",
+);
+
+type CollisionRecord = {
+  linear_issue: string;
+  similar_code: string;
+  prior_art_module: string;
+  related_adr: string;
+};
 
 export function readString(value: SDKJsonValue | undefined): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-export function lookupContext(args: { query?: SDKJsonValue }) {
-  const query = readString(args.query).toLowerCase() || "duplicate-ticket-detector";
+function loadCollisions(): CollisionRecord[] {
+  const raw = fs.readFileSync(
+    path.join(exampleRoot, "fixtures/collisions.json"),
+    "utf8",
+  );
+  return JSON.parse(raw) as CollisionRecord[];
+}
+
+export function searchCollisions(args: { query?: SDKJsonValue }) {
+  const query = readString(args.query).toLowerCase() || "checkout";
+  const records = loadCollisions().filter((record) =>
+    JSON.stringify(record).toLowerCase().includes(query),
+  );
   return {
     query,
-    found: true,
-    facts: [
-      { key: "linear_issue", value: "TEAM-482 checkout 503 after deploy" },
-      { key: "similar_code", value: "src/checkout/retry.ts handles deploy windows" }
-    ],
-    count: 2
+    matches: records,
+    count: records.length,
+    found: records.length > 0,
   };
 }
 
 export function buildDuplicateTicketDetectorPrompt(task: string): string {
   return [
     "You are the Duplicate Ticket Detector.",
-    "Collision detection before plan.",
-    "Call lookup_context before you summarize.",
-    "Do not invent facts the tool did not return.",
-    `Task: ${task || "Run the duplicate-ticket-detector example."}`
+    "Collision and prior art search before plan.",
+    "Call search_collisions before you summarize.",
+    "Report duplicate tickets and prior art from tool output only.",
+    `Task: ${task || "Search for ticket and code collisions."}`,
   ].join("\n");
 }
 
 export function createDuplicateTicketDetectorCustomTools() {
   return {
-    lookup_context: {
-      description: "Return deterministic context facts for the duplicate-ticket-detector example.",
+    search_collisions: {
+      description:
+        "Search issues, ADRs, and code collisions from the duplicate-ticket fixture.",
       inputSchema: {
         type: "object",
         properties: {
-          query: { type: "string", description: "Short task or topic string" }
-        }
+          query: { type: "string", description: "Short task or topic string" },
+        },
       },
-      execute: (args: { query?: SDKJsonValue }) => lookupContext(args)
-    }
+      execute: (args: { query?: SDKJsonValue }) => searchCollisions(args),
+    },
   };
 }
