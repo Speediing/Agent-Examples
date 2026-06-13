@@ -10,9 +10,10 @@ The goal is twofold:
 1. Ship a **flagship Slack-bot example** built on the Cursor SDK + the Vercel
    Chat SDK — the canonical "chat surface" recipe the cookbook is currently
    missing.
-2. Define a **wave-based backlog** that fills every SDLC stage with at least one
-   runnable example, plus a per-example **definition of done** you (or a cloud
-   agent) can run on repeat until the roster is complete.
+2. Define a **wave-based backlog of 50 examples** that staffs every SDLC stage —
+   weighted toward plan and review, as the `agent-team-sdlc` guide argues — plus a
+   per-example **definition of done** you (or a cloud agent) can run on repeat
+   until the roster is complete.
 
 Read this alongside `docs/EVAL_PLAN.md` (test architecture) and
 `eval/manual/coverage-matrix.md` (current eval coverage). Follow
@@ -230,54 +231,135 @@ to in `node_modules/chat/docs/` (`getting-started`, `handling-events`, `actions`
 
 ---
 
-## 4. The backlog — examples by SDLC stage
+## 4. The backlog — 50 examples by SDLC stage
 
-Each row is one playbook run. Priority is the suggested order; "Wave" groups them
-(§5). Patterns reuse the six shapes from `agent-team-sdlc`; net-new shapes are
-flagged. Seats are drawn from the `agent-team-enterprise` 23-seat roster so each
-example becomes a real link target.
+Each row is one playbook run (§2). Tables are grouped by SDLC stage and weighted
+toward plan and review, the stages the `agent-team-sdlc` guide says deserve the
+most agents. Each example reuses one of the six shapes from that guide (or the
+net-new **Chat** shape the Slack bot introduces) and slots into a seat the
+`agent-team-enterprise` roster already names, so every example becomes a real
+cookbook link target.
 
-| # | Example | Stage | Pattern | Surface / trigger | Net-new lesson | Wave |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 | `slack-bot` | Plan / Review | Chat-triggered + approval gate | Chat (Slack webhook) | Chat SDK surface, cloud-agent PR, human-in-loop | 1 |
-| 2 | `spec-drafter` | Plan | Prompt-first + repo read | Terminal / ticket trigger | Ground a spec in code the change touches | 1 |
-| 3 | `pr-summarizer` | Review | Local tool agent | CI (`pull_request`) | Read a diff, route by risk, post a walkthrough | 1 |
-| 4 | `test-coverage-agent` | Test | Local tool agent | CI / terminal | Find untested changed lines, propose tests | 2 |
-| 5 | `flake-hunter` | Test | Audit then act | Scheduled | Detect flaky tests from history, quarantine | 2 |
-| 6 | `release-notes-drafter` | Release | Prompt-first | CI (tag/release) | Summarize merged PRs into release notes | 2 |
-| 7 | `dependency-updater` | Develop / Release | Audit then act | Scheduled | Triage dependency bumps, gate risky ones | 3 |
-| 8 | `scaffolding-agent` | Develop | Local tool agent (writes) | Terminal | Generate a new module from conventions, gated | 3 |
-| 9 | `postmortem-drafter` | Operate | Investigate and gate | Chat / webhook | Turn an incident timeline into a draft postmortem | 3 |
-| 10 | `cost-auditor` | Operate | Audit then act | Scheduled | Flag cost/perf anomalies, no false "fixed" claims | 4 |
+Pattern key: **PF** prompt-first · **LT** local tools · **SFR** scan, fix,
+re-scan · **ATA** audit then act · **IAG** investigate and gate · **BE**
+behavioral evals · **CHAT** chat-triggered + approval gate. "(writes)" marks a
+side-effecting agent that must ship a gate.
 
-Notes:
+Stage weighting: Plan 10 · Develop 8 · Review 10 · Test 7 · Release 7 · Operate 8.
 
-- **Wave 1** is the highest-leverage gap fill: it adds the chat surface (1) and
-  the two stages the SDLC guide says deserve the most weight — plan (2) and review
-  (3). Build these first.
-- Items 4–10 each instantiate an existing pattern on a new surface, so they reuse
-  the eval scaffolding rather than inventing new test infrastructure.
-- The Chat SDK adapter from example 1 is reusable: `postmortem-drafter` (9) can run
-  on the same surface, so build 1 before 9.
-- Stop and re-evaluate the backlog after each wave. If a stage already feels
-  well-covered for your audience, drop or defer its remaining rows rather than
-  shipping examples that only repeat a shape.
+### Plan (10)
+
+| # | Example | Pattern | Surface / trigger | Lesson it adds | Wave |
+| --- | --- | --- | --- | --- | --- |
+| 1 | `slack-bot` | CHAT | Slack webhook | Chat SDK surface, cloud-agent PR, human-in-loop (flagship, §3) | 1 |
+| 2 | `spec-drafter` | PF + repo read | Ticket / terminal | Ground a spec in the code the change touches | 1 |
+| 3 | `codebase-explainer` | PF + repo read | Terminal | Explain an unfamiliar subsystem for onboarding | 1 |
+| 4 | `duplicate-ticket-detector` | LT | Webhook (new issue) | Search issues + code for collisions before work starts | 2 |
+| 5 | `backlog-groomer` | ATA | Scheduled | Link duplicates, flag stale tickets, surface obsoleted work | 2 |
+| 6 | `prior-art-finder` | LT | Ticket / terminal | Surface existing implementations before building new | 3 |
+| 7 | `roadmap-digest` | PF | Scheduled | One-post weekly summary of merged work and decisions | 3 |
+| 8 | `adr-writer` | PF | Terminal | Draft an architecture decision record grounded in code | 3 |
+| 9 | `estimation-helper` | LT | Ticket | Break a spec into tasks with the touched-files list | 4 |
+| 10 | `requirements-clarifier` | CHAT | Slack | Turn a vague request into ranked clarifying questions | 4 |
+
+### Develop (8) — fewest seats; Cursor already covers this interactively
+
+| # | Example | Pattern | Surface / trigger | Lesson it adds | Wave |
+| --- | --- | --- | --- | --- | --- |
+| 11 | `scaffolding-agent` | LT (writes) | Terminal | Generate a new module from house conventions, gated | 4 |
+| 12 | `dependency-updater` | ATA (writes) | Scheduled | Triage dependency bumps, gate the risky ones | 4 |
+| 13 | `codemod-runner` | ATA (writes) | Terminal | Apply a codemod across files after a dry-run audit | 4 |
+| 14 | `convention-fixer` | SFR (writes) | CI | Lint house style, auto-fix, re-scan to confirm | 3 |
+| 15 | `boilerplate-generator` | LT (writes) | Terminal | Emit a CRUD endpoint/component from a schema | 5 |
+| 16 | `type-error-explainer` | LT | Terminal | Read `tsc` output, explain, propose a fix | 5 |
+| 17 | `db-migration-drafter` | LT (writes) | Terminal | Draft a migration from a schema diff, gated | 5 |
+| 18 | `api-client-generator` | ATA (writes) | Scheduled | Regenerate clients when an OpenAPI spec drifts | 5 |
+
+### Review (10) — heaviest stage; weight the roster here
+
+| # | Example | Pattern | Surface / trigger | Lesson it adds | Wave |
+| --- | --- | --- | --- | --- | --- |
+| 19 | `pr-summarizer` | LT | CI (`pull_request`) | Read a diff, name the risky file, post a walkthrough | 1 |
+| 20 | `risk-classifier` | LT | CI | Score PR risk and route low-risk vs high-risk | 1 |
+| 21 | `convention-reviewer` | SFR | CI | Check house style on the diff and report violations | 2 |
+| 22 | `api-contract-gate` | SFR | CI | Detect breaking API changes against a baseline | 2 |
+| 23 | `security-review-agent` | IAG | CI | Flag risky patterns in a diff without fabricating | 2 |
+| 24 | `codeowners-router` | LT | CI | Suggest reviewers from changed paths + history | 3 |
+| 25 | `performance-budget-gate` | SFR | CI (preview) | Flag bundle/perf regressions on the preview build | 3 |
+| 26 | `secret-scanner-gate` | SFR | CI | Block a diff that introduces a secret | 4 |
+| 27 | `test-presence-gate` | SFR | CI | Require tests for changed application code | 4 |
+| 28 | `license-compliance-gate` | ATA | CI | Audit new dependencies' licenses against policy | 5 |
+
+### Test (7)
+
+| # | Example | Pattern | Surface / trigger | Lesson it adds | Wave |
+| --- | --- | --- | --- | --- | --- |
+| 29 | `test-coverage-agent` | LT | CI / terminal | Find untested changed lines, propose tests | 2 |
+| 30 | `eval-trace-grader` | BE | CI | Grade tool choice and grounding from agent traces | 2 |
+| 31 | `flake-hunter` | ATA | Scheduled | Detect flaky tests from history and quarantine them | 3 |
+| 32 | `test-generator` | LT (writes) | Terminal | Generate unit tests for a module, gated | 4 |
+| 33 | `mutation-test-triager` | LT | CI | Run mutation tests, summarize surviving mutants | 5 |
+| 34 | `snapshot-reviewer` | SFR | CI | Review snapshot diffs and approve safe churn | 5 |
+| 35 | `fixture-freshness-auditor` | ATA | Scheduled | Flag stale test fixtures against current schemas | 5 |
+
+### Release (7)
+
+| # | Example | Pattern | Surface / trigger | Lesson it adds | Wave |
+| --- | --- | --- | --- | --- | --- |
+| 36 | `release-notes-drafter` | PF | CI (tag/release) | Summarize merged PRs into release notes | 3 |
+| 37 | `rollout-watcher` | IAG | Webhook (`deployment_status`) | Watch post-deploy health and gate promotion | 3 |
+| 38 | `change-ticket-drafter` | LT | CI | Draft a change/deploy ticket from the release diff | 4 |
+| 39 | `feature-flag-reaper` | ATA (writes) | Scheduled | Find stale flags and propose their removal | 4 |
+| 40 | `dependency-drift-auditor` | ATA | Scheduled | Compare lockfile against the registry, report drift | 4 |
+| 41 | `version-bump-agent` | ATA (writes) | Scheduled | Bump semver from conventional commits, gated | 5 |
+| 42 | `deprecation-notice-drafter` | PF | Scheduled | Draft deprecation notices for sunsetting APIs | 5 |
+
+### Operate (8)
+
+| # | Example | Pattern | Surface / trigger | Lesson it adds | Wave |
+| --- | --- | --- | --- | --- | --- |
+| 43 | `alert-triage-bot` | CHAT | Slack | Alert → triage + runbook suggestion (reuses #1's surface) | 2 |
+| 44 | `postmortem-drafter` | IAG | Chat / webhook | Turn an incident timeline into a draft postmortem | 3 |
+| 45 | `on-call-digest` | PF | Scheduled | Summarize overnight alerts into one digest | 3 |
+| 46 | `cost-auditor` | ATA | Scheduled | Flag cost/perf anomalies, no false "fixed" claims | 3 |
+| 47 | `runbook-freshness-auditor` | ATA | Scheduled | Replay runbooks against infra, flag stale steps | 4 |
+| 48 | `log-anomaly-investigator` | IAG | Webhook | Investigate an error spike and gate any action | 4 |
+| 49 | `slo-budget-reporter` | PF | Scheduled | Weekly error-budget report naming the spending commit | 5 |
+| 50 | `incident-comms-drafter` | PF | Chat | Draft status-page / stakeholder updates during an incident | 5 |
+
+Coverage notes:
+
+- **Surfaces.** The backlog spreads across all five surfaces from the SDLC guide:
+  terminal, CI, webhook, scheduled, and chat. CHAT examples (1, 10, 43) share the
+  Slack bot's adapter, so build #1 first and the rest reuse its plumbing.
+- **Write gates.** Every "(writes)" row ships a gate (scan-only, audit-before-act,
+  or human approval) exactly as the `agent-team-sdlc` step-4 ladder requires.
+- **Pattern reuse.** Most rows instantiate an existing shape on a new surface, so
+  they reuse the eval scaffolding rather than inventing new test infrastructure.
+  Only #1 (CHAT) and #30 (BE, reuses the `agent-evals` harness) add new lessons at
+  the framework level.
 
 ---
 
 ## 5. Sequencing — how to run it for a while
 
-Run waves in order; within a wave, one example per branch/PR, each passing its
-§2.2 definition of done before the next starts.
+Run by wave; within a wave, one example per branch/PR, each passing its §2.2
+definition of done before the next starts. The **Wave** column in §4 assigns every
+row — the themes below explain the ordering. Re-evaluate the remaining backlog
+after each wave: if a stage already feels well-covered for your audience, defer or
+drop its lower-wave rows rather than shipping examples that only repeat a shape.
 
-- **Wave 1 — chat + the upstream stages** (examples 1–3): Slack bot, spec drafter,
-  PR summarizer. Closes the surface gap and the plan/review weighting the SDLC
-  guide argues for.
-- **Wave 2 — test + release** (examples 4–6): coverage agent, flake hunter, release
-  notes.
-- **Wave 3 — develop + operate writes** (examples 7–9): dependency updater,
-  scaffolding agent, postmortem drafter.
-- **Wave 4 — operate tail** (example 10): cost auditor, plus any deferred rows.
+- **Wave 1 — chat surface + the upstream bottleneck** (1, 2, 3, 19, 20). The Slack
+  bot plus the top plan and review seats. Closes the empty chat surface and the
+  plan/review weighting the SDLC guide argues for.
+- **Wave 2 — review depth, test/eval foundation, triage reuse** (4, 5, 21, 22, 23,
+  29, 30, 43). Stand up the eval grader (#30) early so later waves can lean on it.
+- **Wave 3 — release + operate core, planning docs** (6, 7, 8, 14, 24, 25, 31, 36,
+  37, 44, 45, 46). One credible seat per remaining stage.
+- **Wave 4 — develop writes + remaining gates** (9, 10, 11, 12, 13, 26, 27, 32, 38,
+  39, 40, 47, 48). The write-capable agents, once read-only patterns are proven.
+- **Wave 5 — long-tail coverage** (15, 16, 17, 18, 28, 33, 34, 35, 41, 42, 49, 50).
+  Round out each stage; build only the rows your audience will actually use.
 
 A cloud agent can take one row at a time: give it this file, the target row, the
 `agent-cookbook` skill, and `AGENTS.md`. Its task is "complete one playbook run
@@ -286,18 +368,37 @@ and the eval gates stay small.
 
 ### Tracking
 
-Keep status in this section as rows ship (or move to a checklist):
+Check rows off as they ship.
 
-- [ ] 1 `slack-bot`
-- [ ] 2 `spec-drafter`
-- [ ] 3 `pr-summarizer`
-- [ ] 4 `test-coverage-agent`
-- [ ] 5 `flake-hunter`
-- [ ] 6 `release-notes-drafter`
-- [ ] 7 `dependency-updater`
-- [ ] 8 `scaffolding-agent`
-- [ ] 9 `postmortem-drafter`
-- [ ] 10 `cost-auditor`
+**Plan** — [ ] 1 `slack-bot` · [ ] 2 `spec-drafter` · [ ] 3 `codebase-explainer` ·
+[ ] 4 `duplicate-ticket-detector` · [ ] 5 `backlog-groomer` · [ ] 6 `prior-art-finder` ·
+[ ] 7 `roadmap-digest` · [ ] 8 `adr-writer` · [ ] 9 `estimation-helper` ·
+[ ] 10 `requirements-clarifier`
+
+**Develop** — [ ] 11 `scaffolding-agent` · [ ] 12 `dependency-updater` ·
+[ ] 13 `codemod-runner` · [ ] 14 `convention-fixer` · [ ] 15 `boilerplate-generator` ·
+[ ] 16 `type-error-explainer` · [ ] 17 `db-migration-drafter` ·
+[ ] 18 `api-client-generator`
+
+**Review** — [ ] 19 `pr-summarizer` · [ ] 20 `risk-classifier` ·
+[ ] 21 `convention-reviewer` · [ ] 22 `api-contract-gate` ·
+[ ] 23 `security-review-agent` · [ ] 24 `codeowners-router` ·
+[ ] 25 `performance-budget-gate` · [ ] 26 `secret-scanner-gate` ·
+[ ] 27 `test-presence-gate` · [ ] 28 `license-compliance-gate`
+
+**Test** — [ ] 29 `test-coverage-agent` · [ ] 30 `eval-trace-grader` ·
+[ ] 31 `flake-hunter` · [ ] 32 `test-generator` · [ ] 33 `mutation-test-triager` ·
+[ ] 34 `snapshot-reviewer` · [ ] 35 `fixture-freshness-auditor`
+
+**Release** — [ ] 36 `release-notes-drafter` · [ ] 37 `rollout-watcher` ·
+[ ] 38 `change-ticket-drafter` · [ ] 39 `feature-flag-reaper` ·
+[ ] 40 `dependency-drift-auditor` · [ ] 41 `version-bump-agent` ·
+[ ] 42 `deprecation-notice-drafter`
+
+**Operate** — [ ] 43 `alert-triage-bot` · [ ] 44 `postmortem-drafter` ·
+[ ] 45 `on-call-digest` · [ ] 46 `cost-auditor` · [ ] 47 `runbook-freshness-auditor` ·
+[ ] 48 `log-anomaly-investigator` · [ ] 49 `slo-budget-reporter` ·
+[ ] 50 `incident-comms-drafter`
 
 ---
 
@@ -311,9 +412,16 @@ Keep status in this section as rows ship (or move to a checklist):
 - **State backend in CI.** Chat SDK needs a state adapter. Use
   `@chat-adapter/state-memory` for the runnable example and tests; document Redis/PG
   for production.
-- **Python parity for the Slack bot.** The Chat SDK is TypeScript-only. Either scope
-  the Python port to the Cursor SDK triage half (matching the TS factory module) or
-  mark this example TS-only in the manifest. Decide before wiring parity tests.
-- **Backlog size.** Ten examples may over-cover some stages for the intended
-  audience. Confirm the audience (individual builders vs platform teams) before
-  Wave 3 — it decides whether `scaffolding-agent` and `cost-auditor` earn a slot.
+- **Python parity for chat examples.** The Chat SDK is TypeScript-only. For the
+  CHAT rows (1, 10, 43), either scope the Python port to the Cursor SDK half
+  (matching the TS factory module) or mark them TS-only in the manifest. Decide
+  before wiring parity tests.
+- **Backlog size and audience.** Fifty examples over-cover some stages for an
+  individual builder; they fit a platform team building an internal catalog.
+  Confirm the audience before Wave 4 — it decides how much of Waves 4–5 to build
+  versus defer. The waves are designed so stopping after Wave 3 still leaves every
+  stage with at least one read-only and one gated example.
+- **Repo capacity.** Fifty examples is ~3x the current workspace count. Decide
+  whether they all live in this repo or whether some stages graduate to a dedicated
+  catalog repo once the count grows (relates to the `EVAL_PLAN.md` §10 "repo home"
+  question).
