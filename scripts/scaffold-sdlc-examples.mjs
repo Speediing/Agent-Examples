@@ -562,7 +562,7 @@ def audit_state(args: dict[str, object]) -> dict[str, object]:
         "drift_detected": True,
         "actionable": [{"id": "1", "kind": "${slug}", "summary": "Example drift record for audit"}],
         "count": 1,
-        "writes_enabled": "--act" in sys.argv,
+        "writes_enabled": ${writes ? '"--act" in sys.argv' : "False"},
     }
 
 def build_${py}_prompt(task: str) -> str:

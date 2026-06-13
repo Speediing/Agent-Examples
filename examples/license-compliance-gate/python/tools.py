@@ -12,7 +12,7 @@ def audit_state(args: dict[str, object]) -> dict[str, object]:
         "drift_detected": True,
         "actionable": [{"id": "1", "kind": "license-compliance-gate", "summary": "Example drift record for audit"}],
         "count": 1,
-        "writes_enabled": "--act" in sys.argv,
+        "writes_enabled": False,
     }
 
 def build_license_compliance_gate_prompt(task: str) -> str:

@@ -12,7 +12,7 @@ def audit_state(args: dict[str, object]) -> dict[str, object]:
         "drift_detected": True,
         "actionable": [{"id": "1", "kind": "backlog-groomer", "summary": "Example drift record for audit"}],
         "count": 1,
-        "writes_enabled": "--act" in sys.argv,
+        "writes_enabled": False,
     }
 
 def build_backlog_groomer_prompt(task: str) -> str:
