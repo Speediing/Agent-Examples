@@ -12,6 +12,8 @@
     "accessibility-agent:ts",
     "migration-agent:ts",
     "migrate:python-ports",
-    "sre-agent:ts"
+    "sre-agent:ts",
+    "test",
+    "test:llm"
   ]
 }
