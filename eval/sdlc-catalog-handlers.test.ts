@@ -18,7 +18,8 @@ const catalog = JSON.parse(
   readFileSync(path.join(repoRoot, "scripts/sdlc-catalog.json"), "utf8"),
 ) as {
   stages: { id: string; label: string }[];
-  examples: { stage: string }[];
+  examples: { stage: string; recommendedForm?: string }[];
+  foundationExamples: { recommendedForm?: string }[];
 };
 
 describe("sdlc catalog coverage", () => {
@@ -30,6 +31,13 @@ describe("sdlc catalog coverage", () => {
     const stages = new Set(catalog.examples.map((entry) => entry.stage));
     for (const stage of catalog.stages.map((item) => item.id)) {
       expect(stages.has(stage)).toBe(true);
+    }
+  });
+
+  it("assigns a production home to every catalog entry", () => {
+    const allowed = new Set(["Automation", "SDK", "Built-in", "Either"]);
+    for (const entry of [...catalog.examples, ...catalog.foundationExamples]) {
+      expect(allowed.has(entry.recommendedForm ?? "")).toBe(true);
     }
   });
 });
