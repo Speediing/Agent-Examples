@@ -36,6 +36,8 @@
     "type-error-explainer:ts": "npm --workspace @cursor-examples/type-error-explainer-ts run start --",
     "db-migration-drafter:ts": "npm --workspace @cursor-examples/db-migration-drafter-ts run start --",
     "api-client-generator:ts": "npm --workspace @cursor-examples/api-client-generator-ts run start --",
+    "bugbot:validate": "npm --workspace @cursor-examples/bugbot-ts run start --",
+    "security-reviewer:validate": "npm --workspace @cursor-examples/security-reviewer-ts run start --",
     "convention-reviewer:ts": "npm --workspace @cursor-examples/convention-reviewer-ts run start --",
     "api-contract-gate:ts": "npm --workspace @cursor-examples/api-contract-gate-ts run start --",
     "security-review-agent:ts": "npm --workspace @cursor-examples/security-review-agent-ts run start --",

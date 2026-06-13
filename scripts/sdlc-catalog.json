@@ -68,6 +68,8 @@
     { "slug": "hello-world", "stage": "plan", "recommendedForm": "SDK", "title": "Build a prompt-first agent", "description": "Minimal Cursor SDK script: argv in, Agent.prompt, stdout out." },
     { "slug": "tool-calling-agent", "stage": "develop", "recommendedForm": "SDK", "title": "Build an agent with local tools", "description": "Register local tools so Cursor returns facts from code." },
     { "slug": "accessibility-agent", "stage": "review", "recommendedForm": "SDK", "title": "Build an accessibility agent", "description": "Scan, fix, and re-scan pages with axe-core." },
+    { "slug": "bugbot", "stage": "review", "recommendedForm": "Built-in", "title": "Tune Bugbot for pull request review", "description": "Project BUGBOT.md rules, nested scopes, and offline fixture validation." },
+    { "slug": "security-reviewer", "stage": "review", "recommendedForm": "Built-in", "title": "Configure Security Reviewer on pull requests", "description": "Dashboard instructions, threat model, and shadow-mode rollout." },
     { "slug": "migration-agent", "stage": "release", "recommendedForm": "SDK", "title": "Build a migration agent", "description": "Audit drift, then act on stale ports with a gate." },
     { "slug": "sre-agent", "stage": "operate", "recommendedForm": "SDK", "title": "Build an SRE incident agent", "description": "Investigate incidents with read-only observability tools." }
   ]
