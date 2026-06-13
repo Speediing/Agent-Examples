@@ -1,8 +1,11 @@
 # Content Roadmap — more examples across the SDLC
 
-Status: plan for review. This is a **backlog plus a repeatable playbook**, not an
-implementation. It targets the runnable examples in this repo (`examples/<name>/`)
-and the cookbook posts in the sibling `agent-example-site` repo
+Status: **Curated catalog (35 runnable topics):** 7 foundation examples + 28 SDLC
+examples after Opus deduplication (22 scaffold duplicates removed or merged; see
+`scripts/sdlc-catalog.json` → `removedExamples`). Wave 1 posts retain detailed
+copy; remaining SDLC rows use generated guides you can deepen over time. This file
+remains the playbook for upgrading scaffolds into production agents and the
+cookbook posts in the sibling `agent-example-site` repo
 (`app/blog/posts.ts`, `app/blog/guides.ts`).
 
 The goal is twofold:
@@ -366,39 +369,30 @@ A cloud agent can take one row at a time: give it this file, the target row, the
 (§2) for example `<name>` and stop." Keep the per-example PRs independent so review
 and the eval gates stay small.
 
-### Tracking
+### Tracking (curated catalog — post-dedup)
 
-Check rows off as they ship.
+Check rows off as they ship. Removed or merged slugs are documented in
+`scripts/sdlc-catalog.json` → `removedExamples`.
 
-**Plan** — [ ] 1 `slack-bot` · [ ] 2 `spec-drafter` · [ ] 3 `codebase-explainer` ·
-[ ] 4 `duplicate-ticket-detector` · [ ] 5 `backlog-groomer` · [ ] 6 `prior-art-finder` ·
-[ ] 7 `roadmap-digest` · [ ] 8 `adr-writer` · [ ] 9 `estimation-helper` ·
-[ ] 10 `requirements-clarifier`
+**Foundation** — [x] `hello-world` · [x] `tool-calling-agent` · [x] `accessibility-agent` ·
+[x] `bugbot` · [x] `security-reviewer` · [x] `migration-agent` · [x] `sre-agent`
 
-**Develop** — [ ] 11 `scaffolding-agent` · [ ] 12 `dependency-updater` ·
-[ ] 13 `codemod-runner` · [ ] 14 `convention-fixer` · [ ] 15 `boilerplate-generator` ·
-[ ] 16 `type-error-explainer` · [ ] 17 `db-migration-drafter` ·
-[ ] 18 `api-client-generator`
+**Plan** — [x] `slack-bot` · [x] `spec-drafter` · [x] `codebase-explainer` ·
+[x] `duplicate-ticket-detector` · [x] `adr-writer`
 
-**Review** — [ ] 19 `pr-summarizer` · [ ] 20 `risk-classifier` ·
-[ ] 21 `convention-reviewer` · [ ] 22 `api-contract-gate` ·
-[ ] 23 `security-review-agent` · [ ] 24 `codeowners-router` ·
-[ ] 25 `performance-budget-gate` · [ ] 26 `secret-scanner-gate` ·
-[ ] 27 `test-presence-gate` · [ ] 28 `license-compliance-gate`
+**Develop** — [x] `scaffolding-agent` · [x] `dependency-updater` ·
+[x] `type-error-explainer` · [x] `db-migration-drafter`
 
-**Test** — [ ] 29 `test-coverage-agent` · [ ] 30 `eval-trace-grader` ·
-[ ] 31 `flake-hunter` · [ ] 32 `test-generator` · [ ] 33 `mutation-test-triager` ·
-[ ] 34 `snapshot-reviewer` · [ ] 35 `fixture-freshness-auditor`
+**Review** — [x] `pr-summarizer` · [x] `risk-classifier` ·
+[x] `secret-scanner-gate` · [x] `test-presence-gate`
 
-**Release** — [ ] 36 `release-notes-drafter` · [ ] 37 `rollout-watcher` ·
-[ ] 38 `change-ticket-drafter` · [ ] 39 `feature-flag-reaper` ·
-[ ] 40 `dependency-drift-auditor` · [ ] 41 `version-bump-agent` ·
-[ ] 42 `deprecation-notice-drafter`
+**Test** — [x] `test-coverage-agent` · [x] `eval-trace-grader` ·
+[x] `flake-hunter`
 
-**Operate** — [ ] 43 `alert-triage-bot` · [ ] 44 `postmortem-drafter` ·
-[ ] 45 `on-call-digest` · [ ] 46 `cost-auditor` · [ ] 47 `runbook-freshness-auditor` ·
-[ ] 48 `log-anomaly-investigator` · [ ] 49 `slo-budget-reporter` ·
-[ ] 50 `incident-comms-drafter`
+**Release** — [x] `release-notes-drafter` · [x] `feature-flag-reaper`
+
+**Operate** — [x] `alert-triage-bot` · [x] `postmortem-drafter` ·
+[x] `cost-auditor`
 
 ---
 

@@ -1,0 +1,26 @@
+[
+  {
+    "rule": "auth-bypass",
+    "severity": "critical",
+    "title": "Admin check treats missing session as admin",
+    "path": "src/auth/session.ts"
+  },
+  {
+    "rule": "hardcoded-secret",
+    "severity": "critical",
+    "title": "Live API key committed to source",
+    "path": "src/payments/refund.ts"
+  },
+  {
+    "rule": "sql-injection",
+    "severity": "high",
+    "title": "User input concatenated into SQL",
+    "path": "src/payments/refund.ts"
+  },
+  {
+    "rule": "dangerous-eval",
+    "severity": "critical",
+    "title": "Agent tool executes arbitrary shell via eval",
+    "path": "src/admin/tools.ts"
+  }
+]

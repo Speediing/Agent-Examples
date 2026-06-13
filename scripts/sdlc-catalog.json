@@ -1,0 +1,78 @@
+{
+  "stages": [
+    { "id": "plan", "label": "Plan" },
+    { "id": "develop", "label": "Develop" },
+    { "id": "review", "label": "Review" },
+    { "id": "test", "label": "Test" },
+    { "id": "release", "label": "Release" },
+    { "id": "operate", "label": "Operate" }
+  ],
+  "examples": [
+    { "slug": "slack-bot", "stage": "plan", "pattern": "CHAT", "writes": true, "recommendedForm": "Either", "title": "Triage bug reports from Slack", "description": "Chat-triggered triage with a human approval gate before tickets or PRs.", "lesson": "Chat surface plus approval gate" },
+    { "slug": "spec-drafter", "stage": "plan", "pattern": "LT", "writes": false, "recommendedForm": "Automation", "title": "Draft a spec grounded in the repo", "description": "Turn a vague feature request into a draft spec citing files your tools read.", "lesson": "Ground specs in repo reads" },
+    { "slug": "codebase-explainer", "stage": "plan", "pattern": "LT", "writes": false, "recommendedForm": "Either", "title": "Explain an unfamiliar module", "description": "Answer onboarding questions by listing files and reading source.", "lesson": "Onboarding explainer" },
+    { "slug": "duplicate-ticket-detector", "stage": "plan", "pattern": "LT", "writes": false, "recommendedForm": "Automation", "title": "Detect duplicate tickets and prior art", "description": "Search issues, ADRs, and code for collisions before new work starts.", "lesson": "Collision and prior art search before plan" },
+    { "slug": "adr-writer", "stage": "plan", "pattern": "PF", "writes": false, "recommendedForm": "Automation", "title": "Draft an architecture decision record", "description": "Write an ADR grounded in code and tradeoffs.", "lesson": "ADR from design discussion" },
+
+    { "slug": "scaffolding-agent", "stage": "develop", "pattern": "LT", "writes": true, "recommendedForm": "SDK", "title": "Generate a gated module scaffold", "description": "Generate a module from house conventions behind a gate.", "lesson": "Gated scaffolding" },
+    { "slug": "dependency-updater", "stage": "develop", "pattern": "ATA", "writes": true, "recommendedForm": "SDK", "title": "Triage dependency and lockfile drift", "description": "Audit dependency bumps, lockfile drift, and semver impact before merging.", "lesson": "Dependency audit then act" },
+    { "slug": "type-error-explainer", "stage": "develop", "pattern": "LT", "writes": false, "recommendedForm": "Either", "title": "Explain TypeScript errors", "description": "Read tsc output, explain failures, and propose fixes.", "lesson": "Compiler output explainer" },
+    { "slug": "db-migration-drafter", "stage": "develop", "pattern": "LT", "writes": true, "recommendedForm": "SDK", "title": "Draft a database migration", "description": "Draft a migration from a schema diff behind a gate.", "lesson": "Gated migration drafts" },
+
+    { "slug": "pr-summarizer", "stage": "review", "pattern": "LT", "writes": false, "recommendedForm": "Automation", "title": "Summarize a pull request diff", "description": "Read a diff, name the riskiest file, and post a walkthrough.", "lesson": "PR walkthrough" },
+    { "slug": "risk-classifier", "stage": "review", "pattern": "LT", "writes": false, "recommendedForm": "Automation", "title": "Classify pull request risk and route reviewers", "description": "Score changed files, recommend a review path, and suggest code owners.", "lesson": "Risk and reviewer routing" },
+    { "slug": "secret-scanner-gate", "stage": "review", "pattern": "SFR", "writes": false, "recommendedForm": "SDK", "title": "Flag secrets in pull request diffs", "description": "Fail when a diff introduces a secret.", "lesson": "Secret scan gate" },
+    { "slug": "test-presence-gate", "stage": "review", "pattern": "SFR", "writes": false, "recommendedForm": "SDK", "title": "Require tests when application code changes", "description": "Parse the PR diff and fail when application files change without matching tests.", "lesson": "Diff-based test presence gate" },
+
+    { "slug": "test-coverage-agent", "stage": "test", "pattern": "LT", "writes": false, "recommendedForm": "SDK", "title": "Detect untested changed lines", "description": "Propose tests for changed lines without writes.", "lesson": "Coverage gap finder" },
+    { "slug": "eval-trace-grader", "stage": "test", "pattern": "BE", "writes": false, "recommendedForm": "SDK", "title": "Score agent traces for grounding", "description": "Grade tool choice and grounding from agent traces.", "lesson": "Behavioral eval grader" },
+    { "slug": "flake-hunter", "stage": "test", "pattern": "ATA", "writes": false, "recommendedForm": "SDK", "title": "Hunt flaky tests from CI history", "description": "Compute flake rates from CI run history and quarantine unstable tests.", "lesson": "CI-history flake audit" },
+
+    { "slug": "release-notes-drafter", "stage": "release", "pattern": "PF", "writes": false, "recommendedForm": "Automation", "title": "Draft release notes and on-call digests", "description": "Summarize merged PRs into release notes or overnight alert digests.", "lesson": "Scheduled digest writer" },
+    { "slug": "feature-flag-reaper", "stage": "release", "pattern": "ATA", "writes": true, "recommendedForm": "Either", "title": "Reap stale feature flags", "description": "Find stale flags and propose removal behind a gate.", "lesson": "Flag cleanup audit then act" },
+
+    { "slug": "alert-triage-bot", "stage": "operate", "pattern": "CHAT", "writes": false, "recommendedForm": "Either", "title": "Triage alerts in chat", "description": "Turn alerts into triage plans with runbook suggestions.", "lesson": "Alert triage chat" },
+    { "slug": "postmortem-drafter", "stage": "operate", "pattern": "IAG", "writes": false, "recommendedForm": "Either", "title": "Draft a postmortem", "description": "Turn an incident timeline into a draft postmortem.", "lesson": "Postmortem writer" },
+    { "slug": "cost-auditor", "stage": "operate", "pattern": "ATA", "writes": false, "recommendedForm": "Automation", "title": "Audit cost anomalies", "description": "Flag cost anomalies without false fixed claims.", "lesson": "Cost audit" }
+  ],
+  "foundationExamples": [
+    { "slug": "hello-world", "stage": "plan", "recommendedForm": "SDK", "title": "Build a prompt-first agent", "description": "Minimal Cursor SDK script: argv in, Agent.prompt, stdout out." },
+    { "slug": "tool-calling-agent", "stage": "develop", "recommendedForm": "SDK", "title": "Build an agent with local tools", "description": "Register local tools so Cursor returns facts from code." },
+    { "slug": "accessibility-agent", "stage": "review", "recommendedForm": "SDK", "title": "Build an accessibility agent", "description": "Scan, fix, and re-scan pages with axe-core." },
+    { "slug": "bugbot", "stage": "review", "recommendedForm": "Built-in", "title": "Tune Bugbot for pull request review", "description": "Project BUGBOT.md rules, nested scopes, and offline fixture validation." },
+    { "slug": "security-reviewer", "stage": "review", "recommendedForm": "Built-in", "title": "Configure Security Reviewer on pull requests", "description": "Dashboard instructions, threat model, and shadow-mode rollout." },
+    { "slug": "migration-agent", "stage": "release", "recommendedForm": "SDK", "title": "Build a migration agent", "description": "Audit drift, then act on stale ports with a gate." },
+    { "slug": "sre-agent", "stage": "operate", "recommendedForm": "SDK", "title": "Build an SRE incident agent", "description": "Investigate incidents with read-only observability tools." }
+  ],
+  "removedExamples": {
+    "prior-art-finder": "Merged into duplicate-ticket-detector (same lookup pattern, overlapping plan job).",
+    "roadmap-digest": "Removed; scheduled digest pattern covered by release-notes-drafter.",
+    "estimation-helper": "Removed; estimation with file evidence overlaps spec-drafter grounded reads.",
+    "convention-fixer": "Removed; scan-fix-rescan covered by accessibility-agent.",
+    "boilerplate-generator": "Removed; schema codegen overlaps scaffolding-agent gated codegen.",
+    "api-client-generator": "Removed; OpenAPI drift repair overlaps dependency-updater lockfile/spec audit theme.",
+    "api-contract-gate": "Removed; redundant SFR scan_target stub alongside secret-scanner-gate and test-presence-gate.",
+    "security-review-agent": "Removed; native security-reviewer example replaces SDK stub for built-in security review.",
+    "performance-budget-gate": "Removed; redundant SFR scan_target stub.",
+    "license-compliance-gate": "Removed; license audit overlaps dependency-updater develop/release hygiene.",
+    "mutation-test-triager": "Removed; mutation triage overlaps test-coverage-agent.",
+    "snapshot-reviewer": "Removed; redundant SFR scan_target stub.",
+    "fixture-freshness-auditor": "Removed; fixture drift audit overlaps flake-hunter and test-coverage-agent.",
+    "rollout-watcher": "Removed; deploy investigation covered by sre-agent IAG pattern.",
+    "change-ticket-drafter": "Removed; release comms covered by release-notes-drafter and migration-agent gates.",
+    "dependency-drift-auditor": "Merged into dependency-updater.",
+    "version-bump-agent": "Merged into dependency-updater semver audit scope.",
+    "deprecation-notice-drafter": "Removed; deprecation comms covered by release-notes-drafter PF pattern.",
+    "runbook-freshness-auditor": "Removed; runbook audit overlaps sre-agent runbook lookup and alert-triage-bot.",
+    "log-anomaly-investigator": "Removed; log investigation covered by sre-agent.",
+    "slo-budget-reporter": "Removed; SLO reporting overlaps release-notes-drafter digest pattern.",
+    "incident-comms-drafter": "Removed; incident comms overlap postmortem-drafter and alert-triage-bot.",
+    "backlog-groomer": "Removed; backlog duplicate audit overlaps duplicate-ticket-detector plan collision search.",
+    "requirements-clarifier": "Removed; chat clarifier lesson covered by slack-bot CHAT surface.",
+    "codemod-runner": "Merged into feature-flag-reaper release hygiene theme; codemod audit pattern documented in removedExamples.",
+    "convention-reviewer": "Removed; style scan SFR stub redundant with secret-scanner-gate; house style belongs in Bugbot rules.",
+    "codeowners-router": "Merged into risk-classifier (risk scoring plus reviewer routing).",
+    "test-generator": "Removed; gated test generation overlaps scaffolding-agent and test-coverage-agent.",
+    "on-call-digest": "Merged into release-notes-drafter (PF scheduled digest pattern)."
+  }
+}

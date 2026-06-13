@@ -1,0 +1,40 @@
+diff --git a/src/payments/checkout.ts b/src/payments/checkout.ts
+index 1111111..2222222 100644
+--- a/src/payments/checkout.ts
++++ b/src/payments/checkout.ts
+@@ -1,8 +1,14 @@
+ export async function chargeCard(amount: number, token: string) {
+-  return gateway.charge({ amount, token });
++  const normalized = normalizeAmount(amount);
++  return gateway.charge({ amount: normalized, token, idempotencyKey: token });
+ }
+ 
+ export function normalizeAmount(amount: number) {
+   return Math.round(amount * 100) / 100;
+ }
++
++export function refundCard(chargeId: string) {
++  return gateway.refund({ chargeId });
++}
+diff --git a/src/payments/gateway.ts b/src/payments/gateway.ts
+index 3333333..4444444 100644
+--- a/src/payments/gateway.ts
++++ b/src/payments/gateway.ts
+@@ -10,6 +10,10 @@ export const gateway = {
+   async charge(input: { amount: number; token: string; idempotencyKey: string }) {
+     return client.post("/charges", input);
+   },
++  async refund(input: { chargeId: string }) {
++    return client.post("/refunds", input);
++  },
+ };
+diff --git a/tests/payments/checkout.test.ts b/tests/payments/checkout.test.ts
+index 5555555..6666666 100644
+--- a/tests/payments/checkout.test.ts
++++ b/tests/payments/checkout.test.ts
+@@ -12,4 +12,8 @@ describe("checkout", () => {
+   it("charges a card", async () => {
+     await expect(chargeCard(10, "tok_123")).resolves.toBeDefined();
+   });
+-
+ });

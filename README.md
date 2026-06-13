@@ -23,6 +23,21 @@ examples/
   sre-agent/
     ts/       # canonical implementation
     python/   # Python port
+  spec-drafter/
+    ts/       # canonical implementation
+    python/   # Python port
+  codebase-explainer/
+    ts/       # canonical implementation
+    python/   # Python port
+  pr-summarizer/
+    ts/       # canonical implementation
+    python/   # Python port
+  risk-classifier/
+    ts/       # canonical implementation
+    python/   # Python port
+  slack-bot/
+    ts/       # canonical implementation
+    python/   # Python port (prompt + gate handlers; Chat SDK is TS-only)
 ```
 
 Each example is independently runnable. Keep example-specific code inside its
@@ -37,6 +52,11 @@ language folder.
 | `tool-calling-agent` | Cursor SDK local agent with custom tools | `examples/tool-calling-agent/ts` | `examples/tool-calling-agent/python` |
 | `accessibility-agent` | Scans pages with axe-core via a local Playwright tool | `examples/accessibility-agent/ts` | `examples/accessibility-agent/python` |
 | `sre-agent` | Incident triage agent with read-only observability tools | `examples/sre-agent/ts` | `examples/sre-agent/python` |
+| `spec-drafter` | Draft a spec grounded in repo reads | `examples/spec-drafter/ts` | `examples/spec-drafter/python` |
+| `codebase-explainer` | Explain an unfamiliar module read-only | `examples/codebase-explainer/ts` | `examples/codebase-explainer/python` |
+| `pr-summarizer` | Summarize a PR diff and name the risky file | `examples/pr-summarizer/ts` | `examples/pr-summarizer/python` |
+| `risk-classifier` | Score PR risk with deterministic path rules | `examples/risk-classifier/ts` | `examples/risk-classifier/python` |
+| `slack-bot` | Slack triage with human approval before side effects | `examples/slack-bot/ts` | `examples/slack-bot/python` |
 
 ## Setup
 

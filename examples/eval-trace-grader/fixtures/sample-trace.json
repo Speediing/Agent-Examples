@@ -1,0 +1,24 @@
+{
+  "case_id": "accessibility-agent-tier1",
+  "expected_tool_order": ["scan_page", "scan_page"],
+  "completed_tool_calls": [
+    {
+      "callId": "call-1",
+      "name": "scan_page",
+      "args": { "url": "file:///fixture/index.html" },
+      "status": "completed",
+      "truncated": false
+    },
+    {
+      "callId": "call-2",
+      "name": "scan_page",
+      "args": { "url": "file:///fixture/index.html" },
+      "status": "completed",
+      "truncated": false
+    }
+  ],
+  "grounding_rules": [
+    "Final answer must cite violation ids from scan_page output",
+    "Must not claim violations were fixed unless a write tool ran"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "payments.integration.test.ts": [
+    { "run_id": 101, "passed": true },
+    { "run_id": 102, "passed": false },
+    { "run_id": 103, "passed": true },
+    { "run_id": 104, "passed": false },
+    { "run_id": 105, "passed": true },
+    { "run_id": 106, "passed": false },
+    { "run_id": 107, "passed": true },
+    { "run_id": 108, "passed": false },
+    { "run_id": 109, "passed": true },
+    { "run_id": 110, "passed": true }
+  ],
+  "checkout.unit.test.ts": [
+    { "run_id": 201, "passed": true },
+    { "run_id": 202, "passed": true },
+    { "run_id": 203, "passed": true },
+    { "run_id": 204, "passed": true },
+    { "run_id": 205, "passed": true }
+  ]
+}

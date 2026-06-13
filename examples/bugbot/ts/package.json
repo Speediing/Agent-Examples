@@ -1,0 +1,17 @@
+{
+  "name": "@cursor-examples/bugbot-ts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js"
+  },
+  "cursorExample": {
+    "pythonPort": "../python/main.py",
+    "nativeBuiltin": "bugbot"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

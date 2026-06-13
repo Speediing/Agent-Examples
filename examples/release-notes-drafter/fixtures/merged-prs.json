@@ -1,0 +1,24 @@
+{
+  "since_tag": "v2.3.0",
+  "until_tag": "v2.4.0",
+  "merged_prs": [
+    {
+      "number": 482,
+      "title": "Add refund support to checkout",
+      "author": "@payments-team",
+      "labels": ["feature", "payments"]
+    },
+    {
+      "number": 479,
+      "title": "Fix checkout retry on deploy window",
+      "author": "@infra-oncall",
+      "labels": ["bugfix", "checkout"]
+    },
+    {
+      "number": 475,
+      "title": "Document OIDC migration plan",
+      "author": "@platform",
+      "labels": ["docs"]
+    }
+  ]
+}

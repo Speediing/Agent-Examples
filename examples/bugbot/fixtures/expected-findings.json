@@ -1,0 +1,14 @@
+[
+  {
+    "rule": "unsafe-idempotency-key",
+    "severity": "blocking",
+    "title": "Unsafe idempotency key",
+    "path": "src/payments/checkout.ts"
+  },
+  {
+    "rule": "refund-missing-authorization",
+    "severity": "blocking",
+    "title": "Refund path missing authorization",
+    "path": "src/payments/checkout.ts"
+  }
+]

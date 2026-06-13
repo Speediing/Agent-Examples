@@ -1,0 +1,2 @@
+src/payments/refund.ts(42,9): error TS2345: Argument of type 'RefundInput' is not assignable to parameter of type 'ChargeInput'.
+  Property 'currency' is missing in type 'RefundInput' but required in type 'ChargeInput'.

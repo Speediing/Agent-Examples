@@ -1,0 +1,19 @@
+{
+  "name": "@cursor-examples/secret-scanner-gate-ts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js"
+  },
+  "cursorExample": {
+    "pythonPort": "../python/main.py"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@cursor/sdk": "^1.0.18"
+  }
+}

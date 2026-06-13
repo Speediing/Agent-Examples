@@ -1,0 +1,66 @@
+{
+  "lookup": {
+    "duplicate-ticket-detector": [
+      { "key": "linear_issue", "value": "TEAM-482 checkout 503 after deploy" },
+      { "key": "similar_code", "value": "src/checkout/retry.ts handles deploy windows" },
+      { "key": "prior_art_module", "value": "src/payments/refund.ts" },
+      { "key": "related_adr", "value": "docs/adr/014-refund-flow.md" }
+    ],
+    "scaffolding-agent": [
+      { "key": "convention", "value": "payments/* modules use handler + schema pattern" },
+      { "key": "target_path", "value": "src/payments/refund-handler/" }
+    ],
+    "type-error-explainer": [
+      { "key": "error_code", "value": "TS2345 on src/payments/refund.ts:42" },
+      { "key": "hint", "value": "Argument type RefundInput missing field currency" }
+    ],
+    "db-migration-drafter": [
+      { "key": "column", "value": "orders.refund_status varchar(32)" },
+      { "key": "migration_file", "value": "migrations/20260301_add_refund_status.sql" }
+    ],
+    "test-coverage-agent": [
+      { "key": "uncovered_lines", "value": "checkout.ts:142-189 (refund branch)" },
+      { "key": "suggested_test", "value": "tests/checkout/refund.test.ts" }
+    ]
+  },
+  "scan": {
+    "secret-scanner-gate": {
+      "id": "secret/aws-access-key",
+      "path": "src/config.ts",
+      "summary": "AWS access key pattern introduced in diff"
+    },
+    "test-presence-gate": {
+      "id": "test/missing-coverage",
+      "path": "src/payments/refund.ts",
+      "summary": "Application file changed without matching test in diff"
+    }
+  },
+  "audit": {
+    "dependency-updater": {
+      "id": "dep-lodash-421",
+      "kind": "dependency",
+      "summary": "lodash 4.17.20 → 4.17.21 security patch available"
+    },
+    "feature-flag-reaper": {
+      "id": "flag-legacy-checkout",
+      "kind": "feature_flag",
+      "summary": "ENABLE_LEGACY_CHECKOUT enabled in prod for 180 days"
+    },
+    "flake-hunter": {
+      "id": "flake-payments-integration",
+      "kind": "test",
+      "summary": "payments.integration.test.ts failed 4 of last 10 runs"
+    },
+    "cost-auditor": {
+      "id": "cost-ec2-spike",
+      "kind": "cost",
+      "summary": "EC2 spend in us-east-1 up 34% week over week"
+    }
+  },
+  "signals": {
+    "postmortem-drafter": {
+      "status": "resolved",
+      "evidence": ["deploy-482", "checkout-error-rate", "rollback-runbook"]
+    }
+  }
+}

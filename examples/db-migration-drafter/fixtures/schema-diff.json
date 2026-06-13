@@ -1,0 +1,8 @@
+{
+  "table": "orders",
+  "column": "refund_status",
+  "type": "varchar(32)",
+  "default": "pending",
+  "migration_file": "migrations/20260301_add_refund_status.sql",
+  "sql": "ALTER TABLE orders ADD COLUMN refund_status varchar(32) NOT NULL DEFAULT 'pending';"
+}
