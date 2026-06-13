@@ -6,7 +6,7 @@ import {
   createCodebaseExplainerCustomTools
 } from "./tools.js";
 
-const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
+const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
 
 try {
   const [modulePath = "examples/hello-world", ...questionParts] = process.argv.slice(2);

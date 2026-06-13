@@ -10,7 +10,7 @@ from agent import build_codebase_explainer_prompt
 from tools import create_codebase_explainer_custom_tools
 
 
-ROOT_DIR = Path(__file__).resolve().parents[1]
+ROOT_DIR = Path(__file__).resolve().parents[3]
 
 
 def require_env(name: str) -> str:

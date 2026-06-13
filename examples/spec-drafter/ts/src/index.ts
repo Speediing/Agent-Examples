@@ -6,7 +6,7 @@ import {
   createSpecDrafterCustomTools
 } from "./tools.js";
 
-const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
+const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
 
 try {
   const request = process.argv.slice(2).join(" ").trim();

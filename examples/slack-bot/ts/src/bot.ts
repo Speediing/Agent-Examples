@@ -3,7 +3,7 @@ import { Chat } from "chat";
 import { createSlackAdapter } from "@chat-adapter/slack";
 import { createMemoryState } from "@chat-adapter/state-memory";
 import { buildTriagePrompt } from "./agent.js";
-import { approve, createApprovalState } from "./gate.js";
+import { approve, createApprovalState, reject } from "./gate.js";
 import { createTicket, openPr } from "./tools.js";
 
 const approvalByThread = new Map<string, ReturnType<typeof createApprovalState>>();
@@ -52,6 +52,7 @@ export function createSlackBot() {
     const plan = planByThread.get(threadId) ?? message.text;
 
     if (normalized === "reject") {
+      reject(approval);
       await thread.post("Rejected. No ticket or PR was created.");
       return;
     }
