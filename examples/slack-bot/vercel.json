@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/webhooks/slack.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/webhooks/slack",
+      "dest": "/api/webhooks/slack.ts"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/webhooks/slack.ts"
+    }
+  ]
+}

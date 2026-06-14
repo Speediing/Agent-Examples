@@ -19,6 +19,7 @@
     "migration-agent:ts": "npm --workspace @cursor-examples/migration-agent-ts run start --",
     "sre-agent:ts": "npm --workspace @cursor-examples/sre-agent-ts run start --",
     "slack-bot:ts": "npm --workspace @cursor-examples/slack-bot-ts run start --",
+    "slack-bot:serve": "npm --workspace @cursor-examples/slack-bot-ts run serve",
     "spec-drafter:ts": "npm --workspace @cursor-examples/spec-drafter-ts run start --",
     "codebase-explainer:ts": "npm --workspace @cursor-examples/codebase-explainer-ts run start --",
     "duplicate-ticket-detector:ts": "npm --workspace @cursor-examples/duplicate-ticket-detector-ts run start --",

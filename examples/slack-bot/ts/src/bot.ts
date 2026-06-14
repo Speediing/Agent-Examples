@@ -2,16 +2,20 @@ import { Agent } from "@cursor/sdk";
 import { Chat } from "chat";
 import { createSlackAdapter } from "@chat-adapter/slack";
 import { createMemoryState } from "@chat-adapter/state-memory";
-import { buildTriagePrompt } from "./agent.js";
-import { approve, createApprovalState, reject } from "./gate.js";
+import { approve, reject } from "./gate.js";
+import { buildHelpMessage } from "./help.js";
+import { invokeAgent, resolveRepoRoot } from "./invoke.js";
+import { parseSlackMessage } from "./router.js";
+import {
+  createThreadSession,
+  getThreadSession,
+  setThreadSession
+} from "./thread-state.js";
 import { createTicket, openPr } from "./tools.js";
-
-const approvalByThread = new Map<string, ReturnType<typeof createApprovalState>>();
-const planByThread = new Map<string, string>();
 
 export function createSlackBot() {
   const bot = new Chat({
-    userName: "bug-triage",
+    userName: "cursor-examples",
     adapters: {
       slack: createSlackAdapter()
     },
@@ -21,38 +25,72 @@ export function createSlackBot() {
 
   bot.onNewMention(async (thread, message) => {
     await thread.subscribe();
-    const threadId = thread.id;
-    approvalByThread.set(threadId, createApprovalState());
+    const parsed = parseSlackMessage(message.text);
 
-    const prompt = buildTriagePrompt(message.text);
-    const result = await Agent.prompt(prompt, {
-      apiKey: requireEnv("CURSOR_API_KEY"),
-      model: { id: requireEnv("CURSOR_MODEL") },
-      local: { cwd: process.cwd() }
-    });
+    if (parsed.kind === "help") {
+      await thread.post(buildHelpMessage());
+      return;
+    }
 
-    const plan = result.result ?? "No triage plan returned.";
-    planByThread.set(threadId, plan);
+    await thread.post(`Running \`${parsed.slug}\`...`);
 
-    await thread.post(
-      [
-        plan,
-        "",
-        "Reply with `approve` to create a ticket and open a draft PR.",
-        "Reply with `reject` to discard the plan."
-      ].join("\n")
-    );
+    try {
+      const result = await invokeAgent(parsed.slug, parsed.task, {
+        apiKey: requireEnv("CURSOR_API_KEY"),
+        model: requireEnv("CURSOR_MODEL"),
+        repoRoot: resolveRepoRoot(),
+        writesEnabled: false
+      });
+
+      if (result.requiresApproval) {
+        const session = createThreadSession(
+          parsed.slug,
+          parsed.task,
+          result.output
+        );
+        setThreadSession(thread.id, session);
+
+        await thread.post(
+          [
+            result.output,
+            "",
+            "Reply with `approve` to create a ticket and open a draft PR.",
+            "Reply with `reject` to discard the plan."
+          ].join("\n")
+        );
+        return;
+      }
+
+      await thread.post(result.output);
+    } catch (error) {
+      await thread.post(
+        error instanceof Error ? error.message : String(error)
+      );
+    }
   });
 
   bot.onSubscribedMessage(async (thread, message) => {
-    const threadId = thread.id;
     const normalized = message.text.trim().toLowerCase();
-    const approval = approvalByThread.get(threadId) ?? createApprovalState();
-    approvalByThread.set(threadId, approval);
-    const plan = planByThread.get(threadId) ?? message.text;
+    const session = getThreadSession(thread.id);
+
+    if (!session) {
+      const reparsed = parseSlackMessage(message.text);
+      if (reparsed.kind === "help") {
+        await thread.post(buildHelpMessage());
+        return;
+      }
+
+      if (reparsed.kind === "invoke") {
+        await thread.post(
+          "Start a new mention with `@cursor-examples <agent-slug> <task>`."
+        );
+      }
+      return;
+    }
 
     if (normalized === "reject") {
-      reject(approval);
+      reject(session.approval);
+      setThreadSession(thread.id, session);
       await thread.post("Rejected. No ticket or PR was created.");
       return;
     }
@@ -62,9 +100,25 @@ export function createSlackBot() {
       return;
     }
 
-    approve(approval);
-    const ticket = createTicket({ plan, approval });
-    const pr = openPr({ plan, repo: "platform/checkout", approval });
+    if (session.slug !== "slack-bot") {
+      await thread.post(
+        "This thread only supports approve/reject for the `slack-bot` triage flow."
+      );
+      return;
+    }
+
+    approve(session.approval);
+    setThreadSession(thread.id, session);
+
+    const ticket = createTicket({
+      plan: session.plan,
+      approval: session.approval
+    });
+    const pr = openPr({
+      plan: session.plan,
+      repo: "platform/checkout",
+      approval: session.approval
+    });
 
     await thread.post(
       [
