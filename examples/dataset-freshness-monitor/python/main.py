@@ -4,8 +4,6 @@ import json
 import os
 import sys
 
-from cursor_sdk import Agent, AgentOptions, LocalAgentOptions
-
 from tools import (
     build_dataset_freshness_monitor_prompt,
     check_dataset_freshness,
@@ -29,6 +27,8 @@ def main() -> int:
         result = check_dataset_freshness()
         print(json.dumps(result, indent=2))
         return 0 if result["passed"] else 1
+
+    from cursor_sdk import Agent, AgentOptions, LocalAgentOptions
 
     response = Agent.prompt(
         build_dataset_freshness_monitor_prompt(task),

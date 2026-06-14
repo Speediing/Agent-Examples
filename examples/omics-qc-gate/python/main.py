@@ -4,8 +4,6 @@ import json
 import os
 import sys
 
-from cursor_sdk import Agent, AgentOptions, LocalAgentOptions
-
 from tools import (
     build_omics_qc_gate_prompt,
     create_omics_qc_gate_custom_tools,
@@ -29,6 +27,8 @@ def main() -> int:
         result = run_omics_qc()
         print(json.dumps(result, indent=2))
         return 0 if result["passed"] else 1
+
+    from cursor_sdk import Agent, AgentOptions, LocalAgentOptions
 
     response = Agent.prompt(
         build_omics_qc_gate_prompt(task),

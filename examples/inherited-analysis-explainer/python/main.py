@@ -4,8 +4,6 @@ import json
 import os
 import sys
 
-from cursor_sdk import Agent, AgentOptions, LocalAgentOptions
-
 from tools import (
     build_inherited_analysis_explainer_prompt,
     create_inherited_analysis_explainer_custom_tools,
@@ -30,6 +28,8 @@ def main() -> int:
         readme = tools["read_analysis_file"]["execute"]({"path": "README.md"})
         print(json.dumps({"listing": listing, "readme": readme}, indent=2))
         return 0
+
+    from cursor_sdk import Agent, AgentOptions, LocalAgentOptions
 
     response = Agent.prompt(
         build_inherited_analysis_explainer_prompt(question),

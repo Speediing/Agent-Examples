@@ -4,8 +4,6 @@ import json
 import os
 import sys
 
-from cursor_sdk import Agent, AgentOptions, LocalAgentOptions
-
 from tools import (
     build_notebook_pipeline_drafter_prompt,
     create_notebook_pipeline_drafter_custom_tools,
@@ -28,6 +26,8 @@ def main() -> int:
     if scan_only:
         print(json.dumps(load_notebook_draft(), indent=2))
         return 0
+
+    from cursor_sdk import Agent, AgentOptions, LocalAgentOptions
 
     response = Agent.prompt(
         build_notebook_pipeline_drafter_prompt(task),
