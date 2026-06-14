@@ -9,6 +9,18 @@ const exampleRoot = path.resolve(
 );
 const fixtureRoot = path.join(exampleRoot, "fixtures", "legacy-repo");
 
+function resolveFixturePath(relativePath: string): string | null {
+  const root = path.resolve(fixtureRoot);
+  const fullPath = path.resolve(root, relativePath);
+  const relative = path.relative(root, fullPath);
+
+  if (relative.startsWith("..") || path.isAbsolute(relative)) {
+    return null;
+  }
+
+  return fullPath;
+}
+
 export function readString(value: SDKJsonValue | undefined): string {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -32,9 +44,9 @@ export function listAnalysisFiles(args: { limit?: SDKJsonValue }) {
 
 export function readAnalysisFile(args: { path?: SDKJsonValue }) {
   const relativePath = readString(args.path);
-  const fullPath = path.join(fixtureRoot, relativePath);
+  const fullPath = relativePath ? resolveFixturePath(relativePath) : null;
 
-  if (!relativePath || !fullPath.startsWith(fixtureRoot)) {
+  if (!fullPath) {
     return {
       found: false,
       path: relativePath,

@@ -9,6 +9,18 @@ const exampleRoot = path.resolve(
 );
 const fixtureDir = path.join(exampleRoot, "fixtures");
 
+function resolveFixturePath(relativePath: string): string | null {
+  const root = path.resolve(fixtureDir);
+  const fullPath = path.resolve(root, relativePath);
+  const relative = path.relative(root, fullPath);
+
+  if (relative.startsWith("..") || path.isAbsolute(relative)) {
+    return null;
+  }
+
+  return fullPath;
+}
+
 export function loadStudyContext() {
   const metadata = JSON.parse(
     fs.readFileSync(path.join(fixtureDir, "study-metadata.json"), "utf8"),
@@ -20,10 +32,11 @@ export function loadStudyContext() {
     primary_endpoint?: string;
     prior_sap_path?: string;
   };
-  const priorSap = fs.readFileSync(
-    path.join(fixtureDir, metadata.prior_sap_path ?? "prior-sap.md"),
-    "utf8",
-  );
+  const priorSapPath = resolveFixturePath(metadata.prior_sap_path ?? "prior-sap.md");
+  if (!priorSapPath) {
+    throw new Error("prior_sap_path must stay inside fixtures.");
+  }
+  const priorSap = fs.readFileSync(priorSapPath, "utf8");
 
   return {
     study_id: metadata.study_id ?? null,
