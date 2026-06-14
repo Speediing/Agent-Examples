@@ -9,8 +9,55 @@ export type InvokeContext = {
   apiKey: string;
   model: string;
   repoRoot: string;
+  cloudRepoUrl?: string;
   writesEnabled: boolean;
 };
+
+export const CLOUD_FIRST_AGENT_SLUGS = new Set([
+  "spec-drafter",
+  "codebase-explainer",
+  "sre-agent"
+]);
+
+export function shouldUseCloudAgent(
+  slug: string,
+  context: InvokeContext
+): boolean {
+  return Boolean(context.cloudRepoUrl && CLOUD_FIRST_AGENT_SLUGS.has(slug));
+}
+
+function augmentPromptForCloud(prompt: string, repoUrl: string): string {
+  return [
+    prompt,
+    "",
+    `Repository: ${repoUrl}`,
+    "You are running as a Cursor cloud agent with access to this repository.",
+    "Read files directly from the repository. Do not invent paths, exports, or behavior you did not inspect."
+  ].join("\n");
+}
+
+async function runCloudPrompt(
+  prompt: string,
+  context: InvokeContext
+): Promise<string> {
+  if (!context.cloudRepoUrl) {
+    throw new Error("Cloud repository URL is required for cloud agent runs.");
+  }
+
+  const result = await Agent.prompt(
+    augmentPromptForCloud(prompt, context.cloudRepoUrl),
+    {
+      apiKey: context.apiKey,
+      model: { id: context.model },
+      cloud: {
+        repos: [{ url: context.cloudRepoUrl }],
+        autoCreatePR: false
+      }
+    }
+  );
+
+  return result.result ?? "No response returned.";
+}
 
 export type InvokeResult = {
   output: string;
@@ -80,28 +127,43 @@ async function runPromptAgent(
   return result.result ?? "No response returned.";
 }
 
-function parseCodebaseExplainerTask(task: string): {
+function parseCodebaseExplainerTask(
+  task: string,
+  options: { cloudRepo?: boolean } = {}
+): {
   modulePath: string;
   question: string;
 } {
+  const defaultModulePath = options.cloudRepo ? "." : "examples/hello-world";
   const tokens = task.split(/\s+/).filter(Boolean);
   if (tokens.length === 0) {
     return {
-      modulePath: "examples/hello-world",
-      question: "How does this example work end to end?"
+      modulePath: defaultModulePath,
+      question: options.cloudRepo
+        ? "What are the main modules and entrypoints in this repository?"
+        : "How does this example work end to end?"
     };
   }
 
   const first = tokens[0];
-  if (first.startsWith("examples/") || first.includes("/")) {
+  if (
+    first.startsWith("examples/") ||
+    first === "." ||
+    (!options.cloudRepo && first.includes("/")) ||
+    (options.cloudRepo && first.includes("/") && !first.includes(" "))
+  ) {
     return {
       modulePath: first,
-      question: tokens.slice(1).join(" ").trim() || "How does this example work?"
+      question:
+        tokens.slice(1).join(" ").trim() ||
+        (options.cloudRepo
+          ? "How does this part of the repository work?"
+          : "How does this example work?")
     };
   }
 
   return {
-    modulePath: "examples/hello-world",
+    modulePath: defaultModulePath,
     question: task
   };
 }
@@ -212,26 +274,33 @@ export async function invokeAgent(
     }
     case "codebase-explainer": {
       const mod = await loadToolsModule(slug);
-      const parsed = parseCodebaseExplainerTask(task);
+      const useCloud = shouldUseCloudAgent(slug, context);
+      const parsed = parseCodebaseExplainerTask(task, { cloudRepo: useCloud });
       const buildPrompt = mod.buildCodebaseExplainerPrompt as (
         modulePath: string,
         question: string
       ) => string;
+      const prompt = buildPrompt(parsed.modulePath, parsed.question);
+
+      if (useCloud) {
+        return {
+          output: await runCloudPrompt(prompt, context),
+          requiresApproval: false
+        };
+      }
+
       const createTools = mod.createCodebaseExplainerCustomTools as (
         rootDir: string
       ) => Record<string, SDKCustomTool>;
 
-      const result = await Agent.prompt(
-        buildPrompt(parsed.modulePath, parsed.question),
-        {
-          apiKey: context.apiKey,
-          model: { id: context.model },
-          local: {
-            cwd: context.repoRoot,
-            customTools: createTools(context.repoRoot)
-          }
+      const result = await Agent.prompt(prompt, {
+        apiKey: context.apiKey,
+        model: { id: context.model },
+        local: {
+          cwd: context.repoRoot,
+          customTools: createTools(context.repoRoot)
         }
-      );
+      });
 
       return {
         output: result.result ?? "No response returned.",
@@ -315,6 +384,13 @@ export async function invokeAgent(
       const promptTask =
         task.trim() ||
         `Run the ${agent.title} example with representative demo input.`;
+
+      if (shouldUseCloudAgent(slug, context)) {
+        return {
+          output: await runCloudPrompt(buildPrompt(promptTask), context),
+          requiresApproval: false
+        };
+      }
 
       const result = await withWritesEnabled(context.writesEnabled, () =>
         Agent.prompt(buildPrompt(promptTask), {

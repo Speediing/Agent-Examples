@@ -32,6 +32,7 @@ export function buildHelpMessage(): string {
     "• `@cursor-examples codebase-explainer examples/hello-world How does it work?`",
     "",
     "Reply `help` or `list` to see this menu.",
+    "Set `AGENT_DEFAULT_REPO` or `SLACK_CHANNEL_REPOS` to target a GitHub repo. `spec-drafter`, `codebase-explainer`, and `sre-agent` use Cursor cloud agents when a repo URL is configured.",
     "Only `slack-bot` triage posts a plan first; reply `approve` or `reject` before ticket/PR side effects run.",
     "Other `writes` agents stay in proposal mode from Slack; use CLI `--act` to enable writes.",
     "",

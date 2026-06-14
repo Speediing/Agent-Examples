@@ -1,10 +1,10 @@
-import { Agent } from "@cursor/sdk";
 import { Chat } from "chat";
 import { createSlackAdapter } from "@chat-adapter/slack";
 import { createMemoryState } from "@chat-adapter/state-memory";
 import { approve, reject } from "./gate.js";
 import { buildHelpMessage } from "./help.js";
-import { invokeAgent, resolveRepoRoot } from "./invoke.js";
+import { invokeAgent } from "./invoke.js";
+import { buildInvokeContext } from "./repo-target.js";
 import { parseSlackMessage } from "./router.js";
 import {
   clearThreadSession,
@@ -40,12 +40,17 @@ export function createSlackBot() {
     await thread.post(`Running \`${parsed.slug}\`...`);
 
     try {
-      const result = await invokeAgent(parsed.slug, parsed.task, {
+      const context = buildInvokeContext(thread.channelId, {
         apiKey: requireEnv("CURSOR_API_KEY"),
         model: requireEnv("CURSOR_MODEL"),
-        repoRoot: resolveRepoRoot(),
         writesEnabled: false
       });
+
+      if (context.target.cloudRepoUrl) {
+        await thread.post(`Target repository: ${context.target.label}`);
+      }
+
+      const result = await invokeAgent(parsed.slug, parsed.task, context);
 
       if (result.requiresApproval) {
         const session = createThreadSession(

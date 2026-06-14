@@ -1,6 +1,7 @@
 import { simulateSlackTriage } from "./simulate.js";
 import { buildHelpMessage } from "./help.js";
-import { invokeAgentOffline, invokeAgent, resolveRepoRoot } from "./invoke.js";
+import { invokeAgentOffline, invokeAgent } from "./invoke.js";
+import { buildInvokeContext } from "./repo-target.js";
 import { parseSlackMessage } from "./router.js";
 import { listAgentSlugs } from "./catalog.js";
 
@@ -10,6 +11,9 @@ try {
   const serve = args.includes("--serve");
   const showHelp = args.includes("--help");
   const act = args.includes("--act");
+  const channelFlag = args.find((arg) => arg.startsWith("--channel="));
+  const channelId =
+    channelFlag?.slice("--channel=".length) ?? process.env.SLACK_TEST_CHANNEL_ID;
   const actionFlag = args.find((arg) => arg === "--approve" || arg === "--reject");
   const action =
     actionFlag === "--approve"
@@ -25,7 +29,8 @@ try {
       arg !== "--help" &&
       arg !== "--act" &&
       arg !== "--approve" &&
-      arg !== "--reject"
+      arg !== "--reject" &&
+      !arg.startsWith("--channel=")
   );
 
   if (serve) {
@@ -71,17 +76,16 @@ try {
           )
         );
       } else {
-        const context = {
+        const invokeContext = buildInvokeContext(channelId, {
           apiKey: process.env.CURSOR_API_KEY ?? "",
           model: process.env.CURSOR_MODEL ?? "",
-          repoRoot: resolveRepoRoot(),
           writesEnabled: act
-        };
+        });
 
         const result =
-          offline || !context.apiKey || !context.model
+          offline || !invokeContext.apiKey || !invokeContext.model
             ? await invokeAgentOffline(parsed.slug, parsed.task)
-            : await invokeAgent(parsed.slug, parsed.task, context);
+            : await invokeAgent(parsed.slug, parsed.task, invokeContext);
 
         console.log(result.output);
         console.log("");
@@ -90,7 +94,10 @@ try {
             {
               agent: parsed.slug,
               requires_approval: result.requiresApproval,
-              offline
+              offline,
+              target_repo: invokeContext.target.label,
+              target_source: invokeContext.target.source,
+              cloud_repo: invokeContext.cloudRepoUrl ?? null
             },
             null,
             2
