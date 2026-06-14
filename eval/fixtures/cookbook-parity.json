@@ -38,6 +38,7 @@
     "migration-agent:ts",
     "sre-agent:ts",
     "slack-bot:ts",
+    "slack-bot:serve",
     "spec-drafter:ts",
     "codebase-explainer:ts",
     "duplicate-ticket-detector:ts",

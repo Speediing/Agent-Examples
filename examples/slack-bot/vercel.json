@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "installCommand": "cd ../.. && npm ci",
+  "buildCommand": "cd ../.. && npm run build",
+  "builds": [
+    {
+      "src": "api/webhooks/slack.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/webhooks/slack",
+      "dest": "/api/webhooks/slack.ts"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/webhooks/slack.ts"
+    }
+  ]
+}

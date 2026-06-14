@@ -1,43 +1,114 @@
 import { simulateSlackTriage } from "./simulate.js";
-
-const threadText = process.argv.slice(2).join(" ").trim();
-const actionFlag = process.argv.find((arg) => arg === "--approve" || arg === "--reject");
-const action =
-  actionFlag === "--approve" ? "approve" : actionFlag === "--reject" ? "reject" : undefined;
-const cleanedText = process.argv
-  .slice(2)
-  .filter((arg) => arg !== "--approve" && arg !== "--reject")
-  .join(" ")
-  .trim();
+import { buildHelpMessage } from "./help.js";
+import { invokeAgentOffline, invokeAgent } from "./invoke.js";
+import { buildInvokeContext } from "./repo-target.js";
+import { parseSlackMessage } from "./router.js";
+import { listAgentSlugs } from "./catalog.js";
 
 try {
-  const result = await simulateSlackTriage(
-    {
-      text: cleanedText || threadText,
-      action
-    },
-    {
-      apiKey: process.env.CURSOR_API_KEY,
-      model: process.env.CURSOR_MODEL,
-      skipSdk: process.argv.includes("--offline")
-    }
+  const args = process.argv.slice(2);
+  const offline = args.includes("--offline");
+  const serve = args.includes("--serve");
+  const showHelp = args.includes("--help");
+  const act = args.includes("--act");
+  const channelFlag = args.find((arg) => arg.startsWith("--channel="));
+  const channelId =
+    channelFlag?.slice("--channel=".length) ?? process.env.SLACK_TEST_CHANNEL_ID;
+  const actionFlag = args.find((arg) => arg === "--approve" || arg === "--reject");
+  const action =
+    actionFlag === "--approve"
+      ? "approve"
+      : actionFlag === "--reject"
+        ? "reject"
+        : undefined;
+
+  const cleanedArgs = args.filter(
+    (arg) =>
+      arg !== "--offline" &&
+      arg !== "--serve" &&
+      arg !== "--help" &&
+      arg !== "--act" &&
+      arg !== "--approve" &&
+      arg !== "--reject" &&
+      !arg.startsWith("--channel=")
   );
 
-  console.log(result.plan);
-  console.log("");
-  console.log(
-    JSON.stringify(
-      {
-        approved: result.approval.approved,
-        rejected: result.approval.rejected,
-        ticket_created: result.ticket.created,
-        pr_created: result.pr.created,
-        side_effects: result.approval.sideEffects
-      },
-      null,
-      2
-    )
-  );
+  if (serve) {
+    await import("./serve.js");
+  } else if (showHelp) {
+    console.log(buildHelpMessage());
+    console.log("");
+    console.log(`Registered agents: ${listAgentSlugs().length}`);
+  } else {
+    const messageText = cleanedArgs.join(" ").trim();
+    const parsed = parseSlackMessage(messageText);
+
+    if (parsed.kind === "help" && !messageText) {
+      console.log(buildHelpMessage());
+    } else if (parsed.kind === "invoke") {
+      if (parsed.slug === "slack-bot") {
+        const result = await simulateSlackTriage(
+          {
+            text: parsed.task || messageText,
+            action
+          },
+          {
+            apiKey: process.env.CURSOR_API_KEY,
+            model: process.env.CURSOR_MODEL,
+            skipSdk: offline
+          }
+        );
+
+        console.log(result.plan);
+        console.log("");
+        console.log(
+          JSON.stringify(
+            {
+              agent: "slack-bot",
+              approved: result.approval.approved,
+              rejected: result.approval.rejected,
+              ticket_created: result.ticket.created,
+              pr_created: result.pr.created,
+              side_effects: result.approval.sideEffects
+            },
+            null,
+            2
+          )
+        );
+      } else {
+        const invokeContext = buildInvokeContext(channelId, {
+          apiKey: process.env.CURSOR_API_KEY ?? "",
+          model: process.env.CURSOR_MODEL ?? "",
+          writesEnabled: act
+        });
+
+        const result =
+          offline || !invokeContext.apiKey || !invokeContext.model
+            ? await invokeAgentOffline(parsed.slug, parsed.task)
+            : await invokeAgent(parsed.slug, parsed.task, invokeContext);
+
+        console.log(result.output);
+        console.log("");
+        console.log(
+          JSON.stringify(
+            {
+              agent: parsed.slug,
+              requires_approval: result.requiresApproval,
+              offline,
+              target_repo: invokeContext.target.label,
+              target_source: invokeContext.target.source,
+              cloud_repo: invokeContext.cloudRepoUrl ?? null
+            },
+            null,
+            2
+          )
+        );
+      }
+    } else {
+      console.log(buildHelpMessage());
+      process.exitCode = 1;
+    }
+  }
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));
   process.exitCode = 1;
