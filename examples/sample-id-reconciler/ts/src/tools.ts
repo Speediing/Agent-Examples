@@ -40,8 +40,8 @@ export function reconcileSampleIds() {
 
   const warehouseIds = new Set(warehouse.map((row) => row.sample_id));
   const limsIds = new Set(lims.map((row) => row.sample_id));
-  const warehouseOnly = [...warehouseIds].filter((id) => !limsIds.has(id));
-  const limsOnly = [...limsIds].filter((id) => !warehouseIds.has(id));
+  const warehouseOnly = [...warehouseIds].filter((id) => !limsIds.has(id)).sort();
+  const limsOnly = [...limsIds].filter((id) => !warehouseIds.has(id)).sort();
 
   const metadataDupes = metadata
     .map((row) => row.barcode)
@@ -63,7 +63,7 @@ export function reconcileSampleIds() {
     duplicate_barcodes: duplicateBarcodes,
     warehouse_only_sample_ids: warehouseOnly,
     lims_only_sample_ids: limsOnly,
-    metadata_duplicate_barcodes: [...new Set(metadataDupes)],
+    metadata_duplicate_barcodes: [...new Set(metadataDupes)].sort(),
   };
 }
 

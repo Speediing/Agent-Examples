@@ -31,6 +31,7 @@ export function listAnalysisFiles(args: { limit?: SDKJsonValue }) {
   const files = fs
     .readdirSync(fixtureRoot)
     .filter((name) => !name.startsWith("."))
+    .sort()
     .slice(0, limit);
 
   return {
