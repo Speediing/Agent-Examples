@@ -32,7 +32,8 @@ export function buildHelpMessage(): string {
     "• `@cursor-examples codebase-explainer examples/hello-world How does it work?`",
     "",
     "Reply `help` or `list` to see this menu.",
-    "Agents with `writes` post a plan first; reply `approve` or `reject` before side effects run.",
+    "Only `slack-bot` triage posts a plan first; reply `approve` or `reject` before ticket/PR side effects run.",
+    "Other `writes` agents stay in proposal mode from Slack; use CLI `--act` to enable writes.",
     "",
     "Available agents:"
   ];

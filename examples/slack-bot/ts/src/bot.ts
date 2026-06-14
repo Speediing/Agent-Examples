@@ -7,14 +7,17 @@ import { buildHelpMessage } from "./help.js";
 import { invokeAgent, resolveRepoRoot } from "./invoke.js";
 import { parseSlackMessage } from "./router.js";
 import {
+  clearThreadSession,
   createThreadSession,
+  encodeSessionMarker,
   getThreadSession,
-  setThreadSession
+  setThreadSession,
+  type SlackThreadState
 } from "./thread-state.js";
 import { createTicket, openPr } from "./tools.js";
 
 export function createSlackBot() {
-  const bot = new Chat({
+  const bot = new Chat<Record<"slack", ReturnType<typeof createSlackAdapter>>, SlackThreadState>({
     userName: "cursor-examples",
     adapters: {
       slack: createSlackAdapter()
@@ -25,6 +28,8 @@ export function createSlackBot() {
 
   bot.onNewMention(async (thread, message) => {
     await thread.subscribe();
+    await clearThreadSession(thread);
+
     const parsed = parseSlackMessage(message.text);
 
     if (parsed.kind === "help") {
@@ -48,14 +53,15 @@ export function createSlackBot() {
           parsed.task,
           result.output
         );
-        setThreadSession(thread.id, session);
+        await setThreadSession(thread, session);
 
         await thread.post(
           [
             result.output,
             "",
             "Reply with `approve` to create a ticket and open a draft PR.",
-            "Reply with `reject` to discard the plan."
+            "Reply with `reject` to discard the plan.",
+            encodeSessionMarker(session)
           ].join("\n")
         );
         return;
@@ -71,7 +77,7 @@ export function createSlackBot() {
 
   bot.onSubscribedMessage(async (thread, message) => {
     const normalized = message.text.trim().toLowerCase();
-    const session = getThreadSession(thread.id);
+    const session = await getThreadSession(thread);
 
     if (!session) {
       const reparsed = parseSlackMessage(message.text);
@@ -89,8 +95,13 @@ export function createSlackBot() {
     }
 
     if (normalized === "reject") {
+      if (session.approval.rejected) {
+        await thread.post("This plan was already rejected.");
+        return;
+      }
+
       reject(session.approval);
-      setThreadSession(thread.id, session);
+      await clearThreadSession(thread);
       await thread.post("Rejected. No ticket or PR was created.");
       return;
     }
@@ -107,8 +118,13 @@ export function createSlackBot() {
       return;
     }
 
+    if (session.approval.approved) {
+      await thread.post("This plan was already approved.");
+      return;
+    }
+
     approve(session.approval);
-    setThreadSession(thread.id, session);
+    await setThreadSession(thread, session);
 
     const ticket = createTicket({
       plan: session.plan,
@@ -119,6 +135,8 @@ export function createSlackBot() {
       repo: "platform/checkout",
       approval: session.approval
     });
+
+    await clearThreadSession(thread);
 
     await thread.post(
       [

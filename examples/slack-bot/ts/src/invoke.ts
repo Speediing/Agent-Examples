@@ -24,6 +24,34 @@ type PromptAgentModule = {
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 
+function assertPathWithinRoot(resolvedPath: string, root: string): void {
+  const normalized = path.resolve(resolvedPath);
+  const normalizedRoot = path.resolve(root);
+  if (
+    normalized !== normalizedRoot &&
+    !normalized.startsWith(normalizedRoot + path.sep)
+  ) {
+    throw new Error(`Diff path must be under ${normalizedRoot}`);
+  }
+}
+
+async function withWritesEnabled<T>(
+  enabled: boolean,
+  fn: () => Promise<T>
+): Promise<T> {
+  if (!enabled) {
+    return fn();
+  }
+
+  const originalArgv = process.argv;
+  process.argv = [...originalArgv, "--act"];
+  try {
+    return await fn();
+  } finally {
+    process.argv = originalArgv;
+  }
+}
+
 export function resolveRepoRoot(): string {
   return path.resolve(moduleDir, "../../../..");
 }
@@ -106,7 +134,11 @@ async function invokeOfflineValidator(
     resolveDiffPath: (override?: string) => string;
   };
 
+  const exampleRoot = path.join(resolveRepoRoot(), "examples", slug);
   const diffPath = task.trim() ? mod.resolveDiffPath(task) : undefined;
+  if (diffPath) {
+    assertPathWithinRoot(diffPath, exampleRoot);
+  }
   const diff = diffPath
     ? await fs.readFile(diffPath, "utf8")
     : await mod.loadDefaultDiff();
@@ -284,17 +316,19 @@ export async function invokeAgent(
         task.trim() ||
         `Run the ${agent.title} example with representative demo input.`;
 
-      const result = await Agent.prompt(buildPrompt(promptTask), {
-        apiKey: context.apiKey,
-        model: { id: context.model },
-        local: {
-          cwd: context.repoRoot,
-          customTools: createTools?.(context.repoRoot)
-        }
-      });
+      const result = await withWritesEnabled(context.writesEnabled, () =>
+        Agent.prompt(buildPrompt(promptTask), {
+          apiKey: context.apiKey,
+          model: { id: context.model },
+          local: {
+            cwd: context.repoRoot,
+            customTools: createTools?.(context.repoRoot)
+          }
+        })
+      );
 
       const output =
-        agent.writes && slug !== "slack-bot"
+        agent.writes && slug !== "slack-bot" && !context.writesEnabled
           ? [
               result.result ?? "No response returned.",
               "",

@@ -9,6 +9,7 @@ try {
   const offline = args.includes("--offline");
   const serve = args.includes("--serve");
   const showHelp = args.includes("--help");
+  const act = args.includes("--act");
   const actionFlag = args.find((arg) => arg === "--approve" || arg === "--reject");
   const action =
     actionFlag === "--approve"
@@ -22,6 +23,7 @@ try {
       arg !== "--offline" &&
       arg !== "--serve" &&
       arg !== "--help" &&
+      arg !== "--act" &&
       arg !== "--approve" &&
       arg !== "--reject"
   );
@@ -39,10 +41,7 @@ try {
     if (parsed.kind === "help" && !messageText) {
       console.log(buildHelpMessage());
     } else if (parsed.kind === "invoke") {
-      if (
-        parsed.slug === "slack-bot" &&
-        (action || offline || !process.env.CURSOR_API_KEY)
-      ) {
+      if (parsed.slug === "slack-bot") {
         const result = await simulateSlackTriage(
           {
             text: parsed.task || messageText,
@@ -76,7 +75,7 @@ try {
           apiKey: process.env.CURSOR_API_KEY ?? "",
           model: process.env.CURSOR_MODEL ?? "",
           repoRoot: resolveRepoRoot(),
-          writesEnabled: action === "approve"
+          writesEnabled: act
         };
 
         const result =
