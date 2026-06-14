@@ -27,7 +27,13 @@
     "examples/feature-flag-reaper",
     "examples/alert-triage-bot",
     "examples/postmortem-drafter",
-    "examples/cost-auditor"
+    "examples/cost-auditor",
+    "examples/inherited-analysis-explainer",
+    "examples/sample-id-reconciler",
+    "examples/notebook-pipeline-drafter",
+    "examples/omics-qc-gate",
+    "examples/analysis-plan-drafter",
+    "examples/dataset-freshness-monitor"
   ],
   "npmScripts": [
     "hello-world:ts",
@@ -58,6 +64,12 @@
     "feature-flag-reaper:ts",
     "alert-triage-bot:ts",
     "postmortem-drafter:ts",
-    "cost-auditor:ts"
+    "cost-auditor:ts",
+    "inherited-analysis-explainer:ts",
+    "sample-id-reconciler:ts",
+    "notebook-pipeline-drafter:ts",
+    "omics-qc-gate:ts",
+    "analysis-plan-drafter:ts",
+    "dataset-freshness-monitor:ts"
   ]
 }

@@ -39,7 +39,13 @@
     "feature-flag-reaper:ts": "npm --workspace @cursor-examples/feature-flag-reaper-ts run start --",
     "alert-triage-bot:ts": "npm --workspace @cursor-examples/alert-triage-bot-ts run start --",
     "postmortem-drafter:ts": "npm --workspace @cursor-examples/postmortem-drafter-ts run start --",
-    "cost-auditor:ts": "npm --workspace @cursor-examples/cost-auditor-ts run start --"
+    "cost-auditor:ts": "npm --workspace @cursor-examples/cost-auditor-ts run start --",
+    "inherited-analysis-explainer:ts": "npm --workspace @cursor-examples/inherited-analysis-explainer-ts run start --",
+    "sample-id-reconciler:ts": "npm --workspace @cursor-examples/sample-id-reconciler-ts run start --",
+    "notebook-pipeline-drafter:ts": "npm --workspace @cursor-examples/notebook-pipeline-drafter-ts run start --",
+    "omics-qc-gate:ts": "npm --workspace @cursor-examples/omics-qc-gate-ts run start --",
+    "analysis-plan-drafter:ts": "npm --workspace @cursor-examples/analysis-plan-drafter-ts run start --",
+    "dataset-freshness-monitor:ts": "npm --workspace @cursor-examples/dataset-freshness-monitor-ts run start --"
   },
   "workspaces": [
     "examples/*/ts"

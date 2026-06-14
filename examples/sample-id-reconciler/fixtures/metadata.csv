@@ -1,0 +1,5 @@
+barcode,patient_alias
+BC-1001,PAT-A
+BC-1002,PAT-B
+BC-1003-DUP,PAT-C
+BC-1003-DUP,PAT-D
