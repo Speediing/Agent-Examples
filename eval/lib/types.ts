@@ -9,8 +9,6 @@ export type SdlcStage =
   | "release"
   | "operate";
 
-export type EvalTier = 0 | 1 | 2;
-
 export type EvalHarness = "cursor-sdk" | "production-cli";
 
 export type WorkspaceSeed = {
@@ -51,7 +49,6 @@ export type WorkspaceSnapshot = {
 
 export type RunEvidence = {
   caseId: string;
-  tier: EvalTier;
   runId?: string;
   requestIds: string[];
   startedAt: string;
@@ -83,7 +80,7 @@ export type Grader = {
 export type EvalCase = {
   id: string;
   stage: SdlcStage;
-  tier: EvalTier;
+  requiresModel: boolean;
   harness: EvalHarness;
   description: string;
   workspace?: WorkspaceSeed;

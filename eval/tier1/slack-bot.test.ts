@@ -3,7 +3,7 @@ import { buildTriagePrompt } from "../../examples/slack-bot/ts/src/agent.js";
 import { llmEvalsEnabled, requireLlmEvals } from "../lib/config.js";
 import { runLocalAgent, runPromptSmoke } from "../lib/run-agent.js";
 
-describe.skipIf(!llmEvalsEnabled())("tier1 slack-bot", () => {
+describe.skipIf(!llmEvalsEnabled())("model evals slack-bot", () => {
   it("grounds the triage plan in the Slack thread text", async () => {
     requireLlmEvals();
     const prompt = buildTriagePrompt("checkout-api returns 503 after deploy");

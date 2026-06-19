@@ -22,16 +22,15 @@ describe("agent eval package", () => {
     expect(getEvalCase("accessibility/cite-rules")).toBe(accessibilityCiteRulesCase);
   });
 
-  it("filters cases by tier", () => {
-    const tierOne = listEvalCases({ tier: 1 });
-    expect(tierOne.every((evalCase) => evalCase.tier === 1)).toBe(true);
-    expect(tierOne.length).toBeGreaterThan(0);
+  it("filters cases by requiresModel", () => {
+    const modelCases = listEvalCases({ requiresModel: true });
+    expect(modelCases.every((evalCase) => evalCase.requiresModel)).toBe(true);
+    expect(modelCases.length).toBeGreaterThan(0);
   });
 
   it("grades evidence with composable graders", async () => {
     const evidence: RunEvidence = {
       caseId: "fixture",
-      tier: 0,
       requestIds: [],
       startedAt: "2026-01-01T00:00:00.000Z",
       finishedAt: "2026-01-01T00:00:01.000Z",

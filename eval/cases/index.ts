@@ -103,7 +103,7 @@ function citesWordCount(): EvalCase["graders"][number] {
 export const accessibilityCiteRulesCase: EvalCase = {
   id: "accessibility/cite-rules",
   stage: "test",
-  tier: 1,
+  requiresModel: true,
   harness: "cursor-sdk",
   description: "Scan a fixture page and cite rule IDs from the scan output.",
   workspace: {
@@ -134,7 +134,7 @@ export const accessibilityCiteRulesCase: EvalCase = {
 export const accessibilityRepairCase: EvalCase = {
   id: "accessibility/repair-fixture",
   stage: "test",
-  tier: 1,
+  requiresModel: true,
   harness: "cursor-sdk",
   description:
     "Repair a scratch copy of the accessibility fixture and reduce violations.",
@@ -171,7 +171,7 @@ export const accessibilityRepairCase: EvalCase = {
 export const toolCallingAddCase: EvalCase = {
   id: "tool-calling/add-3-9",
   stage: "develop",
-  tier: 1,
+  requiresModel: true,
   harness: "cursor-sdk",
   description: "Call add with [3, 9] and ground the answer in the handler result.",
   async run() {
@@ -191,7 +191,7 @@ export const toolCallingAddCase: EvalCase = {
 export const toolCallingWordCountCase: EvalCase = {
   id: "tool-calling/word-count",
   stage: "develop",
-  tier: 1,
+  requiresModel: true,
   harness: "cursor-sdk",
   description: "Call word_count for the default request and cite the count.",
   async run() {
@@ -211,7 +211,7 @@ export const toolCallingWordCountCase: EvalCase = {
 export const sreCheckout503Case: EvalCase = {
   id: "sre/checkout-503",
   stage: "operate",
-  tier: 1,
+  requiresModel: true,
   harness: "cursor-sdk",
   description:
     "Investigate checkout-api 503s with the causal tool core and stay read-only.",
@@ -243,10 +243,12 @@ export function getEvalCase(caseId: string): EvalCase | undefined {
   return evalCases.find((evalCase) => evalCase.id === caseId);
 }
 
-export function listEvalCases(options?: { tier?: 0 | 1 | 2 }): EvalCase[] {
-  if (options?.tier === undefined) {
+export function listEvalCases(options?: { requiresModel?: boolean }): EvalCase[] {
+  if (options?.requiresModel === undefined) {
     return evalCases;
   }
 
-  return evalCases.filter((evalCase) => evalCase.tier === options.tier);
+  return evalCases.filter(
+    (evalCase) => evalCase.requiresModel === options.requiresModel
+  );
 }

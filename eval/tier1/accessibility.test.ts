@@ -24,7 +24,7 @@ const scratchPath = path.join(
   "examples/accessibility-agent/fixtures/eval-repair-scratch.html"
 );
 
-describe.skipIf(!llmCasesEnabled())("tier1 accessibility-agent", () => {
+describe.skipIf(!llmCasesEnabled())("model evals accessibility-agent", () => {
   it("calls scan_accessibility and cites fixture rule IDs in the summary", async () => {
     const result = await runEvalCase(accessibilityCiteRulesCase);
     expect(result.pass).toBe(true);

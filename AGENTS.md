@@ -1,6 +1,6 @@
 # Agent Examples — agent instructions
 
-This repo ships five Cursor SDK agent examples with a tiered eval suite. When you
+This repo ships five Cursor SDK agent examples with a layered eval suite. When you
 change agent behavior, prompts, tools, or Python ports, run the relevant tests and
 extend the suite when coverage is missing.
 
@@ -9,7 +9,7 @@ for the current coverage map.
 
 ## Before you finish agent work
 
-Always run **Tier 0** (no API key, deterministic):
+Always run **unit evals** (no API key, deterministic):
 
 ```sh
 npm ci
@@ -21,7 +21,7 @@ python3 -m pytest
 npm run typecheck
 ```
 
-Run **Tier 1/2 LLM evals** when you change prompts, tool maps, handler logic that
+Run **model evals** when you change prompts, tool maps, handler logic that
 affects traces, or anything an LLM must do correctly:
 
 ```sh
@@ -37,16 +37,16 @@ npm run test:all
 python3 -m pytest
 ```
 
-Do not skip tests because a change “looks small.” Tier 0 is fast and blocks on every
-PR. LLM evals catch regressions in tool choice, grounding, and read-only contracts.
+Do not skip tests because a change “looks small.” Unit evals are fast and block on every
+PR. Model evals catch regressions in tool choice, grounding, and read-only contracts.
 
-## What each test tier covers
+## What each suite covers
 
-| Tier | Command | Needs key | Use when |
+| Suite | Command | Needs key | Use when |
 | --- | --- | --- | --- |
-| 0 | `npm test` | No | Handlers, classifiers, scans, setup/negative cases, docs↔code parity |
-| 1 | `npm run test:llm` (tier1) | Yes | Trace assertions, grounding, smoke output for each agent |
-| 2 | `npm run test:llm` (tier2) | Yes | SRE adversarial cases (unknown service, injection, metrics contract) |
+| unit | `npm test` | No | Handlers, classifiers, scans, setup/negative cases, docs↔code parity |
+| model | `npm run test:llm` (`eval/tier1/`) | Yes | Trace assertions, grounding, smoke output for each agent |
+| adversarial | `npm run test:llm` (`eval/tier2/`) | Yes | Prompt injection, unknown service, read-only contracts |
 | parity | `eval/parity/*`, pytest | Mixed | TS↔Python deterministic handler parity |
 
 ## Where tests live
@@ -57,10 +57,10 @@ eval/                          # @cursor-examples/agent-eval package
   cli.ts                       # npm run eval:list / eval:run
   cases/                       # SDLC task case catalog
   lib/                         # runner, evidence, workspace, graders
-  tier1/                       # LLM behavioral evals per agent
+  tier1/                       # model behavioral evals per agent
   tier2/                       # adversarial / robustness
   parity/                      # TS↔Python parity
-  *.test.ts                    # Tier 0 unit + integration tests
+  *.test.ts                    # unit + integration tests
 tests/                         # pytest (migration classifier, Python parity)
 docs/EVAL_PLAN.md              # full eval design
 ```
@@ -73,8 +73,8 @@ Add tests when you:
   - Extract prompt builders and tool maps into side-effect-free modules (see
     `examples/*/ts/src/tools.ts`, `agent.ts`, `classifier.ts`) so CLI and evals
     share the same definitions.
-  - Add Tier 0 handler/setup tests in `eval/` or `tests/`.
-  - Add a Tier 1 case in `eval/tier1/<agent>.test.ts` if the agent calls the SDK
+  - Add unit handler/setup tests in `eval/` or `tests/`.
+  - Add a model case in `eval/tier1/<agent>.test.ts` if the agent calls the SDK
     with LLM-dependent behavior.
   - Register `cursorExample.pythonPort` in `ts/package.json` and extend migration
     classifier tests if applicable.
@@ -100,7 +100,7 @@ Add tests when you:
     live cross-repo check against `app/blog/posts.ts`.
 
 - **Add a new failure mode worth guarding** (especially SRE)
-  - Add a Tier 2 case in `eval/tier2/` before fixing behavior when possible.
+  - Add an adversarial case in `eval/tier2/` before fixing behavior when possible.
   - Record the row in `eval/manual/coverage-matrix.md`.
 
 Prefer **trace assertions** (`run.stream()` via `eval/lib/run-agent.ts`) over
@@ -120,6 +120,6 @@ instead of trusting streamed `result` fields. Do not gate CI on LLM-as-judge alo
 
 ## CI
 
-- **Tier 0** — `.github/workflows/tier-0-eval.yml` on every push/PR
-- **Tier 1** — `.github/workflows/tier-1-eval.yml` on `main`, schedule, and
+- **PR eval** — `.github/workflows/pr-eval.yml` on every push/PR
+- **LLM eval** — `.github/workflows/llm-eval.yml` on `main`, schedule, and
   `workflow_dispatch` (requires `CURSOR_API_KEY` in the `cursor-eval` environment)

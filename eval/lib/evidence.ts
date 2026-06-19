@@ -56,7 +56,6 @@ export function buildRunEvidence(options: {
 
   return {
     caseId: evalCase.id,
-    tier: evalCase.tier,
     runId: outcome.result.id,
     requestIds: extractRequestIds(outcome.messages),
     startedAt,

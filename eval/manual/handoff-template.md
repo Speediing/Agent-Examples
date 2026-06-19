@@ -27,5 +27,5 @@ python3 -m pytest
 
 - [ ] Diff stays within allowed files
 - [ ] Teaching prompts unchanged
-- [ ] Full Tier 0 + Tier 1 suite green on the branch
+- [ ] Full unit + model suite green on the branch
 - [ ] Trace artifacts attached for any stochastic failure

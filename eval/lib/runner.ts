@@ -12,7 +12,7 @@ import {
 import type { EvalCase, EvalCaseResult } from "./types.js";
 
 export async function runEvalCase(evalCase: EvalCase): Promise<EvalCaseResult> {
-  if (evalCase.tier > 0) {
+  if (evalCase.requiresModel) {
     requireLlmEvals();
   }
 

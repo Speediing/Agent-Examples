@@ -5,7 +5,6 @@ export type {
   EvalCaseResult,
   EvalContext,
   EvalHarness,
-  EvalTier,
   Grader,
   GraderResult,
   RunEvidence,

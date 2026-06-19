@@ -1,4 +1,4 @@
-name: Tier 0 Eval
+name: PR Eval
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: tier-0-${{ github.workflow }}-${{ github.ref }}
+  group: pr-eval-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -46,7 +46,7 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Run Vitest Tier 0 suite
+      - name: Run unit eval suite
         run: npm test
 
       - name: Run pytest

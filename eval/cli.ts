@@ -5,23 +5,23 @@ import { runEvalCase } from "./lib/runner.js";
 
 function printUsage(): void {
   console.log(`Usage:
-  npm run eval:list [-- --tier 1]
+  npm run eval:list [-- --requires-model]
   npm run eval:run -- --case <case-id>
-  npm run eval:run -- --tier 1
+  npm run eval:run -- --requires-model
 
 Commands:
   list    Print registered SDLC eval cases
-  run     Execute one case or every case in a tier`);
+  run     Execute one case or every case that matches a filter`);
 }
 
 function parseArgs(argv: string[]): {
   command: "list" | "run" | "help";
   caseId?: string;
-  tier?: 0 | 1 | 2;
+  requiresModel?: boolean;
 } {
   const [command = "help", ...rest] = argv;
   let caseId: string | undefined;
-  let tier: 0 | 1 | 2 | undefined;
+  let requiresModel: boolean | undefined;
 
   for (let index = 0; index < rest.length; index += 1) {
     const token = rest[index];
@@ -31,17 +31,13 @@ function parseArgs(argv: string[]): {
       continue;
     }
 
-    if (token === "--tier") {
-      const value = Number(rest[index + 1]);
-      if (value === 0 || value === 1 || value === 2) {
-        tier = value;
-      }
-      index += 1;
+    if (token === "--requires-model") {
+      requiresModel = true;
     }
   }
 
   if (command === "list" || command === "run") {
-    return { command, caseId, tier };
+    return { command, caseId, requiresModel };
   }
 
   return { command: "help" };
@@ -58,9 +54,9 @@ async function runCases(caseIds: string[]): Promise<number> {
       continue;
     }
 
-    if (evalCase.tier > 0 && !llmCasesEnabled()) {
+    if (evalCase.requiresModel && !llmCasesEnabled()) {
       console.error(
-        `Skipping ${caseId}: set CURSOR_API_KEY and CURSOR_MODEL to run tier ${evalCase.tier} cases.`
+        `Skipping ${caseId}: set CURSOR_API_KEY and CURSOR_MODEL to run model cases.`
       );
       failures += 1;
       continue;
@@ -101,7 +97,7 @@ async function runCases(caseIds: string[]): Promise<number> {
 }
 
 async function main(): Promise<void> {
-  const { command, caseId, tier } = parseArgs(process.argv.slice(2));
+  const { command, caseId, requiresModel } = parseArgs(process.argv.slice(2));
 
   if (command === "help") {
     printUsage();
@@ -110,10 +106,12 @@ async function main(): Promise<void> {
   }
 
   if (command === "list") {
-    const cases = listEvalCases(tier === undefined ? undefined : { tier });
+    const cases = listEvalCases(
+      requiresModel === undefined ? undefined : { requiresModel }
+    );
     for (const evalCase of cases) {
       console.log(
-        `${evalCase.id}\t tier=${evalCase.tier}\t stage=${evalCase.stage}\t ${evalCase.description}`
+        `${evalCase.id}\t model=${evalCase.requiresModel ? "yes" : "no"}\t stage=${evalCase.stage}\t ${evalCase.description}`
       );
     }
     return;
@@ -121,7 +119,7 @@ async function main(): Promise<void> {
 
   const caseIds = caseId
     ? [caseId]
-    : listEvalCases(tier === undefined ? undefined : { tier }).map(
+    : listEvalCases(requiresModel === undefined ? undefined : { requiresModel }).map(
         (evalCase) => evalCase.id
       );
 

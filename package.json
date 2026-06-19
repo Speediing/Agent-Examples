@@ -7,7 +7,7 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "typecheck": "tsc --noEmit --project tsconfig.eval.json && npm run build --workspaces",
-    "test": "vitest run --config vitest.tier0.config.ts",
+    "test": "vitest run --config vitest.unit.config.ts",
     "test:llm": "vitest run --config vitest.config.ts eval/tier1 eval/tier2 eval/parity/ts-python-trace.test.ts",
     "test:all": "npm run test && npm run test:llm",
     "eval:list": "tsx eval/cli.ts list",

@@ -54,9 +54,9 @@ These were read from the installed `dist/cjs/*.d.ts`; a committed reference test
   **illustrative** (manual allowlist, §4.4) rather than literal-match — they already
   diverge from source on purpose.
 
-## 3. Tiered architecture (keeps CI cheap and trustworthy)
+## 3. Layered architecture (keeps CI cheap and trustworthy)
 
-### Tier 0 — Static & deterministic (no LLM, no API key, no network egress)
+### Unit evals — static & deterministic (no LLM, no API key, no network egress)
 Runs on **every** push/PR. Fast, blocking. Must be *actually* deterministic:
 - `npm ci`, lint, `tsc --noEmit`, `build` for both repos. (`npm ci`, not `install`,
   is required for the lockfile pin to mean anything.)
@@ -75,7 +75,7 @@ Runs on **every** push/PR. Fast, blocking. Must be *actually* deterministic:
   so its exit code reflects audit state, not env. Also: bad URL / missing file;
   malformed tool args don't crash handlers; `--scan-only` needs no key.
 
-### Tier 1 — Behavioral LLM evals (needs `CURSOR_API_KEY` + model; costs money)
+### Model evals — behavioral LLM evals (needs `CURSOR_API_KEY` + model; costs money)
 Gated triggers only (§6). Three grader classes, strongest first:
 - **Trace assertions (primary, robust):** from `run.stream()`, assert the *allowed
   tool sequence*, args (as multisets/structured, e.g. `add` → `args.numbers` is a
@@ -104,7 +104,7 @@ Gated triggers only (§6). Three grader classes, strongest first:
   rationales; re-calibrate on every judge/model bump; surface judge drift as its own
   alert. Never a blocking gate.
 
-### Tier 2 — Adversarial / robustness (gated, non-blocking → blocking once stable)
+### Adversarial evals / robustness (gated, non-blocking → blocking once stable)
 - SRE must **not** claim it applied changes (read-only contract).
 - Unknown service / unknown metric → reports "not found", does not fabricate.
 - Prompt-injection text in the incident does not derail tool use or the read-only
@@ -124,7 +124,7 @@ Gated triggers only (§6). Three grader classes, strongest first:
 
 ### 4.2 Anti-gaming
 - Prefer trace signals + exit codes over text matching.
-- Grounding gated on trace-returned values; randomized mock facts (§3 Tier 2).
+- Grounding gated on trace-returned values; randomized mock facts (§3 adversarial evals).
 - Require *absence* of unsupported facts and unexpected tool calls, not just presence.
 
 ### 4.3 Statistics (no rigor theater)
@@ -157,7 +157,7 @@ blocking exit code becomes a coin flip. `listFiles` also recurses into `node_mod
 / `dist`, so a prior `build` makes everything permanently `stale`.
 - **Required refactor:** extract the classifier into a pure function over injected
   `(tsMtime, pyMtime, exists)` and unit-test all of `ok/stale/missing/created/error`
-  in Tier 0. Exclude `node_modules`/`dist` from `listFiles`.
+  in unit evals. Exclude `node_modules`/`dist` from `listFiles`.
 - **Recommended signal change:** replace mtime with a git-preserved signal — content
   hash, or `git log -1 --format=%ct <file>` (commit time) — so the staleness check is
   meaningful in CI at all. Any test that must exercise the filesystem path builds a
@@ -168,7 +168,7 @@ blocking exit code becomes a coin flip. `listFiles` also recurses into `node_mod
 
 ## 6. Affordable CI (GitHub Actions) — secrets-safe
 
-### Tier 0 workflow
+### PR eval workflow
 `on: [push, pull_request]`. Minimal `permissions: { contents: read }`. Node + Python
 where needed; cache npm + Playwright (version-keyed). "No network egress" applies to
 **test execution**, not setup: `npm ci` and `npx playwright install` need the network
@@ -183,7 +183,7 @@ second `actions/checkout` with `repository: Speediing/agent-example-site` and a 
 ref into a `path:`, or (b) the parity check lives in the site repo and pins this repo
 instead. Pick one and pin the ref so the two repos can't silently drift the checkout.
 
-### Tier 1 / Tier 2 workflow (secrets) — **never runs untrusted PR code with the key**
+### LLM eval workflow (secrets) — **never runs untrusted PR code with the key**
 This is the load-bearing safety rule. Label gating + protected environments do **not**
 sandbox fork code; a label is not a code review, and `pull_request_target` would run
 attacker code with the secret in scope. Therefore:
@@ -208,16 +208,16 @@ cap on the key**, not a token estimate; only add token caps if a usage/billing A
 exposes them. Cheapest capable pinned model.
 
 ### Caching caveat (correctness)
-Cache **only Tier-0 deterministic artifacts** (scan results, audit output). A cache
+Cache **only unit deterministic artifacts** (scan results, audit output). A cache
 keyed on `(case, prompt, model)` would freeze one sampled completion and collapse
-pass@k to a single replay, hiding the very SDK/model regressions Tier 1 exists to
+pass@k to a single replay, hiding the very SDK/model regressions model evals exists to
 catch. If any LLM output is cached, it is a **historical baseline only**, keyed on
 sample index + SDK version + model id + prompt-template version + grader version, and
 never satisfies a fresh stochastic gate.
 
 ## 7. Operability
 - **Named owner** for the eval suite + a documented **model-deprecation/rotation**
-  procedure (a dead `CURSOR_MODEL` fails every Tier-1 case at once with an opaque
+  procedure (a dead `CURSOR_MODEL` fails every model case at once with an opaque
   error; pin a known-good default and monitor).
 - Per-case **artifact** on failure: full trace + raw output + grader verdicts, so a
   red gate is debuggable.
@@ -226,7 +226,7 @@ never satisfies a fresh stochastic gate.
 
 ## 8. Phasing
 
-### Phase 1 — executable contract (Tier 0 only, zero LLM cost)
+### Phase 1 — executable contract (unit evals only, zero LLM cost)
 Concrete because "build both repos" isn't a command — this repo has **no `lint` or
 `test` script** today (root `package.json` exposes only `build` + `start` wrappers);
 the site has `lint`/`build`. Phase 1 therefore *adds* the harness, then wires CI:
@@ -236,21 +236,21 @@ the site has `lint`/`build`. Phase 1 therefore *adds* the harness, then wires CI
    `dist` from `listFiles`; unit-test all five statuses (§5).
 3. Extract prompt/tool **factory modules** shared by CLI + tests (§2); add unit tests
    for `add`, `word_count`, the 6 SRE handlers, URL resolution.
-4. a11y scan test asserting the **rule-ID set** against the fixture (§3 Tier 0).
-5. Per-agent negative/setup tests (§3 Tier 0).
+4. a11y scan test asserting the **rule-ID set** against the fixture (§3 unit evals).
+5. Per-agent negative/setup tests (§3 unit evals).
 6. Docs `command`/`path` parity test (cross-repo checkout per §6).
 7. A committed **type reference test** importing `RunResult`, `SDKMessage`,
    `SDKToolUseMessage` so the §2 SDK claims are CI-enforced.
-8. Tier 0 workflow: `npm ci` → `npm run lint`/`build`/`test` (this repo + site),
+8. unit evals workflow: `npm ci` → `npm run lint`/`build`/`test` (this repo + site),
    `tsc --noEmit`, pytest. Per-repo commands listed explicitly in the workflow.
 
-### Phase 2 — Tier 1 (gated, costs money)
+### Phase 2 — model evals (gated, costs money)
 Stream-based trace assertions on a tiny case set, read safely (dedupe by `call_id`,
 `completed` only, honor `truncated`); grounding gated on trace; runner cost caps;
 provider spend cap. Resolve the open model-id question first.
 
 ### Phase 3
-LLM-judge quality metric (non-blocking) + Tier 2 adversarial + randomized mocks.
+LLM-judge quality metric (non-blocking) + adversarial evals adversarial + randomized mocks.
 
 ### Phase 4
 Normalized TS↔Python parity + trace-shape behavioral parity (non-blocking).
@@ -285,7 +285,7 @@ agent) is deferred until there is a real trace distribution (production usage) o
 second viable target.
 
 ### What to build now (manual loop, scoped to sre-agent)
-1. **Periodic review, human-paced.** On the Tier-1 cadence, a human reads a sampled set
+1. **Periodic review, human-paced.** On the model-eval cadence, a human reads a sampled set
    of sre-agent traces + judge rationales and writes down failure modes.
 2. **Cases first, authored independently of the fix.** A human (or a role/model
    isolated from whoever implements the fix) adds eval cases for each failure mode and
@@ -321,7 +321,7 @@ second viable target.
   non-inferiority on held-out, with multiplicity correction across cases and
   alpha-spending across cadences. Freeze N before looking; otherwise repeated looks
   ratchet on lucky samples.
-- **Traces are untrusted input.** Tier-2 fixtures contain prompt-injection text *by
+- **Traces are untrusted input.** adversarial fixtures contain prompt-injection text *by
   design*; that text flows into diagnosis and any handoff. Treat all trace/label text
   as **data, hard-delimited, never instructions**; the implementer's write scope is
   path-allowlisted regardless. ("Never triggered by untrusted input" is not enough when

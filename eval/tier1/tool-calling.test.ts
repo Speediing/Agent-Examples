@@ -8,7 +8,7 @@ import {
 } from "../../examples/tool-calling-agent/ts/src/tools.js";
 import { runPromptSmoke } from "../lib/run-agent.js";
 
-describe.skipIf(!llmCasesEnabled())("tier1 tool-calling-agent", () => {
+describe.skipIf(!llmCasesEnabled())("model evals tool-calling-agent", () => {
   it("calls add with [3, 9] and grounds the answer in the handler result", async () => {
     const result = await runEvalCase(toolCallingAddCase);
     expect(result.pass).toBe(true);

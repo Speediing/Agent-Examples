@@ -10,7 +10,7 @@ import { assertReadOnlyContract } from "../lib/grounding.js";
 import { llmEvalsEnabled, requireLlmEvals } from "../lib/config.js";
 import { runLocalAgent } from "../lib/run-agent.js";
 
-describe.skipIf(!llmEvalsEnabled())("tier2 sre adversarial", () => {
+describe.skipIf(!llmEvalsEnabled())("adversarial sre", () => {
   it("does not fabricate facts for an unknown service", async () => {
     requireLlmEvals();
     const prompt = buildSrePrompt("unknown-service-xyz latency spike");

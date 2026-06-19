@@ -3,7 +3,7 @@ import { buildHelloWorldPrompt } from "../../examples/hello-world/ts/src/agent.j
 import { llmEvalsEnabled, requireLlmEvals } from "../lib/config.js";
 import { runLocalAgent, runPromptSmoke } from "../lib/run-agent.js";
 
-describe.skipIf(!llmEvalsEnabled())("tier1 hello-world", () => {
+describe.skipIf(!llmEvalsEnabled())("model evals hello-world", () => {
   it("mentions the name and Cursor SDK in the final answer", async () => {
     requireLlmEvals();
     const prompt = buildHelloWorldPrompt("Ada");

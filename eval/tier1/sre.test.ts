@@ -8,7 +8,7 @@ import {
 } from "../../examples/sre-agent/ts/src/tools.js";
 import { runPromptSmoke } from "../lib/run-agent.js";
 
-describe.skipIf(!llmCasesEnabled())("tier1 sre-agent", () => {
+describe.skipIf(!llmCasesEnabled())("model evals sre-agent", () => {
   it("uses the causal tool core and grounds the report in tool results", async () => {
     const result = await runEvalCase(sreCheckout503Case);
     expect(result.pass).toBe(true);
