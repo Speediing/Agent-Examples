@@ -8,5 +8,5 @@
     "resolveJsonModule": true,
     "noEmit": true
   },
-  "include": ["eval/**/*.ts", "vitest.config.ts"]
+  "include": ["eval/**/*.ts", "vitest.config.ts", "eval/index.ts"]
 }

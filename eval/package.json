@@ -1,0 +1,15 @@
+{
+  "name": "@cursor-examples/agent-eval",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SDLC eval package for Cursor SDK agents: cases, evidence bundles, graders, and a CLI runner.",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./cases": "./cases/index.ts",
+    "./cli": "./cli.ts"
+  },
+  "bin": {
+    "agent-eval": "./cli.ts"
+  }
+}

@@ -7,7 +7,7 @@
 
 ## Forbidden files
 
-- `eval/tier1/**`, `eval/tier2/**`, `eval/graders/**`
+- `eval/cases/**` (held-out case bodies), `eval/tier1/**`, `eval/tier2/**`
 - `.github/workflows/**`
 - `package-lock.json`, pinned version files
 - `agent-example-site/app/blog/posts.ts`

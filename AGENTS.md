@@ -52,8 +52,11 @@ PR. LLM evals catch regressions in tool choice, grounding, and read-only contrac
 ## Where tests live
 
 ```txt
-eval/                          # Vitest suite
-  lib/                         # trace collector, runner, graders, judge
+eval/                          # @cursor-examples/agent-eval package
+  index.ts                     # public API
+  cli.ts                       # npm run eval:list / eval:run
+  cases/                       # SDLC task case catalog
+  lib/                         # runner, evidence, workspace, graders
   tier1/                       # LLM behavioral evals per agent
   tier2/                       # adversarial / robustness
   parity/                      # TS↔Python parity

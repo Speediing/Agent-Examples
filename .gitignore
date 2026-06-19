@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 .DS_Store
 examples/accessibility-agent/fixtures/eval-repair-scratch.html
+eval/artifacts/
