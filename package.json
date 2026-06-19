@@ -44,7 +44,8 @@
     "cost-auditor:ts": "npm --workspace @cursor-examples/cost-auditor-ts run start --"
   },
   "workspaces": [
-    "examples/*/ts"
+    "examples/*/ts",
+    "eval"
   ],
   "devDependencies": {
     "@types/node": "^25.9.2",

@@ -67,8 +67,19 @@ async function runCases(caseIds: string[]): Promise<number> {
     }
 
     console.log(`Running ${caseId} ...`);
-    const result = await runEvalCase(evalCase);
-  const failedGraders = result.graderResults.filter((entry) => !entry.pass);
+    let result;
+    try {
+      result = await runEvalCase(evalCase);
+    } catch (error) {
+      failures += 1;
+      console.error(`FAIL ${caseId}`);
+      console.error(
+        `  - error: ${error instanceof Error ? error.message : String(error)}`
+      );
+      continue;
+    }
+
+    const failedGraders = result.graderResults.filter((entry) => !entry.pass);
 
     if (result.pass) {
       console.log(`PASS ${caseId}`);
