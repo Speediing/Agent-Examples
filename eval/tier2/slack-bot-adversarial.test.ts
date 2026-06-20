@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { simulateSlackTriage } from "../../examples/slack-bot/ts/src/simulate.js";
 
-describe("tier2 slack-bot approval contract", () => {
+describe("adversarial slack-bot approval contract", () => {
   it("does not create side effects when approval is missing", async () => {
     const result = await simulateSlackTriage(
       {

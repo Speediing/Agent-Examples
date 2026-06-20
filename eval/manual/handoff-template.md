@@ -7,7 +7,7 @@
 
 ## Forbidden files
 
-- `eval/tier1/**`, `eval/tier2/**`, `eval/graders/**`
+- `eval/cases/**` (held-out case bodies), `eval/tier1/**`, `eval/tier2/**`
 - `.github/workflows/**`
 - `package-lock.json`, pinned version files
 - `agent-example-site/app/blog/posts.ts`
@@ -27,5 +27,5 @@ python3 -m pytest
 
 - [ ] Diff stays within allowed files
 - [ ] Teaching prompts unchanged
-- [ ] Full Tier 0 + Tier 1 suite green on the branch
+- [ ] Full unit + model suite green on the branch
 - [ ] Trace artifacts attached for any stochastic failure

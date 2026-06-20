@@ -81,12 +81,12 @@ parity wiring is per-example and reviews stay small.
    truth; Python mirrors behavior.
 5. **Register the run command** in root `package.json` scripts (e.g.
    `"<name>:ts"`) and in `README.md`.
-6. **Add Tier 0 tests** (`eval/` or `tests/`): pure-handler unit tests, a
+6. **Add unit tests** (`eval/` or `tests/`): pure-handler unit tests, a
    setup/negative case (missing key, bad input), and TS↔Python parity for any
    shared handler (normalized shape, never string equality — `EVAL_PLAN.md` §4.4).
-7. **Add a Tier 1 case** in `eval/tier1/<name>.test.ts` if the agent calls the SDK
+7. **Add a model case** in `eval/tier1/<name>.test.ts` if the agent calls the SDK
    with LLM-dependent behavior (trace assertion on allowed tool sequence +
-   grounding). Add a **Tier 2** case in `eval/tier2/` for any new write/approval
+   grounding). Add an **adversarial** case in `eval/tier2/` for any new write/approval
    failure mode (SRE-style read-only contract, injection, fabrication).
 8. **Wire docs↔code parity.** Add the example `path` and npm script to
    `eval/fixtures/cookbook-parity.json` so CI keeps the docs site honest.
@@ -102,7 +102,7 @@ parity wiring is per-example and reviews stay small.
 
 ### 2.2 Definition of done (gate before the next example)
 
-Run the full Tier 0 from `AGENTS.md`, from the repo root:
+Run the full unit suite from `AGENTS.md`, from the repo root:
 
 ```sh
 npm ci
@@ -121,10 +121,10 @@ npm run lint
 npm run build
 ```
 
-An example is **done** when: Tier 0 is green (incl. the live cross-repo
+An example is **done** when: unit evals are green (incl. the live cross-repo
 docs↔code parity check), the cookbook post renders and its links resolve, the
 coverage matrix row exists, and — if it changed prompts/tools/handlers — the
-Tier 1 case passes (`npm run test:llm` with a key). Only then start the next one.
+model case passes (`npm run test:llm` with a key). Only then start the next one.
 
 ### 2.3 Guardrails (apply to every example)
 
@@ -215,11 +215,11 @@ to in `node_modules/chat/docs/` (`getting-started`, `handling-events`, `actions`
 
 ### 3.6 Eval coverage
 
-- **Tier 0:** triage prompt builder is pure (unit + TS↔Python parity); tool
+- **Unit:** triage prompt builder is pure (unit + TS↔Python parity); tool
   handlers validate args; a "no approval → no side effect" unit test.
-- **Tier 1:** trace assertion that triage calls `Agent.prompt` and grounds the plan
+- **Model:** trace assertion that triage calls `Agent.prompt` and grounds the plan
   in thread content; smoke output check.
-- **Tier 2:** approval-gate contract (a Reject or missing approval must produce no
+- **Adversarial:** approval-gate contract (a Reject or missing approval must produce no
   ticket/PR); prompt-injection text in the Slack thread must not trigger a side
   effect. Record both rows in the coverage matrix.
 
@@ -401,7 +401,7 @@ Check rows off as they ship. Removed or merged slugs are documented in
 - **Slack bot host.** Does the example ship a Next.js route (matches the Chat SDK
   `slack-nextjs` guide and the docs site's stack) or a framework-light Node HTTP
   entrypoint? A Next.js route reads closest to real deployments; a bare entrypoint
-  is easier to run in Tier 0. Recommendation: bare entrypoint for the runnable
+  is easier to run in unit evals. Recommendation: bare entrypoint for the runnable
   example, Next.js route shown as the deploy step in the cookbook.
 - **State backend in CI.** Chat SDK needs a state adapter. Use
   `@chat-adapter/state-memory` for the runnable example and tests; document Redis/PG

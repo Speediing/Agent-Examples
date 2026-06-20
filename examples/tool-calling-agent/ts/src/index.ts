@@ -1,17 +1,16 @@
 import { Agent } from "@cursor/sdk";
-import {
-  buildToolCallingPrompt,
-  createToolCallingCustomTools
-} from "./tools.js";
+import { createToolCallingAgent } from "./agent.js";
 
 try {
-  const prompt = process.argv.slice(2).join(" ").trim();
-  const result = await Agent.prompt(buildToolCallingPrompt(prompt), {
+  const userMessage = process.argv.slice(2).join(" ").trim();
+  const agent = createToolCallingAgent();
+  const runInput = agent.send(userMessage);
+  const result = await Agent.prompt(runInput.prompt, {
     apiKey: requireEnv("CURSOR_API_KEY"),
     model: { id: requireEnv("CURSOR_MODEL") },
     local: {
-      cwd: process.cwd(),
-      customTools: createToolCallingCustomTools()
+      cwd: runInput.cwd ?? process.cwd(),
+      customTools: runInput.customTools
     }
   });
 

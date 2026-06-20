@@ -1,4 +1,4 @@
-name: Tier 1 LLM Eval
+name: LLM Eval
 
 on:
   workflow_dispatch:
@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: tier-1-${{ github.workflow }}-${{ github.ref }}
+  group: llm-eval-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -47,7 +47,7 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Run Tier 1 and Tier 2 LLM evals
+      - name: Run model and adversarial evals
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           CURSOR_MODEL: ${{ vars.CURSOR_EVAL_MODEL }}
