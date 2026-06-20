@@ -74,6 +74,7 @@ export {
   sreCheckout503Case
 } from "./cases/index.js";
 
+export type { EvalAgent } from "./lib/agent-harness.js";
 export { defineEval, runDefinedEval } from "./lib/define-eval.js";
 export type { DefinedEval, DefinedEvalHandle, EvalTestContext } from "./lib/define-eval.js";
 export { includes, matches } from "./lib/expect.js";

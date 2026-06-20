@@ -6,6 +6,7 @@ describe("defineEval", () => {
   it("builds a runnable handle with a stable id", () => {
     const evalHandle = defineEval({
       description: "Example eval",
+      agent: { send: () => ({ prompt: "" }) },
       async test() {
         // no-op for structure test
       }

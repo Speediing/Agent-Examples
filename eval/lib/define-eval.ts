@@ -1,4 +1,4 @@
-import type { SDKCustomTool } from "@cursor/sdk";
+import type { EvalAgent } from "./agent-harness.js";
 import { writeFailureArtifact } from "./artifacts.js";
 import { buildRunEvidence } from "./evidence.js";
 import { requireLlmEvals } from "./config.js";
@@ -17,7 +17,8 @@ export type EvalTestContext = {
   reply: string;
   status: string;
   completedToolCalls: NormalizedToolCall[];
-  send: (prompt: string) => Promise<void>;
+  /** User message passed to the agent's `send` method. */
+  send: (userMessage: string) => Promise<void>;
   completed: () => void;
   calledTool: (toolName: string) => void;
   check: (value: string, matcher: ExpectMatcher) => void;
@@ -28,7 +29,7 @@ export type DefinedEval = {
   description: string;
   stage?: SdlcStage;
   requiresModel?: boolean;
-  tools?: Record<string, SDKCustomTool>;
+  agent: EvalAgent;
   cwd?: string;
   test: (context: EvalTestContext) => Promise<void>;
 };
@@ -49,7 +50,7 @@ function slugify(description: string): string {
 }
 
 function createTestContext(options: {
-  tools?: Record<string, SDKCustomTool>;
+  agent: EvalAgent;
   cwd?: string;
 }): {
   context: EvalTestContext;
@@ -75,12 +76,13 @@ function createTestContext(options: {
     reply: "",
     status: "",
     completedToolCalls: [],
-    async send(userPrompt: string) {
-      prompt = userPrompt;
+    async send(userMessage: string) {
+      const runInput = await options.agent.send(userMessage);
+      prompt = runInput.prompt;
       const outcome = await runLocalAgent({
-        prompt: userPrompt,
-        customTools: options.tools,
-        cwd: options.cwd
+        prompt: runInput.prompt,
+        customTools: runInput.customTools,
+        cwd: runInput.cwd ?? options.cwd
       });
       status = outcome.result.status;
       reply = outcome.result.result ?? "";
@@ -140,7 +142,7 @@ export async function runDefinedEval(def: DefinedEval): Promise<EvalCaseResult> 
 
   try {
     const { context, collectResults, readOutcome } = createTestContext({
-      tools: def.tools,
+      agent: def.agent,
       cwd: def.cwd ?? ctx.workspaceDir
     });
 
@@ -159,7 +161,8 @@ export async function runDefinedEval(def: DefinedEval): Promise<EvalCaseResult> 
         description: def.description,
         graders: [],
         async run() {
-          return { prompt: outcome.prompt, customTools: def.tools };
+          const runInput = await def.agent.send("");
+          return runInput;
         }
       },
       outcome: {
