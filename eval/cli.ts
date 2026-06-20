@@ -1,21 +1,26 @@
 #!/usr/bin/env node
 import { getEvalCase, listEvalCases } from "./cases/index.js";
+import { loadDefinedEvals } from "./lib/discover-evals.js";
 import { llmCasesEnabled } from "./lib/runner.js";
 import { runEvalCase } from "./lib/runner.js";
+import type { EvalCaseResult } from "./lib/types.js";
+import type { DefinedEvalHandle } from "./lib/define-eval.js";
 
 function printUsage(): void {
   console.log(`Usage:
+  npm run eval
   npm run eval:list [-- --requires-model]
   npm run eval:run -- --case <case-id>
   npm run eval:run -- --requires-model
 
 Commands:
+  eval    Run every evals/*.eval.ts file (defineEval)
   list    Print registered SDLC eval cases
   run     Execute one case or every case that matches a filter`);
 }
 
 function parseArgs(argv: string[]): {
-  command: "list" | "run" | "help";
+  command: "eval" | "list" | "run" | "help";
   caseId?: string;
   requiresModel?: boolean;
 } {
@@ -36,11 +41,50 @@ function parseArgs(argv: string[]): {
     }
   }
 
-  if (command === "list" || command === "run") {
+  if (command === "eval" || command === "list" || command === "run") {
     return { command, caseId, requiresModel };
   }
 
   return { command: "help" };
+}
+
+function printResult(label: string, result: EvalCaseResult): number {
+  if (result.pass) {
+    console.log(`PASS ${label}`);
+    return 0;
+  }
+
+  console.error(`FAIL ${label}`);
+  for (const grader of result.graderResults.filter((entry) => !entry.pass)) {
+    console.error(`  - ${grader.grader}: ${grader.message ?? "failed"}`);
+  }
+
+  if (result.artifactPath) {
+    console.error(`  artifact: ${result.artifactPath}`);
+  }
+
+  return 1;
+}
+
+async function runDefinedEvalHandle(handle: DefinedEvalHandle): Promise<number> {
+  if (handle.requiresModel !== false && !llmCasesEnabled()) {
+    console.error(
+      `Skipping ${handle.id}: set CURSOR_API_KEY and CURSOR_MODEL to run model evals.`
+    );
+    return 1;
+  }
+
+  console.log(`Running ${handle.id} ...`);
+  try {
+    const result = await handle.run();
+    return printResult(handle.id, result);
+  } catch (error) {
+    console.error(`FAIL ${handle.id}`);
+    console.error(
+      `  - error: ${error instanceof Error ? error.message : String(error)}`
+    );
+    return 1;
+  }
 }
 
 async function runCases(caseIds: string[]): Promise<number> {
@@ -75,22 +119,7 @@ async function runCases(caseIds: string[]): Promise<number> {
       continue;
     }
 
-    const failedGraders = result.graderResults.filter((entry) => !entry.pass);
-
-    if (result.pass) {
-      console.log(`PASS ${caseId}`);
-      continue;
-    }
-
-    failures += 1;
-    console.error(`FAIL ${caseId}`);
-    for (const grader of failedGraders) {
-      console.error(`  - ${grader.grader}: ${grader.message ?? "failed"}`);
-    }
-
-    if (result.artifactPath) {
-      console.error(`  artifact: ${result.artifactPath}`);
-    }
+    failures += printResult(caseId, result);
   }
 
   return failures;
@@ -102,6 +131,22 @@ async function main(): Promise<void> {
   if (command === "help") {
     printUsage();
     process.exitCode = 1;
+    return;
+  }
+
+  if (command === "eval") {
+    const handles = await loadDefinedEvals();
+    if (handles.length === 0) {
+      console.error("No evals/*.eval.ts files found.");
+      process.exitCode = 1;
+      return;
+    }
+
+    let failures = 0;
+    for (const handle of handles) {
+      failures += await runDefinedEvalHandle(handle);
+    }
+    process.exitCode = failures > 0 ? 1 : 0;
     return;
   }
 

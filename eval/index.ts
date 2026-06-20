@@ -74,4 +74,10 @@ export {
   sreCheckout503Case
 } from "./cases/index.js";
 
+export { defineEval, runDefinedEval } from "./lib/define-eval.js";
+export type { DefinedEval, DefinedEvalHandle, EvalTestContext } from "./lib/define-eval.js";
+export { includes, matches } from "./lib/expect.js";
+export type { ExpectMatcher } from "./lib/expect.js";
+export { discoverEvalFiles, loadDefinedEvals } from "./lib/discover-evals.js";
+
 export { evalConfig, llmEvalsEnabled, requireLlmEvals } from "./lib/config.js";

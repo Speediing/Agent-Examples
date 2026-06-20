@@ -10,6 +10,7 @@
     "test": "vitest run --config vitest.unit.config.ts",
     "test:llm": "vitest run --config vitest.config.ts eval/tier1 eval/tier2 eval/parity/ts-python-trace.test.ts",
     "test:all": "npm run test && npm run test:llm",
+    "eval": "tsx eval/cli.ts eval",
     "eval:list": "tsx eval/cli.ts list",
     "eval:run": "tsx eval/cli.ts run",
     "migrate:python-ports": "npm --workspace @cursor-examples/migration-agent-ts run start --",
@@ -44,8 +45,7 @@
     "cost-auditor:ts": "npm --workspace @cursor-examples/cost-auditor-ts run start --"
   },
   "workspaces": [
-    "examples/*/ts",
-    "eval"
+    "examples/*/ts"
   ],
   "devDependencies": {
     "@types/node": "^25.9.2",
