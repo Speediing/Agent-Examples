@@ -109,8 +109,8 @@ instead of trusting streamed `result` fields. Do not gate CI on LLM-as-judge alo
 
 ## Patterns to preserve
 
-- **Single source of truth:** CLI entrypoints import factory modules; evals import
-  the same modules. Avoid duplicating prompt or tool definitions in tests.
+- **Single source of truth:** CLI entrypoints import factory modules; evals import the same modules. Avoid duplicating prompt or tool definitions in tests.
+- **Agent export for evals:** `agent.send(userMessage)` in `agent.ts`; eval files in repo-root `evals/*.eval.ts`; run with `npm run eval`. See agent-example-site `agent-eval-guide` skill.
 - **Migration audit:** use the pure classifier in `classifier.ts` / `classifier.py`;
   staleness uses git commit time with mtime fallback (`git-signal.ts`).
 - **Side-effectful paths:** do not run `migration-agent --use-cursor-sdk` repair in
