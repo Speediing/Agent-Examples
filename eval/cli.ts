@@ -1,8 +1,5 @@
 #!/usr/bin/env node
-import { getEvalCase, listEvalCases } from "./cases/index.js";
 import { loadDefinedEvals } from "./lib/discover-evals.js";
-import { llmCasesEnabled } from "./lib/runner.js";
-import { runEvalCase } from "./lib/runner.js";
 import type { EvalCaseResult } from "./lib/types.js";
 import type { DefinedEvalHandle } from "./lib/define-eval.js";
 
@@ -15,8 +12,8 @@ function printUsage(): void {
 
 Commands:
   eval    Run every evals/*.eval.ts file (defineEval)
-  list    Print registered SDLC eval cases
-  run     Execute one case or every case that matches a filter`);
+  list    Print registered SDLC eval cases (Agent-Examples catalog)
+  run     Execute one catalog case or every case that matches a filter`);
 }
 
 function parseArgs(argv: string[]): {
@@ -46,6 +43,13 @@ function parseArgs(argv: string[]): {
   }
 
   return { command: "help" };
+}
+
+function llmCasesEnabled(): boolean {
+  return Boolean(
+    process.env.CURSOR_API_KEY &&
+      (process.env.CURSOR_MODEL ?? process.env.CURSOR_AGENT_MODEL)
+  );
 }
 
 function printResult(label: string, result: EvalCaseResult): number {
@@ -87,7 +91,9 @@ async function runDefinedEvalHandle(handle: DefinedEvalHandle): Promise<number> 
   }
 }
 
-async function runCases(caseIds: string[]): Promise<number> {
+async function runCatalogCases(caseIds: string[]): Promise<number> {
+  const { getEvalCase } = await import("./cases/index.js");
+  const { runEvalCase } = await import("./lib/runner.js");
   let failures = 0;
 
   for (const caseId of caseIds) {
@@ -107,19 +113,16 @@ async function runCases(caseIds: string[]): Promise<number> {
     }
 
     console.log(`Running ${caseId} ...`);
-    let result;
     try {
-      result = await runEvalCase(evalCase);
+      const result = await runEvalCase(evalCase);
+      failures += printResult(caseId, result);
     } catch (error) {
       failures += 1;
       console.error(`FAIL ${caseId}`);
       console.error(
         `  - error: ${error instanceof Error ? error.message : String(error)}`
       );
-      continue;
     }
-
-    failures += printResult(caseId, result);
   }
 
   return failures;
@@ -137,7 +140,7 @@ async function main(): Promise<void> {
   if (command === "eval") {
     const handles = await loadDefinedEvals();
     if (handles.length === 0) {
-      console.error("No evals/*.eval.ts files found.");
+      console.error("No eval/evals/*.eval.ts files found.");
       process.exitCode = 1;
       return;
     }
@@ -149,6 +152,8 @@ async function main(): Promise<void> {
     process.exitCode = failures > 0 ? 1 : 0;
     return;
   }
+
+  const { listEvalCases } = await import("./cases/index.js");
 
   if (command === "list") {
     const cases = listEvalCases(
@@ -174,7 +179,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  const failures = await runCases(caseIds);
+  const failures = await runCatalogCases(caseIds);
   process.exitCode = failures > 0 ? 1 : 0;
 }
 

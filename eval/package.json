@@ -8,8 +8,5 @@
     ".": "./index.ts",
     "./cases": "./cases/index.ts",
     "./cli": "./cli.ts"
-  },
-  "bin": {
-    "agent-eval": "./cli.ts"
   }
 }
