@@ -1,0 +1,24 @@
+{
+  "cells": [
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import pandas as pd\\n",
+        "counts = pd.read_csv('counts-matrix.csv')\\n",
+        "counts.head()"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "filtered = counts[counts.sum(axis=1) > 10]\\n",
+        "filtered.to_csv('filtered-counts.csv', index=False)"
+      ]
+    }
+  ],
+  "metadata": { "kernelspec": { "display_name": "Python 3" } },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

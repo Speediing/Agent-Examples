@@ -47,6 +47,30 @@ accessibility = load(
     "parity_accessibility_agent", "examples/accessibility-agent/python/agent.py"
 )
 migration = load("parity_migration_prompt", "examples/migration-agent/python/prompt.py")
+sample_id = load(
+    "parity_sample_id_tools",
+    "examples/sample-id-reconciler/python/tools.py",
+)
+omics_qc = load(
+    "parity_omics_qc_tools",
+    "examples/omics-qc-gate/python/tools.py",
+)
+dataset_freshness = load(
+    "parity_dataset_freshness_tools",
+    "examples/dataset-freshness-monitor/python/tools.py",
+)
+inherited_analysis = load(
+    "parity_inherited_analysis_tools",
+    "examples/inherited-analysis-explainer/python/tools.py",
+)
+notebook_pipeline = load(
+    "parity_notebook_pipeline_tools",
+    "examples/notebook-pipeline-drafter/python/tools.py",
+)
+analysis_plan = load(
+    "parity_analysis_plan_tools",
+    "examples/analysis-plan-drafter/python/tools.py",
+)
 
 MIGRATION_SAMPLE = [
     {
@@ -103,6 +127,21 @@ output = {
     },
     "migration": {
         "prompt": migration.build_migration_prompt(MIGRATION_SAMPLE),
+    },
+    "lifesci": {
+        "sample_id": sample_id.reconcile_sample_ids(),
+        "sample_id_prompt": sample_id.build_sample_id_reconciler_prompt(""),
+        "omics_qc": omics_qc.run_omics_qc(),
+        "omics_qc_prompt": omics_qc.build_omics_qc_gate_prompt(""),
+        "dataset_freshness": dataset_freshness.check_dataset_freshness(),
+        "dataset_freshness_prompt": dataset_freshness.build_dataset_freshness_monitor_prompt(""),
+        "inherited_list": inherited_analysis.list_analysis_files({}),
+        "inherited_read": inherited_analysis.read_analysis_file({"path": "README.md"}),
+        "inherited_prompt": inherited_analysis.build_inherited_analysis_explainer_prompt(""),
+        "notebook_draft": notebook_pipeline.load_notebook_draft(),
+        "notebook_prompt": notebook_pipeline.build_notebook_pipeline_drafter_prompt(""),
+        "analysis_plan": analysis_plan.load_study_context(),
+        "analysis_plan_prompt": analysis_plan.build_analysis_plan_drafter_prompt(""),
     },
 }
 

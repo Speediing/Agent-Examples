@@ -19,6 +19,12 @@ import {
 import { buildHelloWorldPrompt } from "../../examples/hello-world/ts/src/agent.js";
 import { buildAccessibilityPrompt } from "../../examples/accessibility-agent/ts/src/agent.js";
 import { buildMigrationPrompt } from "../../examples/migration-agent/ts/src/prompt.js";
+import { listAnalysisFiles, readAnalysisFile, buildInheritedAnalysisExplainerPrompt } from "../../examples/inherited-analysis-explainer/ts/src/tools.js";
+import { reconcileSampleIds, buildSampleIdReconcilerPrompt } from "../../examples/sample-id-reconciler/ts/src/tools.js";
+import { loadNotebookDraft, buildNotebookPipelineDrafterPrompt } from "../../examples/notebook-pipeline-drafter/ts/src/tools.js";
+import { runOmicsQc, buildOmicsQcGatePrompt } from "../../examples/omics-qc-gate/ts/src/tools.js";
+import { loadStudyContext, buildAnalysisPlanDrafterPrompt } from "../../examples/analysis-plan-drafter/ts/src/tools.js";
+import { checkDatasetFreshness, buildDatasetFreshnessMonitorPrompt } from "../../examples/dataset-freshness-monitor/ts/src/tools.js";
 import { normalize } from "./normalize.js";
 
 const scriptPath = join(
@@ -112,5 +118,31 @@ describe.skipIf(!pythonAvailable())("ts↔python live parity", () => {
       buildAccessibilityPrompt("file:///tmp/page.html", "")
     );
     expect(py.migration.prompt).toBe(buildMigrationPrompt(MIGRATION_SAMPLE));
+  });
+
+  it("matches lifesci handler outputs and prompts", () => {
+    expect(normalize(py.lifesci.sample_id)).toEqual(normalize(reconcileSampleIds()));
+    expect(py.lifesci.sample_id_prompt).toBe(buildSampleIdReconcilerPrompt(""));
+    expect(normalize(py.lifesci.omics_qc)).toEqual(normalize(runOmicsQc()));
+    expect(py.lifesci.omics_qc_prompt).toBe(buildOmicsQcGatePrompt(""));
+    expect(normalize(py.lifesci.dataset_freshness)).toEqual(
+      normalize(checkDatasetFreshness())
+    );
+    expect(py.lifesci.dataset_freshness_prompt).toBe(
+      buildDatasetFreshnessMonitorPrompt("")
+    );
+    expect(normalize(py.lifesci.inherited_list)).toEqual(
+      normalize(listAnalysisFiles({}))
+    );
+    expect(normalize(py.lifesci.inherited_read)).toEqual(
+      normalize(readAnalysisFile({ path: "README.md" }))
+    );
+    expect(py.lifesci.inherited_prompt).toBe(
+      buildInheritedAnalysisExplainerPrompt("")
+    );
+    expect(normalize(py.lifesci.notebook_draft)).toEqual(normalize(loadNotebookDraft()));
+    expect(py.lifesci.notebook_prompt).toBe(buildNotebookPipelineDrafterPrompt(""));
+    expect(normalize(py.lifesci.analysis_plan)).toEqual(normalize(loadStudyContext()));
+    expect(py.lifesci.analysis_plan_prompt).toBe(buildAnalysisPlanDrafterPrompt(""));
   });
 });

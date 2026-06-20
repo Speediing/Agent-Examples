@@ -1,0 +1,23 @@
+[
+  {
+    "dataset": "omics.counts_matrix",
+    "owner": "bioinformatics",
+    "sla_hours": 24,
+    "last_landed_at": "2025-11-14T08:00:00Z",
+    "as_of": "2025-11-15T12:00:00Z"
+  },
+  {
+    "dataset": "clinical.adverse_events",
+    "owner": "clinical-data",
+    "sla_hours": 12,
+    "last_landed_at": "2025-11-15T06:00:00Z",
+    "as_of": "2025-11-15T12:00:00Z"
+  },
+  {
+    "dataset": "lims.sample_manifest",
+    "owner": "lab-ops",
+    "sla_hours": 6,
+    "last_landed_at": "2025-11-15T11:30:00Z",
+    "as_of": "2025-11-15T12:00:00Z"
+  }
+]

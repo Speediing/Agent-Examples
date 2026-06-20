@@ -1,0 +1,8 @@
+{
+  "study_id": "STUDY-042",
+  "phase": "II",
+  "modality": "RNA-seq",
+  "arms": ["treatment", "placebo"],
+  "primary_endpoint": "GAPDH expression change at week 12",
+  "prior_sap_path": "prior-sap.md"
+}

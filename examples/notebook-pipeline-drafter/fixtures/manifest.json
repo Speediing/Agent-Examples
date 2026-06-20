@@ -1,0 +1,8 @@
+{
+  "study_id": "STUDY-042",
+  "inputs": [
+    { "path": "counts-matrix.csv", "checksum": "abc123" },
+    { "path": "sample-metadata.csv", "checksum": "def456" }
+  ],
+  "outputs": ["filtered-counts.csv"]
+}

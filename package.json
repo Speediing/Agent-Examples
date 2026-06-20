@@ -42,7 +42,19 @@
     "feature-flag-reaper:ts": "npm --workspace @cursor-examples/feature-flag-reaper-ts run start --",
     "alert-triage-bot:ts": "npm --workspace @cursor-examples/alert-triage-bot-ts run start --",
     "postmortem-drafter:ts": "npm --workspace @cursor-examples/postmortem-drafter-ts run start --",
-    "cost-auditor:ts": "npm --workspace @cursor-examples/cost-auditor-ts run start --"
+    "cost-auditor:ts": "npm --workspace @cursor-examples/cost-auditor-ts run start --",
+    "inherited-analysis-explainer:ts": "npm --workspace @cursor-examples/inherited-analysis-explainer-ts run start --",
+    "sample-id-reconciler:ts": "npm --workspace @cursor-examples/sample-id-reconciler-ts run start --",
+    "notebook-pipeline-drafter:ts": "npm --workspace @cursor-examples/notebook-pipeline-drafter-ts run start --",
+    "omics-qc-gate:ts": "npm --workspace @cursor-examples/omics-qc-gate-ts run start --",
+    "analysis-plan-drafter:ts": "npm --workspace @cursor-examples/analysis-plan-drafter-ts run start --",
+    "dataset-freshness-monitor:ts": "npm --workspace @cursor-examples/dataset-freshness-monitor-ts run start --",
+    "inherited-analysis-explainer:py": "python3 examples/inherited-analysis-explainer/python/main.py",
+    "sample-id-reconciler:py": "python3 examples/sample-id-reconciler/python/main.py",
+    "notebook-pipeline-drafter:py": "python3 examples/notebook-pipeline-drafter/python/main.py",
+    "omics-qc-gate:py": "python3 examples/omics-qc-gate/python/main.py",
+    "analysis-plan-drafter:py": "python3 examples/analysis-plan-drafter/python/main.py",
+    "dataset-freshness-monitor:py": "python3 examples/dataset-freshness-monitor/python/main.py"
   },
   "workspaces": [
     "examples/*/ts"

@@ -10,6 +10,9 @@ import {
   lookupRunbook,
   queryMetrics
 } from "../../examples/sre-agent/ts/src/tools.js";
+import { reconcileSampleIds } from "../../examples/sample-id-reconciler/ts/src/tools.js";
+import { runOmicsQc } from "../../examples/omics-qc-gate/ts/src/tools.js";
+import { checkDatasetFreshness } from "../../examples/dataset-freshness-monitor/ts/src/tools.js";
 import { normalize } from "./normalize.js";
 
 describe("ts↔python deterministic parity", () => {
@@ -45,5 +48,19 @@ describe("ts↔python deterministic parity", () => {
 
     const runbook = lookupRunbook({ symptom: "checkout 503" });
     expect(runbook.found).toBe(true);
+  });
+
+  it("matches lifesci handler output shapes", () => {
+    const sampleIds = reconcileSampleIds();
+    expect(sampleIds.passed).toBe(false);
+    expect(sampleIds.duplicate_barcodes.length).toBeGreaterThan(0);
+
+    const qc = runOmicsQc();
+    expect(qc.passed).toBe(false);
+    expect(qc.zero_expression_genes).toContain("TP53");
+
+    const freshness = checkDatasetFreshness();
+    expect(freshness.passed).toBe(false);
+    expect(freshness.breaches.length).toBeGreaterThan(0);
   });
 });

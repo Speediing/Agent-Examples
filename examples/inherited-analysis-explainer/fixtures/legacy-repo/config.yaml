@@ -1,0 +1,4 @@
+study_id: STUDY-042
+counts_path: data/counts-matrix.csv
+metadata_path: data/sample-metadata.csv
+min_total_reads: 10
