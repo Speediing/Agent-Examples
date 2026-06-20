@@ -4,7 +4,7 @@ import { pathToFileURL } from "node:url";
 import { evalConfig } from "./config.js";
 import type { DefinedEvalHandle } from "./define-eval.js";
 
-export function discoverEvalFiles(rootDir = path.join(evalConfig.repoRoot, "eval/evals")): string[] {
+export function discoverEvalFiles(rootDir = path.join(evalConfig.repoRoot, "evals")): string[] {
   try {
     return readdirSync(rootDir)
       .filter((name) => name.endsWith(".eval.ts"))
@@ -16,7 +16,7 @@ export function discoverEvalFiles(rootDir = path.join(evalConfig.repoRoot, "eval
 }
 
 export async function loadDefinedEvals(
-  rootDir = path.join(evalConfig.repoRoot, "eval/evals")
+  rootDir = path.join(evalConfig.repoRoot, "evals")
 ): Promise<DefinedEvalHandle[]> {
   const files = discoverEvalFiles(rootDir);
   const loaded: DefinedEvalHandle[] = [];

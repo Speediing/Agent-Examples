@@ -140,7 +140,7 @@ async function main(): Promise<void> {
   if (command === "eval") {
     const handles = await loadDefinedEvals();
     if (handles.length === 0) {
-      console.error("No eval/evals/*.eval.ts files found.");
+      console.error("No evals/*.eval.ts files found.");
       process.exitCode = 1;
       return;
     }
