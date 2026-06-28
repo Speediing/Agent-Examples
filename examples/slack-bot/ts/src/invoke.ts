@@ -14,6 +14,7 @@ export type InvokeContext = {
 };
 
 export const CLOUD_FIRST_AGENT_SLUGS = new Set([
+  "hello-world",
   "spec-drafter",
   "codebase-explainer",
   "sre-agent"
@@ -38,7 +39,8 @@ function augmentPromptForCloud(prompt: string, repoUrl: string): string {
 
 async function runCloudPrompt(
   prompt: string,
-  context: InvokeContext
+  context: InvokeContext,
+  options: { autoCreatePR?: boolean; startingRef?: string } = {}
 ): Promise<string> {
   if (!context.cloudRepoUrl) {
     throw new Error("Cloud repository URL is required for cloud agent runs.");
@@ -50,8 +52,13 @@ async function runCloudPrompt(
       apiKey: context.apiKey,
       model: { id: context.model },
       cloud: {
-        repos: [{ url: context.cloudRepoUrl }],
-        autoCreatePR: false
+        repos: [
+          {
+            url: context.cloudRepoUrl,
+            ...(options.startingRef ? { startingRef: options.startingRef } : {})
+          }
+        ],
+        autoCreatePR: options.autoCreatePR ?? false
       }
     }
   );
@@ -240,15 +247,18 @@ export async function invokeAgent(
   switch (slug) {
     case "hello-world": {
       const mod = await loadAgentModule(slug);
+      const basePrompt = (
+        mod as { buildInventoryPrompt: () => string }
+      ).buildInventoryPrompt();
+      const prompt = task.trim()
+        ? [basePrompt, "", `User request: ${task}`].join("\n")
+        : basePrompt;
+
       return {
-        output: await runPromptAgent(
-          {
-            buildPrompt: mod.buildHelloWorldPrompt as (task: string) => string
-          },
-          task,
-          context,
-          { cwd: context.repoRoot }
-        ),
+        output: await runCloudPrompt(prompt, context, {
+          autoCreatePR: true,
+          startingRef: "main"
+        }),
         requiresApproval: false
       };
     }

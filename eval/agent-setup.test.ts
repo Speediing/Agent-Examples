@@ -10,7 +10,11 @@ function withoutSdkEnv() {
 
 describe("agent setup and negative cases", () => {
   it("hello-world exits when SDK credentials are missing", () => {
-    const result = runNpmScript("hello-world:ts", ['"Ada"'], withoutSdkEnv());
+    const result = runNpmScript(
+      "hello-world:ts",
+      ["acme/legacy-service"],
+      withoutSdkEnv()
+    );
     expect(result.status).not.toBe(0);
     expect(result.stderr + result.stdout).toMatch(/Missing CURSOR_API_KEY/);
   });

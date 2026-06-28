@@ -15,14 +15,14 @@ migration_prompt = load_example_module(
 from tools import build_tool_calling_prompt  # noqa: E402  (tool-calling via conftest path)
 
 
-def test_hello_world_prompt_uses_recipient() -> None:
-    prompt = hello_world.build_hello_world_prompt("Ada")
-    assert "Greet Ada in one short sentence." in prompt
+def test_hello_world_prompt_names_inventory_artifact() -> None:
+    prompt = hello_world.build_inventory_prompt()
+    assert "assessment.md" in prompt
+    assert "Add codebase inventory" in prompt
 
 
-def test_hello_world_prompt_falls_back_to_there() -> None:
-    prompt = hello_world.build_hello_world_prompt("   ")
-    assert "Greet there in one short sentence." in prompt
+def test_hello_world_prompt_is_deterministic() -> None:
+    assert hello_world.build_inventory_prompt() == hello_world.build_inventory_prompt()
 
 
 def test_accessibility_prompt_omits_empty_instructions() -> None:

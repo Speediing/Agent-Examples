@@ -1,15 +1,31 @@
 import { Agent } from "@cursor/sdk";
-import { buildHelloWorldPrompt } from "./agent.js";
+import { buildInventoryPrompt } from "./agent.js";
+
+function repoUrl(target: string): string {
+  return target.startsWith("http") ? target : `https://github.com/${target}`;
+}
 
 try {
-  const name = process.argv.slice(2).join(" ");
-  const result = await Agent.prompt(buildHelloWorldPrompt(name), {
+  const target = process.argv[2];
+  if (!target) {
+    throw new Error("Usage: npm run inventory:ts -- <owner>/<repo>");
+  }
+
+  const result = await Agent.prompt(buildInventoryPrompt(), {
     apiKey: requireEnv("CURSOR_API_KEY"),
     model: { id: requireEnv("CURSOR_MODEL") },
-    local: { cwd: process.cwd() }
+    cloud: {
+      repos: [{ url: repoUrl(target), startingRef: "main" }],
+      autoCreatePR: true
+    }
   });
 
-  console.log(result.result ?? "");
+  console.log(`Run ID: ${result.id}`);
+  console.log(`Status: ${result.status}`);
+  const prUrl = result.git?.branches?.find((branch) => branch.prUrl)?.prUrl;
+  if (prUrl) {
+    console.log(`PR: ${prUrl}`);
+  }
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));
   process.exitCode = 1;
@@ -17,8 +33,6 @@ try {
 
 function requireEnv(name: string): string {
   const value = process.env[name];
-  if (!value) {
-    throw new Error(`Missing ${name}. Set it before running this SDK example.`);
-  }
+  if (!value) throw new Error(`Missing ${name}. Set it before running.`);
   return value;
 }

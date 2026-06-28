@@ -8,14 +8,15 @@ const siteRepoPath =
   path.resolve(repoRoot, "../agent-example-site");
 
 const postsPath = path.join(siteRepoPath, "app/blog/posts.ts");
-const siteRepoAvailable = existsSync(postsPath);
+const guidesPath = path.join(siteRepoPath, "app/blog/guides.ts");
+const siteRepoAvailable = existsSync(postsPath) && existsSync(guidesPath);
 
 const packageScripts = JSON.parse(
   readFileSync(path.join(repoRoot, "package.json"), "utf8")
 ).scripts as Record<string, string>;
 
 function extractNpmScripts(command: string): string[] {
-  const matches = [...command.matchAll(/npm run ([^\s]+)/g)];
+  const matches = [...command.matchAll(/(?:^|\s)npm run ([^\s]+)/g)];
   return matches.map((match) => match[1] ?? "").filter(Boolean);
 }
 
@@ -37,7 +38,8 @@ describe.skipIf(!siteRepoAvailable)(
   "docs↔code parity (requires agent-example-site checkout)",
   () => {
     it("aligns cookbook paths and npm scripts with this repository", () => {
-      const postsSource = readFileSync(postsPath, "utf8");
+      const postsSource =
+        readFileSync(postsPath, "utf8") + readFileSync(guidesPath, "utf8");
       const { paths, commands } = extractDocFields(postsSource);
 
       expect(paths.length).toBeGreaterThan(0);

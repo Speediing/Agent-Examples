@@ -24,4 +24,23 @@ describe("defineEval", () => {
     expect(fail.pass).toBe(false);
     expect(fail.message).toContain("12");
   });
+
+  it("exposes lastPrompt and skips the model when requiresModel is false", async () => {
+    const evalHandle = defineEval({
+      description: "Prompt boundary only",
+      requiresModel: false,
+      agent: {
+        async send() {
+          return { prompt: "Never disable a failing test", customTools: [] };
+        }
+      },
+      async test(t) {
+        await t.send("run");
+        t.check(t.lastPrompt, includes("Never disable"));
+      }
+    });
+
+    const result = await evalHandle.run();
+    expect(result.pass).toBe(true);
+  });
 });
