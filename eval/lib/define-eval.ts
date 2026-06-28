@@ -16,6 +16,8 @@ import type { NormalizedToolCall } from "./trace.js";
 export type EvalTestContext = {
   reply: string;
   status: string;
+  /** Prompt the agent sent on the last `send` call. */
+  lastPrompt: string;
   completedToolCalls: NormalizedToolCall[];
   /** User message passed to the agent's `send` method. */
   send: (userMessage: string) => Promise<void>;
@@ -52,6 +54,7 @@ function slugify(description: string): string {
 function createTestContext(options: {
   agent: EvalAgent;
   cwd?: string;
+  requiresModel?: boolean;
 }): {
   context: EvalTestContext;
   collectResults: () => GraderResult[];
@@ -75,10 +78,24 @@ function createTestContext(options: {
   const context: EvalTestContext = {
     reply: "",
     status: "",
+    lastPrompt: "",
     completedToolCalls: [],
     async send(userMessage: string) {
       const runInput = await options.agent.send(userMessage);
       prompt = runInput.prompt;
+      context.lastPrompt = prompt;
+
+      if (options.requiresModel === false) {
+        status = "finished";
+        reply = "";
+        completedToolCalls = [];
+        messages = [];
+        context.reply = reply;
+        context.status = status;
+        context.completedToolCalls = completedToolCalls;
+        return;
+      }
+
       const outcome = await runLocalAgent({
         prompt: runInput.prompt,
         customTools: runInput.customTools,
@@ -143,7 +160,8 @@ export async function runDefinedEval(def: DefinedEval): Promise<EvalCaseResult> 
   try {
     const { context, collectResults, readOutcome } = createTestContext({
       agent: def.agent,
-      cwd: def.cwd ?? ctx.workspaceDir
+      cwd: def.cwd ?? ctx.workspaceDir,
+      requiresModel: def.requiresModel
     });
 
     await def.test(context);

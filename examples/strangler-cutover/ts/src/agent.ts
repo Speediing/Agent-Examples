@@ -7,6 +7,7 @@ export function buildStranglerPrompt(): string {
     "  1. Read deploy/traffic-split.json. Fields: legacyWeight, modernWeight, errorBudgetPercent, smokeWindowMinutes.",
     "  2. Open a rollback PR first: set modernWeight to 0 and legacyWeight to 100.",
     "  3. Open a ramp PR with modernWeight at 5. After smokeWindowMinutes elapse, read error rate from deploy/metrics.snapshot.json.",
+    "     Reject the snapshot if its generatedAt timestamp is older than the ramp PR merge time.",
     "  4. If error rate is inside errorBudgetPercent, open the next ramp PR (25, 50, 100). If not, merge the rollback PR and stop.",
     "",
     "Never ramp past 50% without a green smoke window.",

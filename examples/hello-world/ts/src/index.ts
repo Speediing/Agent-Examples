@@ -8,7 +8,7 @@ function repoUrl(target: string): string {
 try {
   const target = process.argv[2];
   if (!target) {
-    throw new Error("Usage: npm run hello-world:ts -- <owner>/<repo>");
+    throw new Error("Usage: npm run inventory:ts -- <owner>/<repo>");
   }
 
   const result = await Agent.prompt(buildInventoryPrompt(), {
