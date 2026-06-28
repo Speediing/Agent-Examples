@@ -16,7 +16,7 @@ import {
   lookupRunbook,
   queryMetrics
 } from "../../examples/sre-agent/ts/src/tools.js";
-import { buildHelloWorldPrompt } from "../../examples/hello-world/ts/src/agent.js";
+import { buildInventoryPrompt } from "../../examples/hello-world/ts/src/agent.js";
 import { buildAccessibilityPrompt } from "../../examples/accessibility-agent/ts/src/agent.js";
 import { buildMigrationPrompt } from "../../examples/migration-agent/ts/src/prompt.js";
 import { normalize } from "./normalize.js";
@@ -103,8 +103,7 @@ describe.skipIf(!pythonAvailable())("ts↔python live parity", () => {
       buildSrePrompt("checkout-api returning 503 after deploy")
     );
     expect(py.sre.prompt_default).toBe(buildSrePrompt(""));
-    expect(py.hello_world.prompt).toBe(buildHelloWorldPrompt("Ada"));
-    expect(py.hello_world.prompt_default).toBe(buildHelloWorldPrompt("   "));
+    expect(py.hello_world.prompt).toBe(buildInventoryPrompt());
     expect(py.accessibility.prompt).toBe(
       buildAccessibilityPrompt("file:///tmp/page.html", "focus on contrast")
     );

@@ -15,7 +15,7 @@ const packageScripts = JSON.parse(
 ).scripts as Record<string, string>;
 
 function extractNpmScripts(command: string): string[] {
-  const matches = [...command.matchAll(/npm run ([^\s]+)/g)];
+  const matches = [...command.matchAll(/(?:^|\s)npm run ([^\s]+)/g)];
   return matches.map((match) => match[1] ?? "").filter(Boolean);
 }
 
@@ -37,7 +37,9 @@ describe.skipIf(!siteRepoAvailable)(
   "docs↔code parity (requires agent-example-site checkout)",
   () => {
     it("aligns cookbook paths and npm scripts with this repository", () => {
-      const postsSource = readFileSync(postsPath, "utf8");
+      const postsSource =
+      readFileSync(postsPath, "utf8") +
+      readFileSync(path.join(siteRepoPath, "app/blog/guides.ts"), "utf8");
       const { paths, commands } = extractDocFields(postsSource);
 
       expect(paths.length).toBeGreaterThan(0);

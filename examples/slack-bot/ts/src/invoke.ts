@@ -243,7 +243,8 @@ export async function invokeAgent(
       return {
         output: await runPromptAgent(
           {
-            buildPrompt: mod.buildHelloWorldPrompt as (task: string) => string
+            buildPrompt: (_task: string) =>
+              (mod as { buildInventoryPrompt: () => string }).buildInventoryPrompt(),
           },
           task,
           context,

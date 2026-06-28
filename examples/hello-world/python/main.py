@@ -2,14 +2,10 @@ from __future__ import annotations
 
 import os
 import sys
-from pathlib import Path
 
-from cursor_sdk import Agent, AgentOptions, LocalAgentOptions
+from cursor_sdk import Agent, AgentOptions
 
-from agent import build_hello_world_prompt
-
-
-ROOT_DIR = Path(__file__).resolve().parents[3]
+from agent import build_inventory_prompt
 
 
 def require_env(name: str) -> str:
@@ -20,13 +16,19 @@ def require_env(name: str) -> str:
 
 
 def main() -> int:
-    name = " ".join(sys.argv[1:])
+    if len(sys.argv) < 2:
+        print(
+            "Usage: python main.py <owner>/<repo>",
+            file=sys.stderr,
+        )
+        return 1
+    target = sys.argv[1]
     result = Agent.prompt(
-        build_hello_world_prompt(name),
+        build_inventory_prompt(),
         AgentOptions(
             api_key=require_env("CURSOR_API_KEY"),
             model=require_env("CURSOR_MODEL"),
-            local=LocalAgentOptions(cwd=str(ROOT_DIR)),
+            cloud={"repos": [{"name": target, "ref": "main"}]},
         ),
     )
     print(result.result)

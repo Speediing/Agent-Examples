@@ -63,7 +63,7 @@ describe("wave 1 plan handlers", () => {
       path: "examples/hello-world/ts/src/agent.ts"
     });
     expect(result.found).toBe(true);
-    expect(result.content).toContain("buildHelloWorldPrompt");
+    expect(result.content).toContain("buildInventoryPrompt");
   });
 
   it("builds a codebase explainer prompt with module and question", () => {
