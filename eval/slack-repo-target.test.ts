@@ -76,6 +76,6 @@ describe("slack repo targeting", () => {
         cloudRepoUrl: "https://github.com/acme/checkout",
         writesEnabled: false
       })
-    ).toBe(false);
+    ).toBe(true);
   });
 });

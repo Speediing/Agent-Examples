@@ -8,6 +8,10 @@ from cursor_sdk import Agent, AgentOptions
 from agent import build_inventory_prompt
 
 
+def repo_url(target: str) -> str:
+    return target if target.startswith("http") else f"https://github.com/{target}"
+
+
 def require_env(name: str) -> str:
     value = os.getenv(name)
     if not value:
@@ -28,7 +32,10 @@ def main() -> int:
         AgentOptions(
             api_key=require_env("CURSOR_API_KEY"),
             model=require_env("CURSOR_MODEL"),
-            cloud={"repos": [{"name": target, "ref": "main"}]},
+            cloud={
+                "repos": [{"url": repo_url(target), "starting_ref": "main"}],
+                "auto_create_pr": True,
+            },
         ),
     )
     print(result.result)
