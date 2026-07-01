@@ -241,13 +241,9 @@ export async function invokeAgent(
     case "hello-world": {
       const mod = await loadAgentModule(slug);
       return {
-        output: await runPromptAgent(
-          {
-            buildPrompt: mod.buildHelloWorldPrompt as (task: string) => string
-          },
-          task,
-          context,
-          { cwd: context.repoRoot }
+        output: await runCloudPrompt(
+          (mod.buildInventoryPrompt as () => string)(),
+          context
         ),
         requiresApproval: false
       };

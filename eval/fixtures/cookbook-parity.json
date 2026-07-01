@@ -1,6 +1,15 @@
 {
   "paths": [
     "examples/hello-world",
+    "examples/score-modernization-risk",
+    "examples/upgrade-net-framework",
+    "examples/cover-before-refactor",
+    "examples/strangler-cutover",
+    "examples/agentic-readiness-check",
+    "examples/plan-modernization-waves",
+    "examples/containerize-legacy-app",
+    "examples/upgrade-java-spring-boot",
+    "examples/port-cobol-to-java",
     "examples/tool-calling-agent",
     "examples/accessibility-agent",
     "examples/bugbot",
@@ -30,6 +39,16 @@
     "examples/cost-auditor"
   ],
   "npmScripts": [
+    "inventory:ts",
+    "assess:ts",
+    "transform:net:ts",
+    "cover:ts",
+    "cutover:ts",
+    "ara:ts",
+    "plan:ts",
+    "containerize:ts",
+    "upgrade:java:ts",
+    "port:cobol:ts",
     "hello-world:ts",
     "tool-calling:ts",
     "accessibility-agent:ts",
