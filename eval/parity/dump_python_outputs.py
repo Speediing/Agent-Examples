@@ -90,8 +90,8 @@ output = {
         "prompt_default": sre.build_sre_prompt(""),
     },
     "hello_world": {
-        "prompt": hello_world.build_hello_world_prompt("Ada"),
-        "prompt_default": hello_world.build_hello_world_prompt("   "),
+        "prompt": hello_world.build_inventory_prompt(),
+        "prompt_default": hello_world.build_inventory_prompt(),
     },
     "accessibility": {
         "prompt": accessibility.build_accessibility_prompt(

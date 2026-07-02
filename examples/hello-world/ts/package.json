@@ -10,10 +10,11 @@
   "cursorExample": {
     "pythonPort": "../python/main.py"
   },
+  "dependencies": {
+    "@cursor-examples/modernization-core": "0.1.0",
+    "@cursor/sdk": "^1.0.18"
+  },
   "devDependencies": {
     "typescript": "^5.9.3"
-  },
-  "dependencies": {
-    "@cursor/sdk": "^1.0.18"
   }
 }

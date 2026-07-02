@@ -5,7 +5,7 @@
   "description": "TypeScript-first Cursor SDK agent examples with Python ports.",
   "type": "module",
   "scripts": {
-    "build": "npm run build --workspaces",
+    "build": "npm run build --workspace @cursor-examples/modernization-core && npm run build --workspaces --if-present",
     "typecheck": "tsc --noEmit --project tsconfig.eval.json && npm run build --workspaces",
     "test": "vitest run --config vitest.unit.config.ts",
     "test:llm": "vitest run --config vitest.config.ts eval/tier1 eval/tier2 eval/parity/ts-python-trace.test.ts",
@@ -14,6 +14,16 @@
     "eval:list": "tsx eval/cli.ts list",
     "eval:run": "tsx eval/cli.ts run",
     "migrate:python-ports": "npm --workspace @cursor-examples/migration-agent-ts run start --",
+    "inventory:ts": "npm --workspace @cursor-examples/hello-world-ts run start --",
+    "assess:ts": "npm --workspace @cursor-examples/score-modernization-risk-ts run start --",
+    "transform:net:ts": "npm --workspace @cursor-examples/upgrade-net-framework-ts run start --",
+    "cover:ts": "npm --workspace @cursor-examples/cover-before-refactor-ts run start --",
+    "cutover:ts": "npm --workspace @cursor-examples/strangler-cutover-ts run start --",
+    "ara:ts": "npm --workspace @cursor-examples/agentic-readiness-check-ts run start --",
+    "plan:ts": "npm --workspace @cursor-examples/plan-modernization-waves-ts run start --",
+    "containerize:ts": "npm --workspace @cursor-examples/containerize-legacy-app-ts run start --",
+    "upgrade:java:ts": "npm --workspace @cursor-examples/upgrade-java-spring-boot-ts run start --",
+    "port:cobol:ts": "npm --workspace @cursor-examples/port-cobol-to-java-ts run start --",
     "hello-world:ts": "npm --workspace @cursor-examples/hello-world-ts run start --",
     "tool-calling:ts": "npm --workspace @cursor-examples/tool-calling-agent-ts run start --",
     "accessibility-agent:ts": "npm --workspace @cursor-examples/accessibility-agent-ts run start --",
@@ -45,7 +55,8 @@
     "cost-auditor:ts": "npm --workspace @cursor-examples/cost-auditor-ts run start --"
   },
   "workspaces": [
-    "examples/*/ts"
+    "examples/*/ts",
+    "packages/*"
   ],
   "devDependencies": {
     "@types/node": "^25.9.2",

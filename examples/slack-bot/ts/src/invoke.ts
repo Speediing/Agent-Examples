@@ -240,15 +240,23 @@ export async function invokeAgent(
   switch (slug) {
     case "hello-world": {
       const mod = await loadAgentModule(slug);
+      const prompt = (mod.buildInventoryPrompt as () => string)();
+
+      if (context.cloudRepoUrl) {
+        return {
+          output: await runCloudPrompt(prompt, context),
+          requiresApproval: false
+        };
+      }
+
+      const result = await Agent.prompt(prompt, {
+        apiKey: context.apiKey,
+        model: { id: context.model },
+        local: { cwd: context.repoRoot }
+      });
+
       return {
-        output: await runPromptAgent(
-          {
-            buildPrompt: mod.buildHelloWorldPrompt as (task: string) => string
-          },
-          task,
-          context,
-          { cwd: context.repoRoot }
-        ),
+        output: result.result ?? "No response returned.",
         requiresApproval: false
       };
     }

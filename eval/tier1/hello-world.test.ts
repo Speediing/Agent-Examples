@@ -1,21 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { buildHelloWorldPrompt } from "../../examples/hello-world/ts/src/agent.js";
-import { llmEvalsEnabled, requireLlmEvals } from "../lib/config.js";
-import { runLocalAgent, runPromptSmoke } from "../lib/run-agent.js";
+import { buildInventoryPrompt } from "../../examples/hello-world/ts/src/agent.js";
 
-describe.skipIf(!llmEvalsEnabled())("model evals hello-world", () => {
-  it("mentions the name and Cursor SDK in the final answer", async () => {
-    requireLlmEvals();
-    const prompt = buildHelloWorldPrompt("Ada");
-    const streamOutcome = await runLocalAgent({ prompt });
-    const smoke = await runPromptSmoke({ prompt });
-
-    expect(streamOutcome.result.status).toBe("finished");
-    expect(smoke.status).toBe("finished");
-
-    const answer = (streamOutcome.result.result ?? "").toLowerCase();
-    expect(answer).toContain("ada");
-    expect(answer).toContain("cursor sdk");
-    expect((smoke.result ?? "").toLowerCase()).toContain("ada");
-  }, 120_000);
+describe("inventory agent prompt", () => {
+  it("names assessment deliverables for cloud inventory runs", () => {
+    const prompt = buildInventoryPrompt();
+    expect(prompt).toContain("inventory agent");
+    expect(prompt).toContain("assessment.md");
+    expect(prompt).toContain("coupling-map.md");
+    expect(prompt).toContain("Add codebase inventory");
+  });
 });

@@ -4,12 +4,9 @@ import os
 import sys
 from pathlib import Path
 
-from cursor_sdk import Agent, AgentOptions, LocalAgentOptions
+from cursor_sdk import Agent, AgentOptions, CloudAgentOptions, CloudRepoOptions
 
-from agent import build_hello_world_prompt
-
-
-ROOT_DIR = Path(__file__).resolve().parents[3]
+from agent import build_inventory_prompt
 
 
 def require_env(name: str) -> str:
@@ -19,17 +16,32 @@ def require_env(name: str) -> str:
     return value
 
 
+def repo_url(target: str) -> str:
+    return target if target.startswith("http") else f"https://github.com/{target}"
+
+
 def main() -> int:
-    name = " ".join(sys.argv[1:])
+    if len(sys.argv) < 2:
+        raise RuntimeError("Usage: python main.py <owner>/<repo>")
+
+    target = sys.argv[1]
     result = Agent.prompt(
-        build_hello_world_prompt(name),
+        build_inventory_prompt(),
         AgentOptions(
             api_key=require_env("CURSOR_API_KEY"),
             model=require_env("CURSOR_MODEL"),
-            local=LocalAgentOptions(cwd=str(ROOT_DIR)),
+            cloud=CloudAgentOptions(
+                repos=[CloudRepoOptions(url=repo_url(target), starting_ref="main")],
+                auto_create_pr=True,
+            ),
         ),
     )
-    print(result.result)
+    print(f"Run ID: {result.id}")
+    print(f"Status: {result.status}")
+    branches = result.git.branches if result.git else []
+    pr_url = next((branch.pr_url for branch in branches if branch.pr_url), None)
+    if pr_url:
+        print(f"PR: {pr_url}")
     return 0
 
 
